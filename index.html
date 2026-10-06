@@ -1,0 +1,1005 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>配合ラボ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Old+Mincho:wght@700;900&display=swap">
+<style>
+/* Layout: 研究ノート風。配合モード = 左に飼育台帳(カード格子)、右に追従する交配カード。進化モード = 操作列 + 3枚のグラフ */
+:root {
+  --bg: #edf1ee;
+  --paper-grid: #e1e8e3;
+  --surface: #fbfcfb;
+  --surface-2: #f2f5f3;
+  --ink: #15201a;
+  --muted: #56635c;
+  --line: #d2dbd5;
+  --accent: #1d5c47;
+  --accent-ink: #ffffff;
+  --accent-soft: #d7eae1;
+  --tile: #dfe8e2;
+  --outline: rgba(20, 24, 22, .55);
+  --str: #eb6834;
+  --cha: #2a78d6;
+  --fer: #1baf7a;
+  --al-m: #4a3aa7;
+  --al-d: #eda100;
+  --ok: #2c7a4b;
+  --caution: #9a5b00;
+  --danger: #b42318;
+  --ok-soft: #dcefe3;
+  --caution-soft: #f6ead2;
+  --danger-soft: #f8dedb;
+  --font-display: "Zen Old Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1412; --paper-grid: #151c18; --surface: #161d19; --surface-2: #1c2420;
+    --ink: #e5ece7; --muted: #9ba9a1; --line: #2b3631;
+    --accent: #6fc3a3; --accent-ink: #0b1511; --accent-soft: #1d3a2f;
+    --tile: #2a3631; --outline: rgba(230, 238, 233, .55);
+    --str: #d95926; --cha: #3987e5; --fer: #199e70; --al-m: #9085e9; --al-d: #c98500;
+    --ok: #5fc08a; --caution: #e0a64a; --danger: #f07a6c;
+    --ok-soft: #173326; --caution-soft: #3a2c14; --danger-soft: #3d1c19;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1412; --paper-grid: #151c18; --surface: #161d19; --surface-2: #1c2420;
+  --ink: #e5ece7; --muted: #9ba9a1; --line: #2b3631;
+  --accent: #6fc3a3; --accent-ink: #0b1511; --accent-soft: #1d3a2f;
+  --tile: #2a3631; --outline: rgba(230, 238, 233, .55);
+  --str: #d95926; --cha: #3987e5; --fer: #199e70; --al-m: #9085e9; --al-d: #c98500;
+  --ok: #5fc08a; --caution: #e0a64a; --danger: #f07a6c;
+  --ok-soft: #173326; --caution-soft: #3a2c14; --danger-soft: #3d1c19;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--paper-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--paper-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font: 15px/1.65 var(--font-body);
+}
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 64px; display: grid; gap: 22px; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* header */
+.masthead { display: grid; gap: 6px; }
+.eyebrow { font: 600 11px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 900 clamp(34px, 6vw, 54px)/1.05 var(--font-display); margin: 0; letter-spacing: .02em; text-wrap: balance; }
+h1 .moff { color: var(--accent); }
+.lead { margin: 4px 0 0; max-width: 62ch; color: var(--muted); }
+
+/* tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.tab { border: 0; background: none; padding: 10px 16px 11px; cursor: pointer; color: var(--muted); font-weight: 700; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab small { font: 400 11px var(--font-mono); margin-left: 6px; color: var(--muted); }
+
+/* shared parameter strip */
+.params { display: flex; flex-wrap: wrap; gap: 10px 26px; align-items: center; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.params .plabel { font-weight: 700; font-size: 13px; }
+.slider { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 10px; min-width: 220px; flex: 1 1 220px; }
+.slider label { font-size: 13px; }
+.slider input { width: 100%; accent-color: var(--accent); }
+.slider output { font: 600 12px var(--font-mono); min-width: 4.5ch; text-align: right; font-variant-numeric: tabular-nums; }
+.slider .hint { grid-column: 1 / -1; font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+h2 { font: 700 21px/1.3 var(--font-display); margin: 0; }
+h3 { font: 700 14px/1.4 var(--font-body); margin: 0; }
+
+/* breeding layout */
+.breed { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 400px); gap: 22px; align-items: start; }
+.side { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); display: grid; gap: 16px; }
+@media (max-width: 900px) {
+  .breed { grid-template-columns: minmax(0, 1fr); }
+  .side { position: static; order: -1; }
+}
+.ledger-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 10px; }
+.ledger-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+select, .btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 10px; font-size: 13px; }
+.btn { cursor: pointer; font-weight: 700; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.primary:disabled { opacity: .45; cursor: not-allowed; }
+.btn.danger { color: var(--danger); }
+.btn.big { padding: 11px 16px; font-size: 15px; width: 100%; }
+
+.goal { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 13px; padding: 10px 14px; border: 1px dashed var(--line); border-radius: var(--r); background: var(--surface-2); }
+.goal b { font-weight: 700; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; margin-top: 12px; }
+.card { position: relative; text-align: left; display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 8px 12px; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); cursor: pointer; }
+.card:hover { border-color: var(--muted); }
+.card.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.card.focus { background: var(--surface-2); }
+.ava { width: 58px; height: 58px; border-radius: 50%; background: var(--tile); display: block; }
+.ava svg { width: 100%; height: 100%; display: block; }
+.meta { min-width: 0; display: grid; align-content: center; }
+.nm { font-weight: 700; font-size: 15px; display: flex; gap: 6px; align-items: baseline; }
+.sx { font-style: normal; color: var(--muted); font-size: 13px; }
+.sub { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bars { grid-column: 1 / -1; display: grid; gap: 3px; }
+.bar { display: grid; grid-template-columns: 3.4em 1fr 2.2em; align-items: center; gap: 8px; font-size: 11.5px; }
+.bar .lbl { color: var(--muted); }
+.bar .trk { display: block; height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; border: 1px solid var(--line); }
+.bar .fill { display: block; height: 100%; border-radius: 0 3px 3px 0; }
+.bar .v { font: 600 11.5px var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; }
+.role { position: absolute; top: 10px; right: 10px; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); }
+.tag { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 0 6px; border-radius: 4px; background: var(--danger-soft); color: var(--danger); }
+
+/* panels */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 14px; }
+.pair { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
+.slot { display: grid; justify-items: center; gap: 4px; padding: 10px 6px; border: 1px dashed var(--line); border-radius: 8px; min-height: 104px; text-align: center; font-size: 13px; }
+.slot.filled { border-style: solid; }
+.slot .ava { width: 52px; height: 52px; }
+.slot .who { font-weight: 700; }
+.slot .ph { font: 11px var(--font-mono); color: var(--muted); }
+.cross { font: 700 20px var(--font-display); color: var(--muted); }
+
+.status { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+.status.ok { background: var(--ok-soft); color: var(--ok); }
+.status.caution { background: var(--caution-soft); color: var(--caution); }
+.status.danger { background: var(--danger-soft); color: var(--danger); }
+.status .ic { font-family: var(--font-mono); }
+
+.pred { display: grid; gap: 10px; }
+.hist { display: grid; gap: 2px; }
+.hist-top { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; }
+.hist-top .mono { font-size: 12px; }
+.hist svg { width: 100%; height: auto; display: block; }
+.probs { display: grid; gap: 6px; font-size: 12.5px; }
+.prow { display: grid; grid-template-columns: 6.5em minmax(0, 1fr); gap: 8px; align-items: center; }
+.stack { display: flex; height: 18px; border-radius: 4px; overflow: hidden; gap: 2px; }
+.stack span { display: flex; align-items: center; justify-content: center; font: 600 10.5px var(--font-mono); min-width: 0; white-space: nowrap; overflow: hidden; }
+.kv { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; }
+.kv b { font-family: var(--font-mono); font-weight: 600; }
+
+.result { display: grid; gap: 8px; }
+.pups { display: flex; flex-wrap: wrap; gap: 8px; }
+.pup { display: grid; justify-items: center; gap: 2px; font-size: 11px; border: 1px solid var(--line); border-radius: 8px; padding: 6px; background: var(--surface-2); cursor: pointer; min-width: 64px; }
+.pup .ava { width: 44px; height: 44px; }
+
+.gtable { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.gtable th { text-align: left; font-weight: 700; color: var(--muted); font-size: 11px; letter-spacing: .06em; padding: 6px 4px; border-bottom: 1px solid var(--line); }
+.gtable td { padding: 6px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.alle { display: inline-flex; gap: 3px; flex-wrap: wrap; }
+.alle span { font: 600 11.5px var(--font-mono); padding: 0 5px; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--line); }
+.alle span.hi { background: var(--accent-soft); border-color: transparent; }
+.ped { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; font-size: 12.5px; }
+.ped button { text-align: left; border: 1px solid var(--line); background: var(--surface-2); border-radius: 6px; padding: 4px 8px; cursor: pointer; }
+.ped .lab { font-size: 11px; color: var(--muted); display: block; }
+
+/* evolution */
+.evo { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 22px; align-items: start; }
+@media (max-width: 900px) { .evo { grid-template-columns: minmax(0, 1fr); } }
+.controls { display: grid; gap: 14px; }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--surface-2); border-radius: 99px; padding: 4px 12px; font-size: 12.5px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); font-weight: 700; }
+.runrow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.runrow .btn { padding: 8px 4px; }
+.counter { display: flex; gap: 22px; align-items: baseline; }
+.counter .n { font: 600 28px/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.counter .l { font-size: 11.5px; color: var(--muted); display: block; margin-top: 4px; }
+.charts { display: grid; gap: 14px; min-width: 0; }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 14px 8px; min-width: 0; }
+.chart-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; align-items: baseline; margin-bottom: 4px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.plot { position: relative; }
+.plot svg { display: block; width: 100%; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.12); white-space: nowrap; z-index: 2; }
+.tip .row { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.tip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.tip b { font-family: var(--font-mono); font-weight: 600; }
+.banner { padding: 10px 14px; border-radius: 8px; background: var(--danger-soft); color: var(--danger); font-weight: 700; font-size: 13px; }
+.sample { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; }
+.sample .pup { min-width: 0; }
+.note { font-size: 12.5px; color: var(--muted); max-width: 70ch; margin: 0; }
+.explain { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.explain .panel { gap: 6px; font-size: 13px; }
+.explain p { margin: 0; color: var(--muted); }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); background: var(--ink); color: var(--bg); padding: 8px 16px; border-radius: 99px; font-size: 13px; font-weight: 700; z-index: 10; max-width: calc(100% - 32px); }
+@media (prefers-reduced-motion: no-preference) {
+  .card, .btn, .chip { transition: border-color .15s, background-color .15s; }
+  .pup.new { animation: pop .45s ease-out both; }
+  @keyframes pop { from { transform: scale(.7); } to { transform: none; } }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <span class="eyebrow">Breeding Lab · 2n = 二倍体 · 16 座位</span>
+    <h1>配合ラボ <span class="moff">モフ</span></h1>
+    <p class="lead">架空の生き物「モフ」を交配して、<b>強さ・魅力・生殖力</b>を子に受け継がせる遺伝シミュレータです。親から1本ずつ遺伝子を受け取り、ときどき突然変異が起こります。手で配合して理想の個体を目指すことも、集団を何百世代も放っておいて進化の行方を見ることもできます。</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-breed" aria-selected="true" data-tab="breed">飼育場で配合<small>manual</small></button>
+    <button class="tab" role="tab" id="tab-evo" aria-selected="false" data-tab="evo">集団で進化<small>auto</small></button>
+  </div>
+
+  <section class="params" aria-label="遺伝パラメータ">
+    <span class="plabel">遺伝パラメータ</span>
+    <div class="slider">
+      <label for="p-mu">突然変異率 μ</label>
+      <input type="range" id="p-mu" min="0" max="5" step="0.1" value="0.5">
+      <output for="p-mu" id="o-mu">0.5%</output>
+      <span class="hint">遺伝子1本が親から子へ渡るときに反転する確率</span>
+    </div>
+    <div class="slider">
+      <label for="p-sigma">環境ゆらぎ σ</label>
+      <input type="range" id="p-sigma" min="0" max="20" step="1" value="6">
+      <output for="p-sigma" id="o-sigma">6</output>
+      <span class="hint">同じ遺伝子でも育ち方で能力値がぶれる幅 (標準偏差)</span>
+    </div>
+  </section>
+
+  <!-- ============ 配合モード ============ -->
+  <section id="view-breed" class="breed">
+    <div>
+      <div class="ledger-head">
+        <div>
+          <h2>飼育台帳</h2>
+          <span class="muted" style="font-size:13px">カードをタップして父(♂)と母(♀)を選びます。もう一度タップで解除。</span>
+        </div>
+        <div class="ledger-tools">
+          <select id="f-sex" aria-label="性別で絞り込み">
+            <option value="all">すべて</option>
+            <option value="M">♂ のみ</option>
+            <option value="F">♀ のみ</option>
+          </select>
+          <select id="f-sort" aria-label="並び順">
+            <option value="new">新しい順</option>
+            <option value="str">強さ順</option>
+            <option value="cha">魅力順</option>
+            <option value="fer">生殖力順</option>
+            <option value="min">総合順 (最低値)</option>
+          </select>
+          <button class="btn danger" id="reset-stock">新しい群れで始める</button>
+        </div>
+      </div>
+      <div class="goal" id="goal" style="margin-top:12px"></div>
+      <div class="grid" id="stock"></div>
+    </div>
+    <aside class="side">
+      <div class="panel" id="mating"></div>
+      <div class="panel" id="detail"></div>
+    </aside>
+  </section>
+
+  <!-- ============ 進化モード ============ -->
+  <section id="view-evo" class="evo" hidden>
+    <div class="controls">
+      <div class="panel">
+        <h2>集団の条件</h2>
+        <div class="presets" id="presets">
+          <button class="chip" data-preset="std" aria-pressed="true">標準</button>
+          <button class="chip" data-preset="peacock">クジャク型</button>
+          <button class="chip" data-preset="harsh">弱肉強食</button>
+          <button class="chip" data-preset="drift">選択なし</button>
+        </div>
+        <p class="note" id="preset-note"></p>
+        <div class="slider">
+          <label for="p-nat">自然選択</label>
+          <input type="range" id="p-nat" min="0" max="3" step="0.1" value="1">
+          <output id="o-nat">1.0</output>
+          <span class="hint">強いモフほど生き残りやすい度合い</span>
+        </div>
+        <div class="slider">
+          <label for="p-sex">性選択</label>
+          <input type="range" id="p-sex" min="0" max="3" step="0.1" value="1">
+          <output id="o-sex">1.0</output>
+          <span class="hint">♀が魅力的な♂を選ぶ度合い</span>
+        </div>
+        <div class="slider">
+          <label for="p-pred">派手さの代償</label>
+          <input type="range" id="p-pred" min="0" max="1" step="0.05" value="0.3">
+          <output id="o-pred">0.30</output>
+          <span class="hint">魅力が高いほど天敵に見つかりやすい (生存率が下がる)</span>
+        </div>
+        <div class="slider">
+          <label for="p-k">環境収容力 K</label>
+          <input type="range" id="p-k" min="40" max="600" step="20" value="240">
+          <output id="o-k">240</output>
+          <span class="hint">1世代に育つことのできる最大の子の数</span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="counter">
+          <div><span class="n" id="c-gen">0</span><span class="l">世代</span></div>
+          <div><span class="n" id="c-n">0</span><span class="l">個体数</span></div>
+        </div>
+        <div class="runrow">
+          <button class="btn primary" id="run">▶ 実行</button>
+          <button class="btn" id="step1">+1</button>
+          <button class="btn" id="step10">+10</button>
+          <button class="btn danger" id="evo-reset">リセット</button>
+        </div>
+        <div class="banner" id="extinct" hidden>絶滅しました。条件を変えてリセットしてください。</div>
+        <p class="note">リセットすると、いまの条件で新しい集団 (祖先世代) から始めます。</p>
+      </div>
+    </div>
+    <div class="charts">
+      <div class="chart">
+        <div class="chart-head"><h3>平均能力値の推移</h3>
+          <div class="legend"><span><i style="background:var(--str)"></i>強さ</span><span><i style="background:var(--cha)"></i>魅力</span><span><i style="background:var(--fer)"></i>生殖力</span></div>
+        </div>
+        <div class="plot" id="ch-traits"></div>
+      </div>
+      <div class="chart">
+        <div class="chart-head"><h3>遺伝子の頻度</h3>
+          <div class="legend"><span><i style="background:var(--al-m)"></i>筋肉 M (強さ↑ 生殖力↓)</span><span><i style="background:var(--al-d)"></i>病気 d (潜性)</span></div>
+        </div>
+        <div class="plot" id="ch-allele"></div>
+      </div>
+      <div class="chart">
+        <div class="chart-head"><h3>個体数</h3><span class="legend">収容力 K を上限に、生まれた子の数</span></div>
+        <div class="plot" id="ch-pop"></div>
+      </div>
+      <div class="chart">
+        <div class="chart-head"><h3>いまの集団から</h3><span class="legend">タップすると飼育場へ迎えます</span></div>
+        <div class="sample" id="sample"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="explain" aria-label="遺伝のしくみ">
+    <div class="panel"><h3>能力値 (量的形質)</h3><p>強さは4座位、魅力は4座位、生殖力は3座位の遺伝子の足し算で決まります。<span class="mono">+</span> を多く持つほど高く、そこに環境ゆらぎ σ が加わります。</p></div>
+    <div class="panel"><h3>筋肉遺伝子 M (顕性)</h3><p>1本でも <span class="mono">M</span> があると強さ +15、ただし生殖力 −15。1つの遺伝子が複数の能力に効く「多面発現」によるトレードオフです。</p></div>
+    <div class="panel"><h3>病気遺伝子 d (潜性)</h3><p><span class="mono">dd</span> のときだけ発症し、全能力が下がります。<span class="mono">Dd</span> は見た目が普通の保因者。近親交配で <span class="mono">dd</span> が出やすくなります。</p></div>
+    <div class="panel"><h3>毛色 (エピスタシス)</h3><p><span class="mono">cc</span> だと色素がなく白 (赤い目)。色素があれば <span class="mono">B</span> で黒、<span class="mono">bb</span> で茶。斑紋 <span class="mono">P</span> は不完全顕性で、<span class="mono">PP</span> は大斑、<span class="mono">Pp</span> は小斑です。</p></div>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+"use strict";
+
+/* ---------- 乱数 ---------- */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const gauss = R => { let u = 0; while (!u) u = R(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * R()); };
+function poisson(lam, R) { const L = Math.exp(-lam); let k = 0, p = 1; do { k++; p *= R(); } while (p > L); return k - 1; }
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const mcR = mulberry32(99);
+
+/* ---------- 遺伝子座 ---------- */
+const TRAITS = ["str", "cha", "fer"];
+const TNAME = { str: "強さ", cha: "魅力", fer: "生殖力" };
+const TSHORT = { str: "強", cha: "魅", fer: "殖" };
+const LOCI = [];
+const ADD = { str: 4, cha: 4, fer: 3 };
+for (const t of TRAITS) for (let i = 1; i <= ADD[t]; i++) LOCI.push({ id: t + i, trait: t, kind: "add", label: TSHORT[t] + i });
+[
+  { id: "M", up: "M", lo: "m", label: "筋肉", f: 0.2 },
+  { id: "D", up: "D", lo: "d", label: "健康", f: 0.82 },
+  { id: "C", up: "C", lo: "c", label: "色素", f: 0.68 },
+  { id: "B", up: "B", lo: "b", label: "黒毛", f: 0.55 },
+  { id: "P", up: "P", lo: "p", label: "斑紋", f: 0.4 },
+].forEach(m => LOCI.push({ ...m, kind: "mend" }));
+const IDX = Object.fromEntries(LOCI.map((l, i) => [l.id, i]));
+const TLOCI = Object.fromEntries(TRAITS.map(t => [t, LOCI.map((l, i) => (l.trait === t ? i : -1)).filter(i => i >= 0)]));
+const ADD_FREQ = 0.42;
+
+const cfg = { mu: 0.005, sigma: 6, nat: 1, sex: 1, pred: 0.3, K: 240 };
+
+const has = (g, id) => g[IDX[id]][0] | g[IDX[id]][1];
+const dose = (g, id) => g[IDX[id]][0] + g[IDX[id]][1];
+
+function baseValues(g) {
+  const cnt = t => TLOCI[t].reduce((s, i) => s + g[i][0] + g[i][1], 0);
+  const M = has(g, "M"), sick = !has(g, "D");
+  return {
+    str: 10 + cnt("str") / 8 * 75 + (M ? 15 : 0) - (sick ? 25 : 0),
+    cha: 10 + cnt("cha") / 8 * 80 - (sick ? 15 : 0),
+    fer: 10 + cnt("fer") / 6 * 80 - (M ? 15 : 0) - (sick ? 30 : 0),
+  };
+}
+function pheno(g, R) {
+  const b = baseValues(g), o = {};
+  for (const t of TRAITS) o[t] = clamp(Math.round(b[t] + gauss(R) * cfg.sigma), 0, 100);
+  return o;
+}
+function founderGenome(R) {
+  return LOCI.map(l => { const f = l.kind === "add" ? ADD_FREQ : l.f; return [R() < f ? 1 : 0, R() < f ? 1 : 0]; });
+}
+function gamete(pair, R) { let a = pair[R() < 0.5 ? 0 : 1]; if (R() < cfg.mu) a ^= 1; return a; }
+function childGenome(s, d, R) { return LOCI.map((_, i) => [gamete(s[i], R), gamete(d[i], R)]); }
+
+function coat(g) {
+  if (!has(g, "C")) return { key: "white", name: "白", spots: 0 };
+  const spots = dose(g, "P");
+  return has(g, "B") ? { key: "black", name: "黒", spots } : { key: "brown", name: "茶", spots };
+}
+const SPOTNAME = ["無地", "小斑", "大斑"];
+const coatLabel = g => { const c = coat(g); return c.key === "white" ? "白 (色素なし)" : c.name + "・" + SPOTNAME[c.spots]; };
+
+/* ---------- 名前 ---------- */
+const SYL = ["ポ", "ム", "モ", "チ", "ル", "ナ", "キ", "ピ", "ヤ", "ココ", "ラ", "ミ", "タ", "ハ", "ニ", "ク", "リ", "ソ", "フ", "ノ", "マ", "ロ", "ペ", "サ"];
+const TAIL = ["", "", "", "ン", "ー", "ル", "ッチ", "マル", "ゾウ", "スケ"];
+function makeName(R) { return SYL[Math.floor(R() * SYL.length)] + SYL[Math.floor(R() * SYL.length)] + TAIL[Math.floor(R() * TAIL.length)]; }
+
+/* ---------- 見た目 (SVG) ---------- */
+const COAT_FILL = { black: "#2f2a27", brown: "#9b5a2d", white: "#f5f2ec" };
+function avatar(ind) {
+  const g = ind.g, p = ind.ph, c = coat(g), fill = COAT_FILL[c.key];
+  const rx = 13 + p.str / 100 * 9, sick = !has(g, "D");
+  const eyeR = 1.8 + p.cha / 100 * 2.2, pupil = c.key === "white" ? "#c0392b" : "#141414";
+  let s = `<svg viewBox="0 0 64 64" aria-hidden="true">`;
+  s += `<ellipse cx="21" cy="21" rx="5" ry="8" fill="${fill}" stroke="var(--outline)" stroke-width="1.2"/>`;
+  s += `<ellipse cx="43" cy="21" rx="5" ry="8" fill="${fill}" stroke="var(--outline)" stroke-width="1.2"/>`;
+  s += `<ellipse cx="32" cy="38" rx="${rx.toFixed(1)}" ry="17" fill="${fill}" stroke="var(--outline)" stroke-width="1.2"/>`;
+  if (c.spots) {
+    const sp = c.key === "black" ? "#e9e2d6" : "#4a2a14";
+    const pts = c.spots === 2 ? [[24, 46, 4.5], [40, 44, 3.5], [36, 29, 3], [27, 27, 2.4], [32, 51, 2.6]] : [[40, 45, 3.6], [25, 47, 2.6]];
+    let h = ind.id || 1;
+    pts.forEach(([x, y, r]) => { h = (h * 9301 + 49297) % 233280; const dx = (h % 5) - 2; s += `<circle cx="${x + dx}" cy="${y}" r="${r}" fill="${sp}" opacity=".9"/>`; });
+  }
+  if (p.cha >= 45) s += `<ellipse cx="22.5" cy="41" rx="3.4" ry="2" fill="#ff7a9a" opacity="${clamp((p.cha - 35) / 80, 0, .85).toFixed(2)}"/><ellipse cx="41.5" cy="41" rx="3.4" ry="2" fill="#ff7a9a" opacity="${clamp((p.cha - 35) / 80, 0, .85).toFixed(2)}"/>`;
+  for (const x of [26, 38]) {
+    s += `<circle cx="${x}" cy="35" r="${(eyeR + 1.1).toFixed(1)}" fill="#ffffff"/><circle cx="${x}" cy="35.4" r="${eyeR.toFixed(1)}" fill="${pupil}"/>`;
+    if (p.cha >= 60) s += `<circle cx="${x + eyeR * .35}" cy="${34.2 - eyeR * .2}" r="${(eyeR * .35).toFixed(1)}" fill="#ffffff"/>`;
+  }
+  if (p.str >= 75) s += `<path d="M22 29 l7 2 M42 29 l-7 2" stroke="${c.key === "black" ? "#e9e2d6" : "#141414"}" stroke-width="1.6" stroke-linecap="round"/>`;
+  s += `<path d="M29.5 42 q2.5 2.6 5 0" fill="none" stroke="${c.key === "black" ? "#e9e2d6" : "#141414"}" stroke-width="1.3" stroke-linecap="round"/>`;
+  if (sick) s += `<g transform="rotate(-25 40 25)"><rect x="33" y="22.5" width="14" height="5" rx="1.5" fill="#f3e3c3" stroke="#b49a6a" stroke-width=".8"/><path d="M38 23.5v3 M42 23.5v3" stroke="#b49a6a" stroke-width=".7"/></g>`;
+  return svgVars(s + `</svg>`);
+}
+
+/* ---------- 飼育場の状態 ---------- */
+const STORE_KEY = "haigo-lab-v1";
+const MAX_STOCK = 40;
+let S;
+let manR = mulberry32(20261006);
+const kinMemo = new Map();
+
+function freshStock(seed) {
+  manR = mulberry32(seed);
+  kinMemo.clear();
+  S = { reg: new Map(), stock: [], nextId: 1, sel: { M: null, F: null }, focus: null, sort: "new", filter: "all", last: null, goal: null };
+  for (let i = 0; i < 8; i++) {
+    const g = founderGenome(manR);
+    addIndividual({ g, sex: i % 2 ? "F" : "M", sire: null, dam: null, gen: 0 });
+  }
+  S.focus = S.stock[0];
+}
+function addIndividual({ g, sex, sire, dam, gen, ph }) {
+  const ind = { id: S.nextId++, name: makeName(manR), g, sex, sire, dam, gen, ph: ph || pheno(g, manR) };
+  S.reg.set(ind.id, ind);
+  S.stock.push(ind.id);
+  return ind;
+}
+const get = id => S.reg.get(id);
+const inStock = id => S.stock.includes(id);
+
+/* 近縁係数 (Malécot) と近交係数 */
+function kin(a, b) {
+  if (a == null || b == null) return 0;
+  if (a === b) return (1 + inbreeding(a)) / 2;
+  if (a < b) [a, b] = [b, a];
+  const key = a + "|" + b;
+  if (kinMemo.has(key)) return kinMemo.get(key);
+  const A = get(a);
+  const v = !A || A.sire == null ? 0 : (kin(A.sire, b) + kin(A.dam, b)) / 2;
+  kinMemo.set(key, v);
+  return v;
+}
+function inbreeding(id) { const r = get(id); return r && r.sire != null ? kin(r.sire, r.dam) : 0; }
+function fStatus(F) {
+  if (F >= 0.2) return { cls: "danger", ic: "!!", text: "強い近親交配" };
+  if (F >= 0.06) return { cls: "caution", ic: "!", text: "近親交配" };
+  if (F > 0) return { cls: "ok", ic: "~", text: "遠縁" };
+  return { cls: "ok", ic: "✓", text: "血縁なし" };
+}
+
+function save() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(serialize()));
+  } catch (e) { /* 保存できない環境では何もしない */ }
+}
+function serialize() {
+  return { reg: [...S.reg.values()], stock: S.stock, nextId: S.nextId, goal: S.goal, sel: S.sel, focus: S.focus, sort: S.sort, filter: S.filter };
+}
+function restore(d) {
+  if (!d || !Array.isArray(d.reg) || !Array.isArray(d.stock)) return false;
+  kinMemo.clear();
+  S = { reg: new Map(d.reg.map(r => [r.id, r])), stock: d.stock, nextId: d.nextId, sel: d.sel || { M: null, F: null }, focus: d.focus ?? null, sort: d.sort || "new", filter: d.filter || "all", last: null, goal: d.goal || null };
+  manR = mulberry32(Date.now() & 0xffffffff);
+  return true;
+}
+
+/* ---------- 交配の予測 ---------- */
+let predCache = { key: "", val: null };
+function predict(s, d) {
+  const key = `${s.id}-${d.id}-${cfg.mu}-${cfg.sigma}`;
+  if (predCache.key === key) return predCache.val;
+  const N = 2000, bins = 20;
+  const hist = {}, vals = {};
+  TRAITS.forEach(t => { hist[t] = new Array(bins).fill(0); vals[t] = []; });
+  for (let k = 0; k < N; k++) {
+    const g = childGenome(s.g, d.g, mcR), ph = pheno(g, mcR);
+    for (const t of TRAITS) { hist[t][Math.min(bins - 1, Math.floor(ph[t] / (100 / bins)))]++; vals[t].push(ph[t]); }
+  }
+  const out = { hist, N, stat: {} };
+  for (const t of TRAITS) {
+    const v = vals[t].sort((a, b) => a - b);
+    out.stat[t] = { mean: v.reduce((a, b) => a + b, 0) / N, lo: v[Math.floor(N * .1)], hi: v[Math.floor(N * .9)] };
+  }
+  // メンデル形質は厳密な確率
+  const pass = (g, id) => dose(g, id) / 2;
+  const pDom = id => 1 - (1 - pass(s.g, id)) * (1 - pass(d.g, id));
+  const pC = pDom("C"), pB = pDom("B");
+  const pPa = pass(s.g, "P"), pPb = pass(d.g, "P");
+  const P2 = pPa * pPb, P0 = (1 - pPa) * (1 - pPb), P1 = 1 - P2 - P0;
+  out.coat = [
+    { name: "黒", p: pC * pB, fill: COAT_FILL.black, ink: "#f5f2ec" },
+    { name: "茶", p: pC * (1 - pB), fill: COAT_FILL.brown, ink: "#ffffff" },
+    { name: "白", p: 1 - pC, fill: COAT_FILL.white, ink: "#3b3b3b" },
+  ];
+  out.spots = [{ name: "無地", p: P0 }, { name: "小斑", p: P1 }, { name: "大斑", p: P2 }];
+  out.sick = (1 - pass(s.g, "D")) * (1 - pass(d.g, "D"));
+  out.muscle = pDom("M");
+  out.conceive = 0.35 + 0.6 * s.ph.fer / 100;
+  out.litter = 0.6 + d.ph.fer / 100 * 4.4;
+  predCache = { key, val: out };
+  return out;
+}
+
+/* ---------- 描画: 飼育場 ---------- */
+const $ = sel => document.querySelector(sel);
+/* SVG の属性値に var() を書くと効かないブラウザがあるので style にまとめ直す */
+const svgVars = html => html.replace(/<[^>]+>/g, tag => {
+  const decl = [];
+  const t = tag.replace(/\s(fill|stroke|font-family)="(var\([^"]+\))"/g, (_, k, v) => { decl.push(`${k}:${v}`); return ""; });
+  return decl.length ? t.replace(/^<([\w:-]+)/, `<$1 style="${decl.join(";")}"`) : tag;
+});
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const minTrait = ind => Math.min(ind.ph.str, ind.ph.cha, ind.ph.fer);
+const sexMark = s => (s === "M" ? "♂" : "♀");
+
+function barsHTML(ph) {
+  return `<span class="bars">${TRAITS.map(t => `<span class="bar"><span class="lbl">${TNAME[t]}</span><span class="trk"><span class="fill" style="width:${ph[t]}%;background:var(--${t})"></span></span><span class="v">${ph[t]}</span></span>`).join("")}</span>`;
+}
+
+function renderStock() {
+  let ids = S.stock.slice();
+  if (S.filter !== "all") ids = ids.filter(id => get(id).sex === S.filter);
+  const key = { new: i => -i.id, str: i => -i.ph.str, cha: i => -i.ph.cha, fer: i => -i.ph.fer, min: i => -minTrait(i) }[S.sort];
+  ids.sort((a, b) => key(get(a)) - key(get(b)));
+  $("#stock").innerHTML = ids.map(id => {
+    const ind = get(id), role = S.sel.M === id ? "父" : S.sel.F === id ? "母" : "";
+    const sick = !has(ind.g, "D");
+    return `<button class="card${role ? " sel" : ""}${S.focus === id ? " focus" : ""}" data-id="${id}" aria-pressed="${!!role}">
+      <span class="ava">${avatar(ind)}</span>
+      <span class="meta"><span class="nm">${esc(ind.name)} <i class="sx">${sexMark(ind.sex)}</i></span>
+      <span class="sub">G${ind.gen} · ${coatLabel(ind.g)}${sick ? ` <span class="tag">病気</span>` : ""}</span></span>
+      ${barsHTML(ind.ph)}
+      ${role ? `<span class="role">${role}</span>` : ""}
+    </button>`;
+  }).join("") || `<p class="muted">該当する個体がいません。</p>`;
+  renderGoal();
+}
+
+function renderGoal() {
+  const all = S.stock.map(get);
+  const best = all.reduce((b, i) => (!b || minTrait(i) > minTrait(b) ? i : b), null);
+  if (!S.goal && best && minTrait(best) >= 80) S.goal = { name: best.name, gen: best.gen };
+  $("#goal").innerHTML = `<b>目標</b><span>強さ・魅力・生殖力がすべて 80 以上のモフを育てる</span>` +
+    (S.goal ? `<span class="status ok"><span class="ic">✓</span>達成: ${esc(S.goal.name)} (G${S.goal.gen})</span>`
+      : best ? `<span class="muted">いちばん近い個体: ${esc(best.name)} (最低値 <span class="mono">${minTrait(best)}</span>)</span>` : "");
+}
+
+function slotHTML(id, label) {
+  if (id == null) return `<div class="slot"><span class="muted">${label}を<br>選んでください</span></div>`;
+  const i = get(id);
+  return `<div class="slot filled"><span class="ava">${avatar(i)}</span><span class="who">${esc(i.name)} ${sexMark(i.sex)}</span><span class="ph">${TRAITS.map(t => TSHORT[t] + i.ph[t]).join(" ")}</span></div>`;
+}
+
+function histSVG(t, pr, s, d) {
+  const W = 300, H = 64, pad = 2, bins = pr.hist[t].length, bw = (W - pad * 2) / bins;
+  const max = Math.max(...pr.hist[t]);
+  let svg = `<svg viewBox="0 0 ${W} ${H + 14}" role="img" aria-label="${TNAME[t]}の予想分布">`;
+  svg += `<line x1="0" x2="${W}" y1="${H}" y2="${H}" stroke="var(--line)"/>`;
+  pr.hist[t].forEach((c, i) => {
+    if (!c) return;
+    const h = Math.max(1.5, c / max * (H - 12));
+    const x = pad + i * bw + 1;
+    svg += `<rect x="${x.toFixed(1)}" y="${(H - h).toFixed(1)}" width="${(bw - 2).toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="var(--${t})"><title>${i * 5}–${i * 5 + 4}: ${(c / pr.N * 100).toFixed(1)}%</title></rect>`;
+  });
+  const mark = (v, lab) => { const x = pad + v / 100 * (W - pad * 2); return `<line x1="${x}" x2="${x}" y1="4" y2="${H}" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="3 2"/><text x="${clamp(x, 8, W - 8)}" y="${H + 12}" font-size="10" text-anchor="middle" fill="var(--muted)">${lab}${v}</text>`; };
+  if (Math.abs(s.ph[t] - d.ph[t]) < 7) svg += mark(Math.round((s.ph[t] + d.ph[t]) / 2), "♂♀");
+  else svg += mark(s.ph[t], "♂") + mark(d.ph[t], "♀");
+  return svgVars(svg + `</svg>`);
+}
+
+function stackHTML(parts) {
+  return `<div class="stack">${parts.filter(p => p.p > 0.0005).map(p => `<span style="flex:${p.p} 1 0;background:${p.fill || "var(--surface-2)"};color:${p.ink || "var(--ink)"};${p.fill ? "" : "border:1px solid var(--line);"}" title="${p.name} ${(p.p * 100).toFixed(1)}%">${p.p >= .12 ? `${p.name} ${Math.round(p.p * 100)}%` : ""}</span>`).join("")}</div>`;
+}
+
+function renderMating() {
+  const s = S.sel.M != null ? get(S.sel.M) : null, d = S.sel.F != null ? get(S.sel.F) : null;
+  let h = `<h2>交配カード</h2><div class="pair">${slotHTML(S.sel.M, "父 ♂")}<span class="cross">×</span>${slotHTML(S.sel.F, "母 ♀")}</div>`;
+  if (s && d) {
+    const pr = predict(s, d), F = kin(s.id, d.id), st = fStatus(F);
+    h += `<div class="kv"><span class="status ${st.cls}"><span class="ic">${st.ic}</span>${st.text}</span><span>子の近交係数 <b>${(F * 100).toFixed(1)}%</b></span></div>`;
+    h += `<div class="pred"><h3>子の予想 <span class="muted" style="font-weight:400;font-size:12px">(${pr.N}回の試行・点線は親)</span></h3>`;
+    for (const t of TRAITS) {
+      const x = pr.stat[t];
+      h += `<div class="hist"><div class="hist-top"><span>${TNAME[t]}</span><span class="mono">平均 ${x.mean.toFixed(0)} · 80%が ${x.lo}–${x.hi}</span></div>${histSVG(t, pr, s, d)}</div>`;
+    }
+    h += `<div class="probs">
+      <div class="prow"><span>毛色</span>${stackHTML(pr.coat)}</div>
+      <div class="prow"><span>斑紋 <span class="muted">(色あり)</span></span>${stackHTML(pr.spots)}</div>
+      <div class="kv"><span>筋肉型 (M_) <b>${(pr.muscle * 100).toFixed(0)}%</b></span><span>病気 (dd) <b style="color:${pr.sick > 0 ? "var(--danger)" : "inherit"}">${(pr.sick * 100).toFixed(1)}%</b></span></div>
+      <div class="kv"><span>受胎率 <b>${(pr.conceive * 100).toFixed(0)}%</b> <span class="muted">(父の生殖力)</span></span><span>平均産子数 <b>${pr.litter.toFixed(1)}</b> <span class="muted">(母の生殖力)</span></span></div>
+    </div></div>`;
+    const full = S.stock.length >= MAX_STOCK;
+    h += `<button class="btn primary big" id="mate"${full ? " disabled" : ""}>交配する</button>`;
+    if (full) h += `<p class="note">飼育場が満員です (${MAX_STOCK}匹)。個体記録の「放す」で空きを作ってください。</p>`;
+  } else {
+    h += `<p class="note">台帳から ♂ と ♀ を1匹ずつ選ぶと、子の能力の分布・毛色の確率・近親度を予想します。</p>`;
+  }
+  if (S.last) {
+    h += `<div class="result"><h3>${esc(S.last.msg)}</h3>`;
+    if (S.last.ids.length) h += `<div class="pups">${S.last.ids.filter(id => get(id)).map(id => { const p = get(id); return `<button class="pup new" data-focus="${id}"><span class="ava">${avatar(p)}</span>${esc(p.name)} ${sexMark(p.sex)}<span class="mono muted">${TRAITS.map(t => p.ph[t]).join("/")}</span></button>`; }).join("")}</div>`;
+    h += `</div>`;
+  }
+  $("#mating").innerHTML = h;
+}
+
+function alleleChips(g, i) {
+  const l = LOCI[i];
+  const sym = a => (l.kind === "add" ? (a ? "+" : "−") : a ? l.up : l.lo);
+  const pair = g[i].slice().sort((a, b) => b - a);
+  return `<span class="alle">${pair.map(a => `<span class="${a ? "hi" : ""}">${sym(a)}</span>`).join("")}</span>`;
+}
+
+function renderDetail() {
+  const id = S.focus, ind = id != null ? get(id) : null;
+  if (!ind) { $("#detail").innerHTML = `<h2>個体記録</h2><p class="note">カードをタップすると、その個体の遺伝子型と血統がここに出ます。</p>`; return; }
+  const g = ind.g, F = inbreeding(id), st = fStatus(F);
+  const cnt = t => TLOCI[t].reduce((s, i) => s + g[i][0] + g[i][1], 0);
+  const dLabel = { 2: "DD 正常", 1: "Dd 保因者 (発症しない)", 0: "dd 発症: 全能力ダウン" }[dose(g, "D")];
+  const mLabel = has(g, "M") ? `${dose(g, "M") === 2 ? "MM" : "Mm"} 筋肉型: 強さ+15 生殖力−15` : "mm 通常型";
+  let h = `<div style="display:flex;gap:12px;align-items:center"><span class="ava" style="width:64px;height:64px">${avatar(ind)}</span><div><h2>${esc(ind.name)} ${sexMark(ind.sex)}</h2><span class="muted" style="font-size:12.5px">ID ${ind.id} · 第${ind.gen}世代 · ${coatLabel(g)}${inStock(id) ? "" : " · 放した個体"}</span></div></div>`;
+  h += barsHTML(ind.ph);
+  h += `<table class="gtable"><thead><tr><th>遺伝子</th><th>遺伝子型</th><th>効果</th></tr></thead><tbody>`;
+  for (const t of TRAITS) h += `<tr><td>${TNAME[t]}</td><td><span class="alle">${TLOCI[t].map(i => alleleChips(g, i)).join("")}</span></td><td class="mono">${cnt(t)}/${ADD[t] * 2}</td></tr>`;
+  h += `<tr><td>筋肉 M</td><td>${alleleChips(g, IDX.M)}</td><td>${mLabel}</td></tr>`;
+  h += `<tr><td>健康 D</td><td>${alleleChips(g, IDX.D)}</td><td>${dLabel}</td></tr>`;
+  h += `<tr><td>毛色 C·B·P</td><td><span class="alle">${alleleChips(g, IDX.C)}${alleleChips(g, IDX.B)}${alleleChips(g, IDX.P)}</span></td><td>${coatLabel(g)}</td></tr>`;
+  h += `</tbody></table>`;
+  h += `<div class="kv"><span class="status ${st.cls}"><span class="ic">${st.ic}</span>${st.text}</span><span>近交係数 <b>${(F * 100).toFixed(1)}%</b></span></div>`;
+  if (ind.sire != null) {
+    const pb = (pid, lab) => { const p = get(pid); return p ? `<button data-focus="${pid}"><span class="lab">${lab}</span>${esc(p.name)} <span class="muted">G${p.gen}</span></button>` : ""; };
+    const sire = get(ind.sire), dam = get(ind.dam);
+    h += `<h3>血統</h3><div class="ped">${pb(ind.sire, "父")}${pb(ind.dam, "母")}`;
+    if (sire && sire.sire != null) h += pb(sire.sire, "父方の祖父") + pb(sire.dam, "父方の祖母");
+    if (dam && dam.sire != null) h += pb(dam.sire, "母方の祖父") + pb(dam.dam, "母方の祖母");
+    h += `</div>`;
+  } else h += `<p class="note">創始個体 (親の記録なし)</p>`;
+  if (inStock(id)) h += `<button class="btn danger" id="release" data-id="${id}">${S.confirmRelease === id ? "本当に放しますか？もう一度押すと放します" : "放す"}</button>`;
+  $("#detail").innerHTML = h;
+}
+
+function renderBreed() { renderStock(); renderMating(); renderDetail(); save(); }
+
+function mate() {
+  const s = get(S.sel.M), d = get(S.sel.F);
+  if (!s || !d) return;
+  const pr = predict(s, d);
+  if (manR() > pr.conceive) { S.last = { msg: "今回は受胎しませんでした。もう一度試せます。", ids: [] }; renderBreed(); return; }
+  const room = MAX_STOCK - S.stock.length;
+  let n = Math.max(1, poisson(pr.litter, manR));
+  const born = n;
+  n = Math.min(n, room);
+  const ids = [];
+  for (let k = 0; k < n; k++) {
+    const g = childGenome(s.g, d.g, manR);
+    ids.push(addIndividual({ g, sex: manR() < 0.5 ? "M" : "F", sire: s.id, dam: d.id, gen: Math.max(s.gen, d.gen) + 1 }).id);
+  }
+  S.last = { msg: `${born}匹生まれました${born > n ? ` (満員のため${n}匹だけ迎えました)` : ""}`, ids };
+  S.focus = ids[0];
+  renderBreed();
+}
+
+/* ---------- 進化モード ---------- */
+let evoR = mulberry32(7);
+const E = { pop: [], gen: 0, hist: [], running: false, timer: null };
+
+function newPopulation() {
+  E.pop = []; E.gen = 0; E.hist = [];
+  const n = Math.round(cfg.K / 2);
+  for (let i = 0; i < n; i++) { const g = founderGenome(evoR); E.pop.push({ g, sex: i % 2 ? "F" : "M", ph: pheno(g, evoR) }); }
+  record();
+}
+function record() {
+  const P = E.pop, n = P.length, row = { gen: E.gen, n };
+  for (const t of TRAITS) row[t] = n ? P.reduce((s, i) => s + i.ph[t], 0) / n : null;
+  const freq = (id, allele) => n ? P.reduce((s, i) => s + (i.g[IDX[id]][0] === allele) + (i.g[IDX[id]][1] === allele), 0) / (2 * n) * 100 : null;
+  row.M = freq("M", 1); row.d = freq("D", 0);
+  E.hist.push(row);
+}
+function evoStep() {
+  const P = E.pop;
+  if (!P.length) return false;
+  const R = evoR;
+  // 生存率は集団平均に対する相対値 (ソフト選択)。能力が上がっても選択圧が飽和しない
+  const w = P.map(i => Math.exp(cfg.nat * (i.ph.str - 50) / 40) * (1 - cfg.pred * 0.6 * i.ph.cha / 100));
+  const wMean = w.reduce((a, b) => a + b, 0) / w.length;
+  const surv = P.filter((i, k) => R() < clamp(0.7 * w[k] / wMean, 0.01, 0.98));
+  const males = surv.filter(i => i.sex === "M"), females = surv.filter(i => i.sex === "F");
+  let kids = [];
+  if (males.length && females.length) {
+    const cum = []; let acc = 0;
+    for (const m of males) { acc += Math.exp(cfg.sex * (m.ph.cha - 50) / 40); cum.push(acc); }
+    for (const f of females) {
+      const r = R() * acc;
+      let lo = 0, hi = cum.length - 1;
+      while (lo < hi) { const mid = (lo + hi) >> 1; if (cum[mid] < r) lo = mid + 1; else hi = mid; }
+      const m = males[lo];
+      if (R() > 0.6 + 0.4 * m.ph.fer / 100) continue;
+      const k = poisson(2 + f.ph.fer / 100 * 8, R);
+      for (let j = 0; j < k; j++) { const g = childGenome(m.g, f.g, R); kids.push({ g, sex: R() < 0.5 ? "M" : "F", ph: pheno(g, R) }); }
+    }
+  }
+  if (kids.length > cfg.K) {
+    for (let i = kids.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [kids[i], kids[j]] = [kids[j], kids[i]]; }
+    kids.length = cfg.K;
+  }
+  E.pop = kids; E.gen++;
+  record();
+  if (E.hist.length > 3000) E.hist.splice(0, E.hist.length - 3000);
+  return kids.length > 0;
+}
+
+/* ---------- 折れ線グラフ ---------- */
+function niceStep(range, target) {
+  const raw = range / target, p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
+  return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p;
+}
+function lineChart(host, { series, yMax, unit = "", area = false, height = 190 }) {
+  const rows = E.hist, W = Math.max(280, host.clientWidth || 600), H = height;
+  const m = { l: 34, r: 66, t: 10, b: 24 };
+  const pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const g0 = rows.length ? rows[0].gen : 0, g1 = rows.length ? rows[rows.length - 1].gen : 1;
+  const span = Math.max(1, g1 - g0);
+  const X = gen => m.l + (gen - g0) / span * pw, Y = v => m.t + (1 - v / yMax) * ph;
+  let s = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img">`;
+  const ys = niceStep(yMax, 4);
+  for (let v = 0; v <= yMax + 1e-9; v += ys) s += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-width="${v === 0 ? 1 : .6}"/><text x="${m.l - 6}" y="${Y(v) + 3.5}" font-size="10" text-anchor="end" fill="var(--muted)" font-family="var(--font-mono)">${Math.round(v)}</text>`;
+  const xs = niceStep(span, Math.max(2, Math.floor(pw / 90)));
+  for (let v = Math.ceil(g0 / xs) * xs; v <= g1; v += xs) s += `<text x="${X(v)}" y="${H - 6}" font-size="10" text-anchor="middle" fill="var(--muted)" font-family="var(--font-mono)">${v}</text>`;
+  s += `<text x="${W - m.r + 4}" y="${H - 6}" font-size="10" fill="var(--muted)">世代</text>`;
+  const ends = [];
+  for (const se of series) {
+    const pts = rows.filter(r => r[se.key] != null).map(r => [X(r.gen), Y(r[se.key])]);
+    if (!pts.length) continue;
+    const d = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join("");
+    if (area) s += `<path d="${d}L${pts[pts.length - 1][0].toFixed(1)} ${Y(0)}L${pts[0][0].toFixed(1)} ${Y(0)}Z" fill="${se.color}" opacity=".14"/>`;
+    s += `<path d="${d}" fill="none" stroke="${se.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    const last = pts[pts.length - 1];
+    s += `<circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${se.color}" stroke="var(--surface)" stroke-width="2"/>`;
+    ends.push({ y: last[1], x: last[0], label: se.label, v: rows[rows.length - 1][se.key], color: se.color });
+  }
+  ends.sort((a, b) => a.y - b.y);
+  for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 13) ends[i].y = ends[i - 1].y + 13;
+  for (const e of ends) s += `<text x="${W - m.r + 8}" y="${clamp(e.y, m.t + 4, H - m.b) + 3.5}" font-size="11" fill="var(--ink)"><tspan font-family="var(--font-mono)" font-weight="600">${Math.round(e.v)}${unit}</tspan> <tspan fill="var(--muted)">${e.label}</tspan></text>`;
+  s += `<line class="xh" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" stroke="var(--muted)" stroke-width="1" visibility="hidden"/>`;
+  s += `<rect class="hit" x="${m.l}" y="0" width="${pw}" height="${H}" fill="transparent"/>`;
+  s += `</svg><div class="tip" hidden></div>`;
+  host.innerHTML = svgVars(s);
+  const svg = host.querySelector("svg"), xh = svg.querySelector(".xh"), tip = host.querySelector(".tip");
+  const hit = svg.querySelector(".hit");
+  const dots = series.map(se => { const c = document.createElementNS("http://www.w3.org/2000/svg", "circle"); c.setAttribute("r", "4"); c.setAttribute("fill", se.color); c.style.stroke = "var(--surface)"; c.setAttribute("stroke-width", "2"); c.setAttribute("visibility", "hidden"); svg.appendChild(c); return c; });
+  const move = ev => {
+    if (!rows.length) return;
+    const rect = svg.getBoundingClientRect(), sx = (ev.clientX - rect.left) * (W / rect.width);
+    const gen = g0 + clamp((sx - m.l) / pw, 0, 1) * span;
+    let best = rows[0];
+    for (const r of rows) if (Math.abs(r.gen - gen) < Math.abs(best.gen - gen)) best = r;
+    const x = X(best.gen);
+    xh.setAttribute("x1", x); xh.setAttribute("x2", x); xh.setAttribute("visibility", "visible");
+    series.forEach((se, i) => { const v = best[se.key]; if (v == null) { dots[i].setAttribute("visibility", "hidden"); return; } dots[i].setAttribute("cx", x); dots[i].setAttribute("cy", Y(v)); dots[i].setAttribute("visibility", "visible"); });
+    tip.innerHTML = `<div style="font-weight:700;margin-bottom:2px">第${best.gen}世代</div>` + series.map(se => `<div class="row"><span><i style="background:${se.color}"></i>${se.label}</span><b>${best[se.key] == null ? "—" : (unit === "%" ? best[se.key].toFixed(1) : Math.round(best[se.key]))}${unit}</b></div>`).join("");
+    tip.hidden = false;
+    const px = x / W * rect.width;
+    tip.style.left = (px > rect.width / 2 ? px - tip.offsetWidth - 12 : px + 12) + "px";
+    tip.style.top = "6px";
+  };
+  const leave = () => { xh.setAttribute("visibility", "hidden"); dots.forEach(d => d.setAttribute("visibility", "hidden")); tip.hidden = true; };
+  hit.addEventListener("pointermove", move);
+  hit.addEventListener("pointerdown", move);
+  hit.addEventListener("pointerleave", leave);
+}
+
+function renderCharts() {
+  const css = getComputedStyle(document.documentElement);
+  const col = k => css.getPropertyValue(k).trim();
+  lineChart($("#ch-traits"), { yMax: 100, series: TRAITS.map(t => ({ key: t, label: TNAME[t], color: col("--" + t) })) });
+  lineChart($("#ch-allele"), { yMax: 100, unit: "%", height: 160, series: [{ key: "M", label: "M", color: col("--al-m") }, { key: "d", label: "d", color: col("--al-d") }] });
+  const maxN = Math.max(cfg.K, ...E.hist.map(r => r.n));
+  lineChart($("#ch-pop"), { yMax: Math.ceil(maxN / 50) * 50, height: 140, area: true, series: [{ key: "n", label: "匹", color: col("--accent") }] });
+}
+let sampleIdx = [];
+function renderEvo(full = true) {
+  $("#c-gen").textContent = E.gen;
+  $("#c-n").textContent = E.pop.length;
+  $("#extinct").hidden = E.pop.length > 0;
+  $("#run").textContent = E.running ? "❚❚ 停止" : "▶ 実行";
+  if (!full) return;
+  renderCharts();
+  const n = Math.min(12, E.pop.length);
+  sampleIdx = [];
+  const step = E.pop.length / Math.max(1, n);
+  for (let i = 0; i < n; i++) sampleIdx.push(Math.floor(i * step));
+  $("#sample").innerHTML = sampleIdx.map((pi, k) => { const p = E.pop[pi]; return `<button class="pup" data-adopt="${k}" title="飼育場へ迎える"><span class="ava">${avatar({ ...p, id: pi + 1 })}</span><span>${sexMark(p.sex)} <span class="mono muted">${TRAITS.map(t => p.ph[t]).join("/")}</span></span></button>`; }).join("") || `<p class="muted">個体がいません。</p>`;
+}
+function toggleRun(force) {
+  E.running = force ?? !E.running;
+  clearInterval(E.timer);
+  if (E.running) {
+    E.timer = setInterval(() => { if (!evoStep()) toggleRun(false); renderEvo(); }, 70);
+  }
+  renderEvo(false);
+}
+
+/* ---------- 通知 ---------- */
+let toastT;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2200); }
+
+/* ---------- イベント ---------- */
+function bind() {
+  document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => {
+    const tab = b.dataset.tab;
+    document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", String(x === b)));
+    $("#view-breed").hidden = tab !== "breed";
+    $("#view-evo").hidden = tab !== "evo";
+    if (tab === "evo") renderEvo(); else { toggleRun(false); renderBreed(); }
+    try { localStorage.setItem(STORE_KEY + "-tab", tab); } catch (e) {}
+  }));
+
+  const sliders = [
+    ["p-mu", "o-mu", v => (cfg.mu = v / 100), v => v.toFixed(1) + "%"],
+    ["p-sigma", "o-sigma", v => (cfg.sigma = v), v => String(v)],
+    ["p-nat", "o-nat", v => (cfg.nat = v), v => v.toFixed(1)],
+    ["p-sex", "o-sex", v => (cfg.sex = v), v => v.toFixed(1)],
+    ["p-pred", "o-pred", v => (cfg.pred = v), v => v.toFixed(2)],
+    ["p-k", "o-k", v => (cfg.K = v), v => String(v)],
+  ];
+  for (const [inp, out, set, fmt] of sliders) {
+    const el = document.getElementById(inp);
+    const upd = manual => {
+      const v = parseFloat(el.value); set(v); document.getElementById(out).textContent = fmt(v);
+      if (manual && /nat|sex|pred|k/.test(inp)) { document.querySelectorAll("#presets .chip").forEach(c => c.setAttribute("aria-pressed", "false")); const n = document.getElementById("preset-note"); if (n) n.textContent = "カスタム条件"; }
+    };
+    el.addEventListener("input", () => { upd(true); if (!$("#view-breed").hidden) renderMating(); });
+    upd(false);
+  }
+
+  const PRESETS = {
+    std: { nat: 1, sex: 1, pred: 0.3, note: "生き残りやすさと♀の好みが両方はたらく、ほどほどの環境。" },
+    peacock: { nat: 0.4, sex: 2.6, pred: 0.6, note: "♀の好みがとても強い。目立つと危険でも、魅力が上がっていくかを見てみましょう。" },
+    harsh: { nat: 2.6, sex: 0.3, pred: 0.2, note: "強くなければ生き残れない。生殖力を削ってでも筋肉遺伝子 M が広がるでしょうか。" },
+    drift: { nat: 0, sex: 0, pred: 0, note: "生き残りも相手選びも運まかせ。それでも子を多く産む個体の遺伝子は増えるので、生殖力だけは上がります。" },
+  };
+  const setNote = k => { $("#preset-note").textContent = k ? PRESETS[k].note : "カスタム条件"; };
+  setNote("std");
+  $("#presets").addEventListener("click", e => {
+    const b = e.target.closest("[data-preset]"); if (!b) return;
+    const p = PRESETS[b.dataset.preset];
+    for (const [k, v] of Object.entries(p)) { if (k === "note") continue; const el = document.getElementById("p-" + k); el.value = v; el.dispatchEvent(new Event("input")); }
+    document.querySelectorAll("#presets .chip").forEach(c => c.setAttribute("aria-pressed", String(c === b)));
+    setNote(b.dataset.preset);
+    toast("条件を変えました。リセットで新しい集団から試せます");
+  });
+
+  $("#stock").addEventListener("click", e => {
+    const card = e.target.closest(".card"); if (!card) return;
+    const id = +card.dataset.id, ind = get(id);
+    S.sel[ind.sex] = S.sel[ind.sex] === id ? null : id;
+    S.focus = id; S.confirmRelease = null;
+    renderBreed();
+  });
+  $("#f-sex").addEventListener("change", e => { S.filter = e.target.value; renderStock(); save(); });
+  $("#f-sort").addEventListener("change", e => { S.sort = e.target.value; renderStock(); save(); });
+
+  let resetArmed = false, resetT;
+  $("#reset-stock").addEventListener("click", e => {
+    if (!resetArmed) {
+      resetArmed = true; e.target.textContent = "台帳を消して始める？ もう一度押す";
+      clearTimeout(resetT); resetT = setTimeout(() => { resetArmed = false; e.target.textContent = "新しい群れで始める"; }, 4000);
+      return;
+    }
+    resetArmed = false; e.target.textContent = "新しい群れで始める";
+    freshStock(Date.now() & 0xffffffff);
+    renderBreed(); toast("新しい群れ (8匹) を迎えました");
+  });
+
+  document.addEventListener("click", e => {
+    const f = e.target.closest("[data-focus]");
+    if (f) { S.focus = +f.dataset.focus; S.confirmRelease = null; renderStock(); renderDetail(); save(); return; }
+    if (e.target.closest("#mate")) { mate(); return; }
+    const rel = e.target.closest("#release");
+    if (rel) {
+      const id = +rel.dataset.id;
+      if (S.confirmRelease !== id) { S.confirmRelease = id; renderDetail(); return; }
+      S.stock = S.stock.filter(x => x !== id);
+      if (S.sel.M === id) S.sel.M = null;
+      if (S.sel.F === id) S.sel.F = null;
+      S.confirmRelease = null;
+      toast(`${get(id).name} を野に放しました`);
+      renderBreed();
+      return;
+    }
+    const ad = e.target.closest("[data-adopt]");
+    if (ad) {
+      if (S.stock.length >= MAX_STOCK) { toast(`飼育場が満員です (${MAX_STOCK}匹)`); return; }
+      const p = E.pop[sampleIdx[+ad.dataset.adopt]]; if (!p) return;
+      const ind = addIndividual({ g: p.g.map(x => x.slice()), sex: p.sex, sire: null, dam: null, gen: 0, ph: { ...p.ph } });
+      S.focus = ind.id; save();
+      toast(`${ind.name} を飼育場へ迎えました (第${E.gen}世代の集団から)`);
+    }
+  });
+
+  $("#run").addEventListener("click", () => toggleRun());
+  $("#step1").addEventListener("click", () => { toggleRun(false); evoStep(); renderEvo(); });
+  $("#step10").addEventListener("click", () => { toggleRun(false); for (let i = 0; i < 10 && evoStep(); i++); renderEvo(); });
+  $("#evo-reset").addEventListener("click", () => { toggleRun(false); evoR = mulberry32(Date.now() & 0xffffffff); newPopulation(); renderEvo(); });
+
+  if ("ResizeObserver" in window) {
+    let raf;
+    new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { if (!$("#view-evo").hidden) renderCharts(); }); }).observe($("#ch-traits"));
+  }
+  const mq = matchMedia("(prefers-color-scheme: dark)");
+  mq.addEventListener && mq.addEventListener("change", () => { if (!$("#view-evo").hidden) renderCharts(); });
+  new MutationObserver(() => { if (!$("#view-evo").hidden) renderCharts(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+}
+
+/* ---------- 起動 ---------- */
+function start(data) {
+  let ok = data && data.breed ? restore(data.breed) : false;
+  if (!ok) { try { ok = restore(JSON.parse(localStorage.getItem(STORE_KEY))); } catch (e) { ok = false; } }
+  if (!ok) freshStock(20261006);
+  $("#f-sex").value = S.filter; $("#f-sort").value = S.sort;
+  bind();
+  newPopulation();
+  for (let i = 0; i < 80 && evoStep(); i++);
+  renderBreed();
+  let tab = "breed";
+  try { tab = localStorage.getItem(STORE_KEY + "-tab") || "breed"; } catch (e) {}
+  if (tab === "evo") document.getElementById("tab-evo").click();
+}
+window.claude?.hot?.snapshot?.(() => ({ breed: serialize() }));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+})();
+</script>
+</body>
+</html>
