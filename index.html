@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Old+Mincho:wght@700;900&display=swap">
 <style>
-/* Layout: 研究ノート風の牧場。上に追従する所持品バー、タブで 飼育場 / 大会 / ガチャ。飼育場は左に台帳カード、右に交配カードとカルテ */
+/* Layout: 研究ノート風の牧場。所持品バー + タブ (飼育場 / 大会 / ガチャ / 研究所)。飼育場は左に台帳カード、右に交配カードとカルテ */
 :root {
   --bg: #edf1ee;
   --paper-grid: #e1e8e3;
@@ -95,6 +95,7 @@ h1 .moff { color: var(--accent); }
 
 /* status bar */
 .hud { position: relative; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 22px; padding: 10px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: 0 6px 18px -14px rgba(0,0,0,.35); }
+@media (min-width: 700px) { .hud { position: sticky; top: env(safe-area-inset-top, 0px); } }
 .hud .stat { display: grid; line-height: 1.15; }
 .hud .stat .l { font-size: 11px; color: var(--muted); }
 .hud .stat .v { font: 600 18px var(--font-mono); font-variant-numeric: tabular-nums; }
@@ -104,12 +105,11 @@ h1 .moff { color: var(--accent); }
 .trophies span { font: 600 11px var(--font-mono); padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); }
 .trophies span.won { background: var(--rare-soft); color: var(--rare); border-color: transparent; }
 
-@media (min-width: 700px) { .hud { position: sticky; top: env(safe-area-inset-top, 0px); } }
-
 /* tabs */
 .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
-.tab { border: 0; background: none; padding: 10px 16px 11px; cursor: pointer; color: var(--muted); font-weight: 700; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.tab { border: 0; background: none; padding: 10px 14px 11px; cursor: pointer; color: var(--muted); font-weight: 700; border-bottom: 3px solid transparent; margin-bottom: -1px; }
 .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+@media (max-width: 480px) { .tab { padding: 10px 8px 11px; font-size: 14px; } .tab .badge { margin-left: 3px; } }
 .tab .badge { font: 600 10.5px var(--font-mono); margin-left: 6px; padding: 0 6px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); }
 
 select, .btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 10px; font-size: 13px; }
@@ -128,7 +128,7 @@ select, .btn { border: 1px solid var(--line); background: var(--surface); border
 @media (max-width: 900px) { .farm { grid-template-columns: minmax(0, 1fr); } }
 .ledger-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 10px; }
 .ledger-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 10px; margin-top: 12px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin-top: 12px; }
 .card { position: relative; text-align: left; display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 8px 12px; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); cursor: pointer; }
 .card:hover { border-color: var(--muted); }
 .card.focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
@@ -140,20 +140,23 @@ select, .btn { border: 1px solid var(--line); background: var(--surface); border
 .sx { font-style: normal; color: var(--muted); font-size: 13px; }
 .stars { font-size: 11px; color: var(--rare); letter-spacing: -.05em; }
 .sub { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tags { position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; }
-.tag { font-size: 10.5px; font-weight: 700; padding: 0 7px; border-radius: 4px; line-height: 18px; background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+.tags:empty { display: none; }
+.tag { font-size: 10.5px; font-weight: 700; padding: 0 7px; border-radius: 4px; line-height: 18px; background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
 .tag.role { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .tag.bad { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
-.tag.win { background: var(--rare-soft); color: var(--rare); border-color: transparent; }
+.tag.win, .tag.rare { background: var(--rare-soft); color: var(--rare); border-color: transparent; }
 
 .est { grid-column: 1 / -1; display: grid; gap: 4px; }
-.erow { display: grid; grid-template-columns: 3.4em minmax(0, 1fr) 4.6em; align-items: center; gap: 8px; font-size: 11.5px; }
+.erow { display: grid; grid-template-columns: 3.4em minmax(0, 1fr) 6.4em; align-items: center; gap: 8px; font-size: 11.5px; }
 .erow .lbl { color: var(--muted); }
 .trk { position: relative; display: block; height: 10px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
 .trk .band { position: absolute; top: 0; bottom: 0; opacity: .3; }
+.trk .band.vague { opacity: .16; }
 .trk .dot { position: absolute; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid var(--surface); }
 .trk .gen { position: absolute; top: -1px; bottom: -1px; width: 2px; margin-left: -1px; background: var(--ink); }
-.erow .v { font: 600 11.5px var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.erow .v { font: 600 11.5px var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.erow .v.word { font-family: var(--font-body); font-weight: 500; }
 .erow .v.unk { color: var(--muted); font-weight: 400; }
 
 /* panels */
@@ -180,6 +183,7 @@ select, .btn { border: 1px solid var(--line); background: var(--surface); border
 .stack { display: flex; height: 18px; border-radius: 4px; overflow: hidden; gap: 2px; }
 .stack span { display: flex; align-items: center; justify-content: center; font: 600 10.5px var(--font-mono); min-width: 0; white-space: nowrap; overflow: hidden; }
 .locked { padding: 12px; border: 1px dashed var(--line); border-radius: 8px; font-size: 12.5px; color: var(--muted); background: var(--surface-2); }
+.locked b { color: var(--ink); }
 
 .actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .actions .btn { text-align: left; display: grid; gap: 0; padding: 8px 10px; }
@@ -187,7 +191,8 @@ select, .btn { border: 1px solid var(--line); background: var(--surface); border
 .actions .btn.primary .d { color: inherit; opacity: .85; }
 .looks { display: flex; flex-wrap: wrap; gap: 4px; }
 .looks span { font-size: 12px; padding: 1px 8px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); }
-.mlog { display: grid; gap: 2px; font-size: 12px; max-height: 140px; overflow: auto; }
+.looks span.rare { background: var(--rare-soft); color: var(--rare); border-color: transparent; font-weight: 700; }
+.mlog { display: grid; gap: 2px; font-size: 12px; max-height: 150px; overflow: auto; }
 .mlog div { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px dotted var(--line); padding: 2px 0; }
 
 .gtable { width: 100%; border-collapse: collapse; font-size: 12.5px; }
@@ -243,6 +248,15 @@ select, .btn { border: 1px solid var(--line); background: var(--surface); border
 .cap.r4 { border-color: var(--rare); box-shadow: 0 0 0 1px var(--rare); background: var(--rare-soft); }
 .cap .ava { width: 64px; height: 64px; }
 
+/* research */
+.lab { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.res { display: grid; gap: 8px; align-content: start; }
+.res.done { background: var(--surface-2); }
+.res-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.res .price { font: 600 13px var(--font-mono); white-space: nowrap; }
+.res .what { font-size: 13px; margin: 0; }
+.res .req { font-size: 11.5px; color: var(--caution); margin: 0; }
+
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); background: var(--ink); color: var(--bg); padding: 8px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; z-index: 10; max-width: calc(100% - 32px); text-align: center; }
 @media (prefers-reduced-motion: no-preference) {
   .card, .btn { transition: border-color .15s, background-color .15s; }
@@ -261,9 +275,10 @@ select, .btn { border: 1px solid var(--line); background: var(--surface); border
     </div>
     <ol class="steps" aria-label="遊び方">
       <li>ガチャで仲間を迎える</li>
-      <li>実験と見た目で能力を見きわめる</li>
+      <li>見た目と実験で実力を推理する</li>
+      <li>研究所で見る力を磨く</li>
       <li>配合して強い子を作る</li>
-      <li>大会で勝ち上がり殿堂入り</li>
+      <li>大会で殿堂入り</li>
     </ol>
   </header>
 
@@ -273,6 +288,7 @@ select, .btn { border: 1px solid var(--line); background: var(--surface); border
     <button class="tab" role="tab" id="tab-farm" data-tab="farm" aria-selected="true">飼育場</button>
     <button class="tab" role="tab" id="tab-tour" data-tab="tour" aria-selected="false">大会</button>
     <button class="tab" role="tab" id="tab-gacha" data-tab="gacha" aria-selected="false">ガチャ</button>
+    <button class="tab" role="tab" id="tab-lab" data-tab="lab" aria-selected="false">研究所</button>
   </div>
 
   <section id="view-farm" class="farm">
@@ -280,14 +296,14 @@ select, .btn { border: 1px solid var(--line); background: var(--surface); border
       <div class="ledger-head">
         <div>
           <h2>飼育台帳</h2>
-          <span class="muted" style="font-size:13px">能力値は実験するまで「？」。帯は推定の幅 (95%) で、測るほど狭くなります。</span>
+          <span class="muted" style="font-size:13px" id="ledger-hint"></span>
         </div>
         <div class="ledger-tools">
           <select id="f-sort" aria-label="並び順">
             <option value="new">新しい順</option>
-            <option value="str">推定 強さ順</option>
-            <option value="cha">推定 魅力順</option>
-            <option value="fer">推定 生殖力順</option>
+            <option value="str">強さの印象順</option>
+            <option value="cha">魅力の印象順</option>
+            <option value="fer">生殖力の印象順</option>
             <option value="star">レア度順</option>
           </select>
           <button class="btn" id="expand"></button>
@@ -306,7 +322,7 @@ select, .btn { border: 1px solid var(--line); background: var(--surface); border
     <div style="display:grid;gap:14px">
       <div id="hall"></div>
       <div class="tours" id="tours"></div>
-      <p class="note">大会は種目ごとに1日1回。優勝すると次のランクに上がります。3種目すべての「王者」ランクで優勝すると殿堂入りです。出場した記録は、そのモフの能力の測定値にもなります。</p>
+      <p class="note">大会は種目ごとに1日1回。優勝すると次のランクに上がります。3種目すべての「王者」ランクで優勝すると殿堂入りです。出場した結果は、そのモフの実力の手がかりにもなります。</p>
     </div>
   </section>
 
@@ -320,8 +336,15 @@ select, .btn { border: 1px solid var(--line); background: var(--surface); border
       <h3>提供割合</h3>
       <table class="rates" id="rates"></table>
       <p class="note">★はそのモフが来た群れの質を表します。遺伝子は1匹ずつ違うので、★5でも実際の能力は確かめるまでわかりません。</p>
-      <p class="note">ガチャチケットは毎日1枚もらえます (最大3枚)。</p>
+      <p class="note">ごくまれに「特異体質」のモフが混じっています。ガチャチケットは毎日1枚もらえます (最大3枚)。</p>
     </aside>
+  </section>
+
+  <section id="view-lab" hidden>
+    <div style="display:grid;gap:14px">
+      <div class="panel" style="gap:4px"><h2>研究所</h2><p class="note">最初は見た目と「なんとなくの印象」しかわかりません。コインで道具や設備をそろえると、見える情報が増えていきます。</p></div>
+      <div class="lab" id="lab"></div>
+    </div>
   </section>
 
   <div style="display:flex;justify-content:flex-end"><button class="btn danger" id="reset-game">はじめからやり直す</button></div>
@@ -353,26 +376,31 @@ const TNAME = { str: "強さ", cha: "魅力", fer: "生殖力" };
 const ADD = { str: 4, cha: 4, fer: 3 };
 const LOCI = [];
 for (const t of TRAITS) for (let i = 1; i <= ADD[t]; i++) LOCI.push({ id: t + i, trait: t, kind: "add" });
+/* f = 大文字側 (1) の頻度。X の x は超筋肉 (ミオスタチン欠損型)、Q は多産型 (ブールーラ型) */
 [
-  { id: "M", up: "M", lo: "m", f: 0.2 },
-  { id: "D", up: "D", lo: "d", f: 0.8 },
-  { id: "C", up: "C", lo: "c", f: 0.68 },
-  { id: "B", up: "B", lo: "b", f: 0.55 },
-  { id: "P", up: "P", lo: "p", f: 0.4 },
+  { id: "M", up: "M", lo: "m", f: 0.2, dna: "筋肉" },
+  { id: "X", up: "X", lo: "x", f: 0.9, dna: "超筋肉" },
+  { id: "Q", up: "Q", lo: "q", f: 0.03, dna: "多産" },
+  { id: "D", up: "D", lo: "d", f: 0.8, dna: "健康" },
+  { id: "C", up: "C", lo: "c", f: 0.68, dna: "色素" },
+  { id: "B", up: "B", lo: "b", f: 0.55, dna: "黒毛" },
+  { id: "P", up: "P", lo: "p", f: 0.4, dna: "斑紋" },
 ].forEach(m => LOCI.push({ ...m, kind: "mend" }));
 const IDX = Object.fromEntries(LOCI.map((l, i) => [l.id, i]));
 const TLOCI = Object.fromEntries(TRAITS.map(t => [t, LOCI.map((l, i) => (l.trait === t ? i : -1)).filter(i => i >= 0)]));
-const MU = 0.005, SIGMA = 6;
+const MU = 0.005, SIGMA = 6, LOOK_NOISE = 8;
 
 const has = (g, id) => g[IDX[id]][0] | g[IDX[id]][1];
 const dose = (g, id) => g[IDX[id]][0] + g[IDX[id]][1];
+const isMega = g => !has(g, "X");
+const qDose = g => dose(g, "Q");
 function baseValues(g) {
   const cnt = t => TLOCI[t].reduce((s, i) => s + g[i][0] + g[i][1], 0);
-  const M = has(g, "M"), sick = !has(g, "D");
+  const M = has(g, "M"), sick = !has(g, "D"), mega = isMega(g), q = qDose(g);
   return {
-    str: 10 + cnt("str") / 8 * 75 + (M ? 15 : 0) - (sick ? 25 : 0),
+    str: 10 + cnt("str") / 8 * 75 + (M ? 15 : 0) + (mega ? 30 : 0) - (q === 2 ? 8 : 0) - (sick ? 25 : 0),
     cha: 10 + cnt("cha") / 8 * 80 - (sick ? 15 : 0),
-    fer: 10 + cnt("fer") / 6 * 80 - (M ? 15 : 0) - (sick ? 30 : 0),
+    fer: 10 + cnt("fer") / 6 * 80 - (M ? 15 : 0) - (mega ? 20 : 0) + [0, 18, 32][q] - (sick ? 30 : 0),
   };
 }
 function pheno(g, r) {
@@ -401,16 +429,15 @@ const RARITY = [
 ];
 const BANNERS = [
   { name: "いつものガチャ", desc: "ピックアップなし。どんなモフが来るかはお楽しみ。", mod: {} },
-  { name: "筋肉フェス", desc: "筋肉遺伝子 M を持つモフが出やすい。強さは上がるが生殖力は下がる。", mod: { M: 0.6 } },
-  { name: "キラキラ魅力祭", desc: "魅力の遺伝子が出やすい。コンテスト狙いに。", mod: { cha: 0.15 } },
-  { name: "多産の春", desc: "生殖力の遺伝子が出やすい。たくさん産む母を探すなら今。", mod: { fer: 0.15 } },
+  { name: "筋肉フェス", desc: "筋肉質なモフが出やすい。まれに「めっちゃムキムキ」も。強いが子は少なめ。", mod: { M: 0.6, X: 0.7 } },
+  { name: "キラキラ魅力祭", desc: "かわいいモフが出やすい。コンテスト狙いに。", mod: { cha: 0.15 } },
+  { name: "多産の春", desc: "子だくさんの家系が出やすい。たくさん産む母を探すなら今。", mod: { fer: 0.15, Q: 0.15 } },
   { name: "まっしろ祭", desc: "色素のない白いモフが出やすい。", mod: { C: 0.3 } },
-  { name: "まだら模様フェア", desc: "斑紋 P を持つモフが出やすい。", mod: { P: 0.75 } },
+  { name: "まだら模様フェア", desc: "まだら模様のモフが出やすい。", mod: { P: 0.75 } },
 ];
 const BANNER_DAYS = 4;
 const bannerOf = day => BANNERS[Math.floor((day - 1) / BANNER_DAYS) % BANNERS.length];
 const PULL_COST = 100, PULL5_COST = 450, MAX_TICKETS = 3;
-
 function gachaGenome(rar, banner, r) {
   return LOCI.map(l => {
     let f;
@@ -422,41 +449,87 @@ function gachaGenome(rar, banner, r) {
 }
 function rollRarity(r) { let x = r(); for (const k of RARITY) { if ((x -= k.p) < 0) return k; } return RARITY[0]; }
 
+/* ---------- 研究 ---------- */
+const RESEARCH = [
+  { id: "eye", name: "観察眼の修行", price: 200, what: "見た目の印象を5段階で言い分けられるようになる (最初は3段階)。" },
+  { id: "watch", name: "ストップウォッチ", price: 250, what: "「走らせる」やレースの結果が、印象ではなく点数でわかる。" },
+  { id: "score", name: "審査員の採点表", price: 250, what: "「写真審査」やコンテストの結果が、印象ではなく点数でわかる。" },
+  { id: "vet", name: "動物病院と提携", price: 300, what: "健康診断 (1回40コイン) で生殖力を点数で測れる。それまでは見た目と出産記録が頼り。" },
+  { id: "pedigree", name: "血統書", price: 200, what: "祖父母までの血統と、近親交配の度合い (近交係数) がわかる。" },
+  { id: "stats", name: "統計ノート", price: 400, req: ["watch", "score", "vet"], reqText: "点数で測れる道具をどれか1つ", what: "点数の記録をまとめて、能力の推定値と誤差の幅を出す。" },
+  { id: "kit", name: "DNA検査キット", price: 600, what: "1匹80コインで、毛色・筋肉・病気・特異体質の遺伝子がわかる。" },
+  { id: "genome", name: "ゲノム解析装置", price: 1500, req: ["kit"], reqText: "DNA検査キット", what: "1匹150コインで、能力の遺伝子まで全部わかる。" },
+  { id: "sim", name: "交配シミュレータ", price: 1000, req: ["kit"], reqText: "DNA検査キット", what: "検査済みの親どうしなら、交配する前に子の毛色や能力の確率がわかる。" },
+];
+const U = k => !!(G.unlocks && G.unlocks[k]);
+const reqOk = r => !r.req || r.req.some(U);
+
 /* ---------- 名前 ---------- */
 const SYL = ["ポ", "ム", "モ", "チ", "ル", "ナ", "キ", "ピ", "ヤ", "ココ", "ラ", "ミ", "タ", "ハ", "ニ", "ク", "リ", "ソ", "フ", "ノ", "マ", "ロ", "ペ", "サ"];
 const TAIL = ["", "", "", "ン", "ー", "ル", "ッチ", "マル", "ゾウ", "スケ"];
 const makeName = r => SYL[Math.floor(r() * SYL.length)] + SYL[Math.floor(r() * SYL.length)] + TAIL[Math.floor(r() * TAIL.length)];
 
+/* ---------- 印象のことば ---------- */
+const bin5 = v => (v < 30 ? 0 : v < 45 ? 1 : v < 60 ? 2 : v < 75 ? 3 : 4);
+const BIN5 = [[0, 30], [30, 45], [45, 60], [60, 75], [75, 100]];
+const bin3 = v => (v < 40 ? 0 : v < 68 ? 1 : 2);
+const WORD = {
+  str: ["かなり遅い", "遅め", "ふつう", "速い", "とても速い"],
+  cha: ["かなり不評", "いまいち", "ふつう", "好評", "大好評"],
+  fer: ["かなり低い", "低め", "ふつう", "高め", "とても高い"],
+};
+const SENT = {
+  str: ["かなり遅かった", "遅めだった", "ふつうだった", "速かった", "とても速かった"],
+  cha: ["かなり不評だった", "いまいちだった", "ふつうだった", "好評だった", "大好評だった"],
+};
+const LOOK5 = {
+  str: ["ほっそり", "やや細め", "ふつうの体格", "がっしり", "かなりがっしり"],
+  cha: ["ぼんやりした顔", "やや地味な顔", "ふつうの顔", "かわいい顔", "とびきりかわいい顔"],
+  fer: ["毛がパサパサ", "毛ツヤいまいち", "毛ツヤふつう", "毛ツヤ良好", "毛ツヤつやつや"],
+};
+const LOOK3 = { str: [0, 2, 3], cha: [1, 2, 3], fer: [0, 2, 4] };
+
 /* ---------- 見た目 ---------- */
-const lvl = v => (v < 40 ? 0 : v < 68 ? 1 : 2);
 const ADULT_AGE = 2;
 const isAdult = ind => G.day - ind.born >= ADULT_AGE;
 function looks(ind) {
-  const adult = isAdult(ind);
-  return { adult, body: adult ? lvl(ind.ph.str) : 1, eyes: adult ? lvl(ind.ph.cha) : 1, gloss: adult ? lvl(ind.ph.fer) : 0, muscle: adult && !!has(ind.g, "M"), sick: !has(ind.g, "D") };
+  const adult = isAdult(ind), lk = ind.look;
+  return { adult, body: adult ? bin3(lk.str) : 1, eyes: adult ? bin3(lk.cha) : 1, gloss: adult ? bin3(lk.fer) : 0,
+    muscle: adult && !!has(ind.g, "M"), mega: adult && isMega(ind.g), q: adult ? qDose(ind.g) : 0, sick: !has(ind.g, "D") };
+}
+const lookWord = (ind, t) => (U("eye") ? LOOK5[t][bin5(ind.look[t])] : LOOK5[t][LOOK3[t][bin3(ind.look[t])]]);
+function specials(ind) {
+  const L = looks(ind), out = [];
+  if (L.mega) out.push("めっちゃムキムキ");
+  if (L.q) out.push(ind.sex === "M" ? (L.q === 2 ? "睾丸がとんでもなくデカい" : "睾丸がめちゃくちゃデカい") : (L.q === 2 ? "お腹まわりがとんでもなくふっくら" : "お腹まわりがやけにふっくら"));
+  return out;
 }
 function looksText(ind) {
-  const L = looks(ind), out = [coatLabel(ind.g)];
-  if (!L.adult) { out.push(`幼体 (あと${ADULT_AGE - (G.day - ind.born)}日で大人)`); out.push("体つきはまだわからない"); }
+  const L = looks(ind), out = [{ t: coatLabel(ind.g) }];
+  if (!L.adult) { out.push({ t: `幼体 (あと${ADULT_AGE - (G.day - ind.born)}日で大人)` }, { t: "体つきはまだわからない" }); }
   else {
-    out.push(["ほっそり", "ふつうの体格", "がっしり"][L.body]);
-    if (L.muscle) out.push("筋肉質");
-    out.push(["小さな目", "くりっとした目", "キラキラした目"][L.eyes]);
-    out.push(["毛がパサパサ", "毛ツヤふつう", "毛ツヤつやつや"][L.gloss]);
+    for (const t of TRAITS) out.push({ t: lookWord(ind, t) });
+    if (L.muscle && !L.mega) out.push({ t: "筋肉質" });
+    specials(ind).forEach(s => out.push({ t: s, rare: true }));
   }
-  if (L.sick) out.push("元気がない");
+  if (L.sick) out.push({ t: "元気がない" });
   return out;
 }
 const COAT_FILL = { black: "#2f2a27", brown: "#9b5a2d", white: "#f5f2ec" };
 function avatar(ind) {
   const L = looks(ind), c = coat(ind.g), fill = COAT_FILL[c.key];
-  const rx = [13, 17, 21][L.body], eyeR = [1.9, 2.8, 3.8][L.eyes];
+  const rx = L.mega ? 23 : [13, 17, 21][L.body], eyeR = [1.9, 2.8, 3.8][L.eyes];
   const pupil = c.key === "white" ? "#c0392b" : "#141414", line = c.key === "black" ? "#e9e2d6" : "#141414";
+  const ol = `stroke="var(--outline)" stroke-width="1.2"`;
   let s = `<svg viewBox="0 0 64 64" aria-hidden="true"><g${L.adult ? "" : ` transform="translate(32 40) scale(.74) translate(-32 -36)"`}>`;
-  s += `<ellipse cx="21" cy="21" rx="5" ry="8" fill="${fill}" stroke="var(--outline)" stroke-width="1.2"/>`;
-  s += `<ellipse cx="43" cy="21" rx="5" ry="8" fill="${fill}" stroke="var(--outline)" stroke-width="1.2"/>`;
-  if (L.muscle) for (const sx of [-1, 1]) s += `<ellipse cx="${32 + sx * (rx + 1)}" cy="42" rx="4.5" ry="5.5" fill="${fill}" stroke="var(--outline)" stroke-width="1.2"/>`;
-  s += `<ellipse cx="32" cy="38" rx="${rx}" ry="17" fill="${fill}" stroke="var(--outline)" stroke-width="1.2"/>`;
+  s += `<ellipse cx="21" cy="21" rx="5" ry="8" fill="${fill}" ${ol}/><ellipse cx="43" cy="21" rx="5" ry="8" fill="${fill}" ${ol}/>`;
+  if (L.mega) {
+    for (const sx of [-1, 1]) s += `<ellipse cx="${32 + sx * 17}" cy="29" rx="8" ry="6.5" fill="${fill}" ${ol}/><ellipse cx="${32 + sx * 24}" cy="42" rx="7.5" ry="9" fill="${fill}" ${ol}/>`;
+  } else if (L.muscle) {
+    for (const sx of [-1, 1]) s += `<ellipse cx="${32 + sx * (rx + 1)}" cy="42" rx="4.5" ry="5.5" fill="${fill}" ${ol}/>`;
+  }
+  s += `<ellipse cx="32" cy="38" rx="${rx}" ry="17" fill="${fill}" ${ol}/>`;
+  if (L.mega) s += `<path d="M24 47 q8 4 16 0 M26 42 q6 2.5 12 0" fill="none" stroke="${line}" stroke-width="1" opacity=".5" stroke-linecap="round"/>`;
   if (c.spots) {
     const sp = c.key === "black" ? "#e9e2d6" : "#4a2a14";
     const pts = c.spots === 2 ? [[24, 46, 4.5], [40, 44, 3.5], [36, 28, 3], [27, 27, 2.4], [32, 51, 2.6]] : [[40, 45, 3.6], [25, 47, 2.6]];
@@ -471,35 +544,38 @@ function avatar(ind) {
     s += `<circle cx="${x}" cy="35" r="${eyeR + 1.1}" fill="#ffffff"/><circle cx="${x}" cy="35.4" r="${eyeR}" fill="${pupil}"/>`;
     if (L.eyes === 2) s += `<circle cx="${x + eyeR * .35}" cy="${34.2 - eyeR * .2}" r="${(eyeR * .35).toFixed(2)}" fill="#ffffff"/>`;
   }
-  if (L.muscle) s += `<path d="M21.5 29 l7 2 M42.5 29 l-7 2" stroke="${line}" stroke-width="1.7" stroke-linecap="round"/>`;
+  if (L.muscle || L.mega) s += `<path d="M21.5 29 l7 2 M42.5 29 l-7 2" stroke="${line}" stroke-width="${L.mega ? 2.4 : 1.7}" stroke-linecap="round"/>`;
   s += `<path d="M29.5 42 q2.5 ${L.sick ? -1.5 : 2.6} 5 0" fill="none" stroke="${line}" stroke-width="1.3" stroke-linecap="round"/>`;
   if (L.sick) s += `<g transform="rotate(-25 40 25)"><rect x="33" y="22.5" width="14" height="5" rx="1.5" fill="#f3e3c3" stroke="#b49a6a" stroke-width=".8"/><path d="M38 23.5v3 M42 23.5v3" stroke="#b49a6a" stroke-width=".7"/></g>`;
   return svgVars(s + `</g></svg>`);
 }
 
 /* ---------- 状態 ---------- */
-const STORE_KEY = "haigo-lab-v2";
-const START_CAP = 12, MAX_CAP = 40, UPKEEP_ADULT = 5, UPKEEP_BABY = 2;
-const COST = { health: 40, gtest: 150 };
-const SELL_PRICE = 30;
+const STORE_KEY = "haigo-lab-v3";
+const START_CAP = 12, MAX_CAP = 40, UPKEEP_ADULT = 3, UPKEEP_BABY = 1;
+const COST = { health: 40, kit: 80, genome: 150 };
+const SELL_PRICE = 40;
 let G;
 const kinMemo = new Map();
 
 function newGame(seed) {
   R = mulberry32(seed);
   kinMemo.clear();
-  G = { day: 1, coins: 300, tickets: 1, cap: START_CAP, reg: new Map(), stock: [], nextId: 1, sel: { M: null, F: null }, focus: null, sort: "new",
+  G = { day: 1, coins: 400, tickets: 1, cap: START_CAP, reg: new Map(), stock: [], nextId: 1, sel: { M: null, F: null }, focus: null, sort: "new",
     tiers: { race: 0, contest: 0, show: 0 }, cleared: { race: false, contest: false, show: false }, entered: {}, hallDay: null,
-    log: [], last: null, lastTour: null, lastPull: null, confirm: null };
+    unlocks: {}, log: [], last: null, lastTour: null, lastPull: null, confirm: null };
   const b = BANNERS[0];
   [[2, "M"], [1, "F"], [1, "M"], [2, "F"]].forEach(([star, sex]) => {
     addInd({ g: gachaGenome(RARITY[star - 1], b, R), sex, star, sire: null, dam: null, gen: 0, born: -99 });
   });
   G.focus = G.stock[0];
-  note("牧場を開きました。まずは「走らせる」「写真審査」でモフの実力を確かめてみましょう。");
+  note("牧場を開きました。まずは見た目を観察して、「走らせる」「写真審査」で実力を確かめてみましょう。");
 }
 function addInd({ g, sex, star, sire, dam, gen, born }) {
-  const ind = { id: G.nextId++, name: makeName(R), g, sex, star: star || 0, sire, dam, gen, born, ph: pheno(g, R), meas: { str: [], cha: [], fer: [] }, tested: false, acted: null, wins: 0 };
+  const ph = pheno(g, R);
+  const look = Object.fromEntries(TRAITS.map(t => [t, ph[t] + gauss(R) * LOOK_NOISE]));
+  const ind = { id: G.nextId++, name: makeName(R), g, sex, star: star || 0, sire, dam, gen, born, ph, look,
+    meas: { str: [], cha: [], fer: [] }, dna: 0, acted: null, wins: 0, births: [], tries: 0, hits: 0 };
   G.reg.set(ind.id, ind);
   G.stock.push(ind.id);
   return ind;
@@ -509,12 +585,13 @@ const inStock = id => G.stock.includes(id);
 const room = () => G.cap - G.stock.length;
 const canAct = ind => inStock(ind.id) && isAdult(ind) && ind.acted !== G.day;
 function note(text) { G.log.unshift({ day: G.day, text }); if (G.log.length > 80) G.log.length = 80; }
+const isSpecial = ind => isMega(ind.g) || qDose(ind.g) > 0;
 
 function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify({ ...G, reg: [...G.reg.values()] })); } catch (e) { /* 保存できない環境 */ } }
 function restore(d) {
   if (!d || !Array.isArray(d.reg) || !Array.isArray(d.stock) || typeof d.day !== "number") return false;
   kinMemo.clear();
-  G = { ...d, reg: new Map(d.reg.map(r => [r.id, r])), confirm: null };
+  G = { ...d, unlocks: d.unlocks || {}, reg: new Map(d.reg.map(r => [r.id, r])), confirm: null };
   R = mulberry32((Date.now() ^ (d.day * 7919)) >>> 0);
   return true;
 }
@@ -539,42 +616,51 @@ function fStatus(F) {
   return { cls: "ok", ic: "✓", text: "血縁なし" };
 }
 
-/* 測定値を逆分散で重みづけして推定 */
-function estimate(ind, t) {
-  const ms = ind.meas[t];
-  if (!ms.length) return null;
-  let w = 0, s = 0;
-  for (const m of ms) { const wi = 1 / (m.s * m.s); w += wi; s += m.v * wi; }
-  return { mean: s / w, ci: 1.96 * Math.sqrt(1 / w), n: ms.length };
-}
-function measure(ind, t, sigma, src) {
+/* ---------- 測定と、そこからわかること ---------- */
+function measure(ind, t, sigma, src, num) {
   const v = clamp(Math.round(ind.ph[t] + gauss(R) * sigma), 0, 100);
-  ind.meas[t].push({ v, s: sigma, src, day: G.day });
+  ind.meas[t].push({ v, s: sigma, src, day: G.day, num });
   return v;
 }
+/* 見せ方: 統計ノートがあれば推定値±幅、点数の記録があれば前回の点数、印象しかなければ印象の平均 */
+function traitInfo(ind, t) {
+  const nums = ind.meas[t].filter(m => m.num), words = ind.meas[t].filter(m => !m.num);
+  if (U("stats") && nums.length) {
+    let w = 0, s = 0;
+    for (const m of nums) { const wi = 1 / (m.s * m.s); w += wi; s += m.v * wi; }
+    return { kind: "est", mean: s / w, ci: 1.96 * Math.sqrt(1 / w), key: s / w };
+  }
+  if (nums.length) { const v = nums[nums.length - 1].v; return { kind: "last", v, n: nums.length, key: v }; }
+  if (words.length) { const b = Math.round(words.reduce((a, m) => a + bin5(m.v), 0) / words.length); return { kind: "word", bin: b, n: words.length, key: (BIN5[b][0] + BIN5[b][1]) / 2 }; }
+  return null;
+}
+const infoLabel = (i, t) => (!i ? "未測定" : i.kind === "est" ? `推定${Math.round(i.mean)}` : i.kind === "last" ? `前回${i.v}` : `${WORD[t][i.bin]}?`);
 
 /* ---------- 実験・検査・交配 ---------- */
 const EXPS = {
-  race: { name: "走らせる", trait: "str", sigma: 10, cost: 0, desc: "強さを測る", verb: "タイム計測" },
-  photo: { name: "写真審査", trait: "cha", sigma: 10, cost: 0, desc: "魅力を測る", verb: "写真審査" },
-  health: { name: "健康診断", trait: "fer", sigma: 8, cost: COST.health, desc: "生殖力を測る", verb: "健康診断" },
+  race: { name: "走らせる", trait: "str", sigma: 10, cost: 0, desc: "強さの手がかり", verb: "かけっこ", tool: "watch" },
+  photo: { name: "写真審査", trait: "cha", sigma: 10, cost: 0, desc: "魅力の手がかり", verb: "写真審査", tool: "score" },
+  health: { name: "健康診断", trait: "fer", sigma: 8, cost: COST.health, desc: "生殖力を測る", verb: "健康診断", tool: "vet", needs: "vet" },
 };
 function doExp(id, kind) {
   const ind = get(id), e = EXPS[kind];
-  if (!canAct(ind) || G.coins < e.cost) return;
+  if (!canAct(ind) || G.coins < e.cost || (e.needs && !U(e.needs))) return;
   G.coins -= e.cost;
   ind.acted = G.day;
-  const v = measure(ind, e.trait, e.sigma, e.verb);
-  note(`${ind.name}の${e.verb}: ${TNAME[e.trait]} ${v}点 (誤差 ±${e.sigma * 2}くらい)`);
-  toast(`${ind.name}の${TNAME[e.trait]}: ${v}点`);
+  const num = U(e.tool), v = measure(ind, e.trait, e.sigma, e.verb, num);
+  const msg = num ? `${ind.name}の${e.verb}: ${TNAME[e.trait]} ${v}点` : `${ind.name}の${e.verb}: ${SENT[e.trait][bin5(v)]}`;
+  note(msg); toast(msg);
 }
-function geneTest(id) {
-  const ind = get(id);
-  if (ind.tested || G.coins < COST.gtest) return;
-  G.coins -= COST.gtest; ind.tested = true;
-  const carrier = dose(ind.g, "D") === 1;
-  note(`${ind.name}の遺伝子検査が終わりました${carrier ? "。病気遺伝子 d の保因者でした" : ""}`);
-  toast(`${ind.name}の遺伝子型がわかりました`);
+function geneTest(id, level) {
+  const ind = get(id), cost = level === 2 ? COST.genome : COST.kit;
+  if (ind.dna >= level || G.coins < cost || !U(level === 2 ? "genome" : "kit")) return;
+  G.coins -= cost; ind.dna = level;
+  const found = [];
+  if (dose(ind.g, "D") === 1) found.push("病気遺伝子 d の保因者");
+  if (dose(ind.g, "X") === 1) found.push("超筋肉 x を隠し持っている");
+  if (qDose(ind.g) && !isAdult(ind)) found.push("多産遺伝子 Q を持っている");
+  note(`${ind.name}の${level === 2 ? "ゲノム解析" : "DNA検査"}が終わりました${found.length ? "。" + found.join("、") : ""}`);
+  toast(`${ind.name}の遺伝子がわかりました`);
 }
 
 let predCache = { key: "", val: null };
@@ -601,7 +687,9 @@ function predict(s, d) {
     { name: "白", p: 1 - pC, fill: COAT_FILL.white, ink: "#3b3b3b" },
   ];
   out.spots = [{ name: "無地", p: (1 - pa) * (1 - pb) }, { name: "小斑", p: pa * (1 - pb) + pb * (1 - pa) }, { name: "大斑", p: pa * pb }];
-  out.sick = (1 - pass(s.g, "D")) * (1 - pass(d.g, "D"));
+  out.sick = 1 - pDom("D");
+  out.mega = 1 - pDom("X");
+  out.q = pDom("Q");
   out.muscle = pDom("M");
   predCache = { key, val: out };
   return out;
@@ -610,12 +698,16 @@ function mate() {
   const s = get(G.sel.M), d = get(G.sel.F);
   if (!s || !d || !canAct(s) || !canAct(d) || room() < 1) return;
   s.acted = d.acted = G.day;
+  s.tries++;
   if (R() > 0.35 + 0.6 * s.ph.fer / 100) {
+    d.births.push({ day: G.day, n: 0 });
     G.last = { msg: `${s.name} × ${d.name}: 今回は受胎しませんでした`, ids: [] };
     note(G.last.msg);
     return;
   }
+  s.hits++;
   const born = Math.max(1, poisson(0.6 + d.ph.fer / 100 * 4.4, R)), n = Math.min(born, room()), ids = [];
+  d.births.push({ day: G.day, n: born });
   for (let k = 0; k < n; k++) ids.push(addInd({ g: childGenome(s.g, d.g, R), sex: R() < 0.5 ? "M" : "F", star: 0, sire: s.id, dam: d.id, gen: Math.max(s.gen, d.gen) + 1, born: G.day }).id);
   G.last = { msg: `${s.name} × ${d.name}: ${born}匹生まれました${born > n ? ` (空きがなく${born - n}匹は里親へ)` : ""}`, ids };
   note(G.last.msg);
@@ -624,9 +716,9 @@ function mate() {
 
 /* ---------- 大会 ---------- */
 const TOURS = {
-  race: { name: "モフレース", short: "レース", desc: "走りと力くらべ。強さで決まる", trait: "str", offset: 0 },
-  contest: { name: "美モフコンテスト", short: "コンテスト", desc: "見た目と愛嬌の審査。魅力で決まる", trait: "cha", offset: 0 },
-  show: { name: "品評会", short: "品評会", desc: "体格・容姿・繁殖力の総合審査。3能力の平均で決まる", trait: null, offset: -6 },
+  race: { name: "モフレース", short: "レース", desc: "走りと力くらべ。強さで決まる", trait: "str", offset: 0, tool: "watch" },
+  contest: { name: "美モフコンテスト", short: "コンテスト", desc: "見た目と愛嬌の審査。魅力で決まる", trait: "cha", offset: 0, tool: "score" },
+  show: { name: "品評会", short: "品評会", desc: "体格・容姿・繁殖力の総合審査。3能力の平均で決まる", trait: null, offset: -6, tool: "stats" },
 };
 const TIERS = [
   { name: "初級", mean: 40, prize: 80 },
@@ -639,22 +731,22 @@ function enterTour(type, id) {
   const ind = get(id), T = TOURS[type], tier = TIERS[G.tiers[type]];
   if (!ind || !canAct(ind) || G.entered[type] === G.day) return;
   ind.acted = G.day; G.entered[type] = G.day;
-  const score = T.trait ? measure(ind, T.trait, 6, T.short + "大会")
+  const score = T.trait ? measure(ind, T.trait, 6, T.short + "大会", U(T.tool))
     : clamp(Math.round((ind.ph.str + ind.ph.cha + ind.ph.fer) / 3 + gauss(R) * 5), 0, 100);
   const rows = [{ name: ind.name, score, me: true }];
   for (let i = 0; i < 7; i++) rows.push({ name: "野良の" + makeName(R), score: clamp(Math.round(tier.mean + T.offset + gauss(R) * 7), 0, 100), me: false });
   rows.sort((a, b) => b.score - a.score || (a.me ? -1 : b.me ? 1 : 0));
   const place = rows.findIndex(r => r.me) + 1;
-  const prize = place <= 3 ? Math.round(tier.prize * PLACE_PAY[place - 1]) : 10;
+  const prize = place <= 3 ? Math.round(tier.prize * PLACE_PAY[place - 1]) : 15;
   G.coins += prize;
-  let msg = `${T.name} ${tier.name}: ${ind.name}は${place}位 (${score}点) 賞金 ${prize}コイン`;
+  let msg = `${T.name} ${tier.name}: ${ind.name}は${place}位${U(T.tool) ? ` (${score}点)` : ""} 賞金 ${prize}コイン`;
   if (place === 1) {
     ind.wins++;
     if (G.tiers[type] < 3) { G.tiers[type]++; msg += `。${TIERS[G.tiers[type]].name}に昇格`; }
     else if (!G.cleared[type]) { G.cleared[type] = true; msg += "。王者の称号を獲得"; }
     if (!G.hallDay && Object.values(G.cleared).every(Boolean)) { G.hallDay = G.day; msg += "。殿堂入り達成！"; }
   }
-  G.lastTour = { type, tier: tier.name, rows, place, prize };
+  G.lastTour = { type, tier: tier.name, rows, place, prize, shown: U(T.tool) };
   note(msg);
   toast(place === 1 ? `優勝！ +${prize}コイン` : `${place}位 · +${prize}コイン`);
 }
@@ -669,10 +761,16 @@ function endDay() {
   if (gotTicket) G.tickets++;
   G.last = null; G.lastTour = null; G.confirm = null;
   note(`${G.day}日目の朝。餌代 −${upkeep}コイン${gotTicket ? "、ガチャチケット +1" : ""}`);
-  G.stock.map(get).filter(i => G.day - i.born === ADULT_AGE).forEach(i => note(`${i.name}が大人になりました。体つきが見えてきました`));
+  let surprise = null;
+  G.stock.map(get).filter(i => G.day - i.born === ADULT_AGE).forEach(i => {
+    const sp = specials(i);
+    if (sp.length) { note(`${i.name}が大人になったら……${sp.join("、")}！ 特異体質です`); surprise = i; }
+    else note(`${i.name}が大人になりました。体つきが見えてきました`);
+  });
   if (bannerOf(G.day) !== oldBanner) note(`ガチャが「${bannerOf(G.day).name}」に切り替わりました`);
   if (G.coins < 0) note("コインがマイナスです。大会で稼ぐか、モフを売って立て直しましょう");
-  toast(`${G.day}日目 · 餌代 −${upkeep}${gotTicket ? " · チケット +1" : ""}`);
+  if (surprise) { G.focus = surprise.id; toast(`${surprise.name}が${specials(surprise)[0]}に育った！`); }
+  else toast(`${G.day}日目 · 餌代 −${upkeep}${gotTicket ? " · チケット +1" : ""}`);
 }
 
 /* ---------- ガチャを引く ---------- */
@@ -688,6 +786,17 @@ function pull(n, pay) {
   G.lastPull = ids;
   const best = Math.max(...ids.map(id => get(id).star));
   note(`ガチャ「${banner.name}」で${n}匹を迎えました (最高 ★${best})`);
+  const sp = ids.map(get).filter(i => specials(i).length);
+  sp.forEach(i => note(`${i.name}は${specials(i).join("、")}。特異体質かも！`));
+  if (sp.length) toast(`特異体質のモフが来た！ ${sp[0].name}: ${specials(sp[0])[0]}`);
+}
+
+function buy(id) {
+  const r = RESEARCH.find(x => x.id === id);
+  if (!r || U(id) || !reqOk(r) || G.coins < r.price) return;
+  G.coins -= r.price; G.unlocks[id] = G.day;
+  note(`研究所: 「${r.name}」を手に入れました`);
+  toast(`「${r.name}」を解放しました`);
 }
 
 /* ---------- 描画ヘルパ ---------- */
@@ -704,18 +813,26 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;",
 const sexMark = s => (s === "M" ? "♂" : "♀");
 const starStr = n => (n ? "★".repeat(n) : "");
 const ageText = ind => (isAdult(ind) ? "大人" : `幼体 あと${ADULT_AGE - (G.day - ind.born)}日`);
+const lockNote = what => `<b>研究所</b>で「${what}」を解放すると`;
 
 function estRows(ind) {
-  const gv = ind.tested ? baseValues(ind.g) : null;
+  const gv = ind.dna >= 2 ? baseValues(ind.g) : null;
   return `<span class="est">${TRAITS.map(t => {
-    const e = estimate(ind, t);
-    let trk = "";
-    if (e) {
-      const lo = clamp(e.mean - e.ci, 0, 100), hi = clamp(e.mean + e.ci, 0, 100);
-      trk += `<span class="band" style="left:${lo}%;width:${hi - lo}%;background:var(--${t})"></span><span class="dot" style="left:${clamp(e.mean, 0, 100)}%;background:var(--${t})"></span>`;
+    const i = traitInfo(ind, t);
+    let trk = "", v = `<span class="v unk">？</span>`;
+    if (i && i.kind === "est") {
+      const lo = clamp(i.mean - i.ci, 0, 100), hi = clamp(i.mean + i.ci, 0, 100);
+      trk += `<span class="band" style="left:${lo}%;width:${hi - lo}%;background:var(--${t})"></span><span class="dot" style="left:${clamp(i.mean, 0, 100)}%;background:var(--${t})"></span>`;
+      v = `<span class="v">${Math.round(i.mean)}<span class="muted" style="font-weight:400"> ±${Math.round(i.ci)}</span></span>`;
+    } else if (i && i.kind === "last") {
+      trk += `<span class="dot" style="left:${i.v}%;background:var(--${t})"></span>`;
+      v = `<span class="v"><span class="muted" style="font-weight:400">前回</span> ${i.v}</span>`;
+    } else if (i) {
+      const [a, b] = BIN5[i.bin];
+      trk += `<span class="band vague" style="left:${a}%;width:${b - a}%;background:var(--${t})"></span>`;
+      v = `<span class="v word">${WORD[t][i.bin]}?</span>`;
     }
     if (gv) trk += `<span class="gen" style="left:${clamp(gv[t], 0, 100)}%" title="遺伝子から見込まれる値 ${Math.round(gv[t])}"></span>`;
-    const v = e ? `<span class="v">${Math.round(e.mean)}<span class="muted" style="font-weight:400"> ±${Math.round(e.ci)}</span></span>` : `<span class="v unk">？</span>`;
     return `<span class="erow"><span class="lbl">${TNAME[t]}</span><span class="trk">${trk}</span>${v}</span>`;
   }).join("")}</span>`;
 }
@@ -733,32 +850,35 @@ function renderHud() {
     <button class="btn primary" data-act="endday">1日を終える <small>餌代 −${up}</small></button>`;
   const ready = G.stock.map(get).filter(canAct).length;
   const open = Object.keys(TOURS).filter(k => G.entered[k] !== G.day).length;
+  const buyable = RESEARCH.filter(r => !U(r.id) && reqOk(r) && G.coins >= r.price).length;
   $("#tab-farm").innerHTML = `飼育場${ready ? `<span class="badge" title="今日まだ行動できるモフ">${ready}</span>` : ""}`;
   $("#tab-tour").innerHTML = `大会${open ? `<span class="badge" title="今日出場できる大会">${open}</span>` : ""}`;
   $("#tab-gacha").innerHTML = `ガチャ${G.tickets ? `<span class="badge" title="ガチャチケット">${G.tickets}</span>` : ""}`;
+  $("#tab-lab").innerHTML = `研究所${buyable ? `<span class="badge" title="いま解放できる研究">${buyable}</span>` : ""}`;
 }
 
 /* ---------- 描画: 飼育場 ---------- */
 const expandPrice = () => 300 + (G.cap - START_CAP) * 50;
 function renderStock() {
+  $("#ledger-hint").textContent = U("stats") ? "帯は推定の幅 (95%)。測るほど狭くなります。" : "能力は見た目と実験の印象から推理します。研究所で道具をそろえると数字で見えます。";
   const ids = G.stock.slice();
-  const est = (i, t) => { const e = estimate(i, t); return e ? e.mean : -1; };
-  const key = { new: i => -i.id, str: i => -est(i, "str"), cha: i => -est(i, "cha"), fer: i => -est(i, "fer"), star: i => -i.star * 1000 - i.id }[G.sort];
+  const val = (i, t) => { const x = traitInfo(i, t); return x ? x.key : -1; };
+  const key = { new: i => -i.id, str: i => -val(i, "str"), cha: i => -val(i, "cha"), fer: i => -val(i, "fer"), star: i => -i.star * 1000 - i.id }[G.sort];
   ids.sort((a, b) => key(get(a)) - key(get(b)));
   $("#stock").innerHTML = ids.map(id => {
     const ind = get(id), role = G.sel.M === id ? "父" : G.sel.F === id ? "母" : "";
     const tags = [];
     if (role) tags.push(`<span class="tag role">${role}</span>`);
+    if (isAdult(ind) && isSpecial(ind)) tags.push(`<span class="tag rare">特異体質</span>`);
     if (ind.wins) tags.push(`<span class="tag win">優勝${ind.wins}</span>`);
     if (!has(ind.g, "D")) tags.push(`<span class="tag bad">病気</span>`);
-    if (ind.tested) tags.push(`<span class="tag">検査済</span>`);
     const tired = isAdult(ind) && ind.acted === G.day;
     return `<button class="card${G.focus === id ? " focus" : ""}${tired ? " tired" : ""}" data-act="focus" data-id="${id}">
       <span class="ava">${avatar(ind)}</span>
       <span class="meta"><span class="nm">${esc(ind.name)} <i class="sx">${sexMark(ind.sex)}</i>${ind.star ? `<span class="stars">${starStr(ind.star)}</span>` : ""}</span>
-      <span class="sub">${ageText(ind)}${tired ? " · 行動済み" : ""} · ${coatLabel(ind.g)}</span></span>
+      <span class="sub">${ageText(ind)}${tired ? " · 行動済み" : ""} · ${coatLabel(ind.g)}${ind.dna ? " · 検査済" : ""}</span>
+      <span class="tags">${tags.join("")}</span></span>
       ${estRows(ind)}
-      <span class="tags">${tags.join("")}</span>
     </button>`;
   }).join("") || `<p class="muted">モフがいません。ガチャで迎えましょう。</p>`;
   const price = expandPrice(), ex = $("#expand");
@@ -779,7 +899,7 @@ function histSVG(t, pr, s, d) {
     const h = Math.max(1.5, c / max * (H - 12));
     svg += `<rect x="${(i * bw + 1).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${(bw - 2).toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="var(--${t})"><title>${i * 5}–${i * 5 + 4}: ${(c / pr.N * 100).toFixed(1)}%</title></rect>`;
   });
-  const marks = [[s, "♂"], [d, "♀"]].map(([p, lab]) => { const e = estimate(p, t); return e ? { v: Math.round(e.mean), lab } : null; }).filter(Boolean);
+  const marks = [[s, "♂"], [d, "♀"]].map(([p, lab]) => { const i = traitInfo(p, t); return i && i.kind !== "word" ? { v: Math.round(i.key), lab } : null; }).filter(Boolean);
   if (marks.length === 2 && Math.abs(marks[0].v - marks[1].v) < 7) marks.splice(0, 2, { v: Math.round((marks[0].v + marks[1].v) / 2), lab: "♂♀" });
   for (const m of marks) { const x = m.v / 100 * W; svg += `<line x1="${x}" x2="${x}" y1="4" y2="${H}" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="3 2"/><text x="${clamp(x, 10, W - 10)}" y="${H + 12}" font-size="10" text-anchor="middle" fill="var(--muted)">${m.lab}${m.v}</text>`; }
   return svgVars(svg + `</svg>`);
@@ -792,22 +912,29 @@ function renderMating() {
   const s = G.sel.M != null ? get(G.sel.M) : null, d = G.sel.F != null ? get(G.sel.F) : null;
   let h = `<h2>交配カード</h2><div class="pair">${slotHTML(G.sel.M, "M")}<span class="cross">×</span>${slotHTML(G.sel.F, "F")}</div>`;
   if (s && d) {
-    const F = kin(s.id, d.id), st = fStatus(F);
-    h += `<div class="kv"><span class="status ${st.cls}"><span class="ic">${st.ic}</span>${st.text}</span><span>子の近交係数 <b>${(F * 100).toFixed(1)}%</b></span></div>`;
-    if (s.tested && d.tested) {
-      const pr = predict(s, d);
-      h += `<h3>子の予想 <span class="muted" style="font-weight:400;font-size:12px">(2000回の試算・点線は親の推定値)</span></h3>`;
-      for (const t of TRAITS) { const x = pr.stat[t]; h += `<div class="hist"><div class="hist-top"><span>${TNAME[t]}</span><span class="mono">平均 ${x.mean.toFixed(0)} · 80%が ${x.lo}–${x.hi}</span></div>${histSVG(t, pr, s, d)}</div>`; }
-      h += `<div class="prow"><span>毛色</span>${stackHTML(pr.coat)}</div><div class="prow"><span>斑紋 <span class="muted">(白以外)</span></span>${stackHTML(pr.spots)}</div>
-        <div class="kv"><span>筋肉質 (M) <b>${Math.round(pr.muscle * 100)}%</b></span><span>病気 (dd) <b style="color:${pr.sick > 0 ? "var(--danger)" : "inherit"}">${(pr.sick * 100).toFixed(1)}%</b></span></div>`;
+    if (U("pedigree")) {
+      const F = kin(s.id, d.id), st = fStatus(F);
+      h += `<div class="kv"><span class="status ${st.cls}"><span class="ic">${st.ic}</span>${st.text}</span><span>子の近交係数 <b>${(F * 100).toFixed(1)}%</b></span></div>`;
+    }
+    if (!U("sim")) {
+      h += `<div class="locked">どんな子が生まれるかは、生まれてみるまでわかりません。${lockNote("交配シミュレータ")}、検査済みの親どうしの子を予想できます。</div>`;
     } else {
-      h += `<div class="locked">子の能力や毛色の確率は、両親とも遺伝子検査をすると見られます (${[s, d].filter(x => !x.tested).map(x => esc(x.name)).join("・")} が未検査)。それまでは見た目と測定値から予想しましょう。</div>`;
+      const lv = Math.min(s.dna, d.dna);
+      if (lv < 1) h += `<div class="locked">両親ともDNA検査をすると子の予想が見られます (${[s, d].filter(x => !x.dna).map(x => esc(x.name)).join("・")} が未検査)。</div>`;
+      else {
+        const pr = predict(s, d);
+        h += `<h3>子の予想</h3>`;
+        if (lv >= 2) for (const t of TRAITS) { const x = pr.stat[t]; h += `<div class="hist"><div class="hist-top"><span>${TNAME[t]}</span><span class="mono">平均 ${x.mean.toFixed(0)} · 80%が ${x.lo}–${x.hi}</span></div>${histSVG(t, pr, s, d)}</div>`; }
+        else h += `<p class="note">能力の分布は、両親ともゲノム解析をすると見られます。</p>`;
+        h += `<div class="prow"><span>毛色</span>${stackHTML(pr.coat)}</div><div class="prow"><span>斑紋 <span class="muted">(白以外)</span></span>${stackHTML(pr.spots)}</div>
+          <div class="kv"><span>筋肉質 <b>${Math.round(pr.muscle * 100)}%</b></span><span>めっちゃムキムキ <b>${(pr.mega * 100).toFixed(1)}%</b></span><span>多産体質 <b>${(pr.q * 100).toFixed(1)}%</b></span><span>病気 <b style="color:${pr.sick > 0 ? "var(--danger)" : "inherit"}">${(pr.sick * 100).toFixed(1)}%</b></span></div>`;
+      }
     }
     const why = !inStock(s.id) || !inStock(d.id) ? "手放した個体は交配できません" : !canAct(s) ? `${s.name}は今日は動けません` : !canAct(d) ? `${d.name}は今日は動けません` : room() < 1 ? "飼育場に空きがありません" : "";
     h += `<button class="btn primary big block" data-act="mate"${why ? " disabled" : ""}>交配する</button>`;
-    h += `<p class="note">${why ? esc(why) + "。" : ""}両親とも今日の行動を使います。受胎率は父の、産子数は母の生殖力しだい。子は${ADULT_AGE}日で大人になります。</p>`;
+    h += `<p class="note">${why ? esc(why) + "。" : ""}両親とも今日の行動を使います。子は${ADULT_AGE}日で大人になり、体つきが見えてきます。</p>`;
   } else {
-    h += `<p class="note">カルテの「父にする / 母にする」で♂と♀を選んで交配します。血縁が近いほど、隠れた病気遺伝子 d がそろいやすくなります。</p>`;
+    h += `<p class="note">カルテの「父にする / 母にする」で♂と♀を選んで交配します。ふつうに見える親どうしから、とんでもない子が生まれることもあります。</p>`;
   }
   if (G.last) {
     h += `<h3>${esc(G.last.msg)}</h3>`;
@@ -821,14 +948,20 @@ function alleleChips(g, i) {
   const l = LOCI[i], sym = a => (l.kind === "add" ? (a ? "+" : "−") : a ? l.up : l.lo);
   return `<span class="alle">${g[i].slice().sort((a, b) => b - a).map(a => `<span class="${a ? "hi" : ""}">${sym(a)}</span>`).join("")}</span>`;
 }
-function geneTable(g) {
+function geneTable(ind) {
+  const g = ind.g;
   const cnt = t => TLOCI[t].reduce((s, i) => s + g[i][0] + g[i][1], 0);
-  const dLabel = { 2: "DD 正常", 1: "Dd 保因者 (発症しない)", 0: "dd 発症: 全能力ダウン" }[dose(g, "D")];
-  const mLabel = has(g, "M") ? `${dose(g, "M") === 2 ? "MM" : "Mm"} 強さ+15 生殖力−15` : "mm 通常";
+  const lab = {
+    M: has(g, "M") ? "強さ+15 生殖力−15" : "通常",
+    X: { 2: "通常", 1: "保因者 (見た目は普通)", 0: "超筋肉: 強さ+30 生殖力−20" }[dose(g, "X")],
+    Q: ["通常", "多産型: 生殖力+18", "多産型×2: 生殖力+32 強さ−8"][qDose(g)],
+    D: { 2: "正常", 1: "保因者 (発症しない)", 0: "発症: 全能力ダウン" }[dose(g, "D")],
+  };
   let h = `<table class="gtable"><thead><tr><th>遺伝子</th><th>遺伝子型</th><th>効果</th></tr></thead><tbody>`;
-  for (const t of TRAITS) h += `<tr><td>${TNAME[t]}</td><td><span class="alle">${TLOCI[t].map(i => alleleChips(g, i)).join("")}</span></td><td class="mono">+${cnt(t)}/${ADD[t] * 2}</td></tr>`;
-  h += `<tr><td>筋肉 M</td><td>${alleleChips(g, IDX.M)}</td><td>${mLabel}</td></tr>`;
-  h += `<tr><td>健康 D</td><td>${alleleChips(g, IDX.D)}</td><td>${dLabel}</td></tr>`;
+  for (const t of TRAITS) h += ind.dna >= 2
+    ? `<tr><td>${TNAME[t]}</td><td><span class="alle">${TLOCI[t].map(i => alleleChips(g, i)).join("")}</span></td><td class="mono">+${cnt(t)}/${ADD[t] * 2}</td></tr>`
+    : `<tr><td>${TNAME[t]}</td><td class="muted">？ (ゲノム解析で判明)</td><td></td></tr>`;
+  for (const id of ["M", "X", "Q", "D"]) h += `<tr><td>${LOCI[IDX[id]].dna} ${id}</td><td>${alleleChips(g, IDX[id])}</td><td>${lab[id]}</td></tr>`;
   h += `<tr><td>毛色</td><td><span class="alle">${alleleChips(g, IDX.C)}${alleleChips(g, IDX.B)}${alleleChips(g, IDX.P)}</span></td><td>${coatLabel(g)}</td></tr>`;
   return h + `</tbody></table>`;
 }
@@ -837,15 +970,20 @@ function renderDetail() {
   const ind = G.focus != null ? get(G.focus) : null;
   if (!ind) { $("#detail").innerHTML = `<h2>カルテ</h2><p class="note">カードをタップすると、そのモフのカルテが開きます。</p>`; return; }
   const id = ind.id, here = inStock(id), adult = isAdult(ind), act = canAct(ind);
-  const F = inbreeding(id), st = fStatus(F);
   let h = `<div style="display:flex;gap:12px;align-items:center"><span class="ava" style="width:64px;height:64px;flex:none">${avatar(ind)}</span><div style="min-width:0"><h2>${esc(ind.name)} ${sexMark(ind.sex)} ${ind.star ? `<span class="stars">${starStr(ind.star)}</span>` : ""}</h2><span class="muted" style="font-size:12.5px">${ind.star ? "ガチャ出身" : `第${ind.gen}世代 · 自家産`} · ${here ? ageText(ind) : "手放した個体"}${ind.wins ? ` · 優勝${ind.wins}回` : ""}</span></div></div>`;
-  h += `<div class="looks" aria-label="見た目">${looksText(ind).map(x => `<span>${esc(x)}</span>`).join("")}</div>`;
+  h += `<div class="looks" aria-label="見た目の印象">${looksText(ind).map(x => `<span class="${x.rare ? "rare" : ""}">${esc(x.t)}</span>`).join("")}</div>`;
   h += estRows(ind);
   if (here) {
     const why = !adult ? "幼体はまだ実験や交配ができません" : ind.acted === G.day ? "今日はもう行動しました。明日また動けます" : "";
     h += `<div class="actions">`;
-    for (const [k, e] of Object.entries(EXPS)) h += `<button class="btn" data-act="exp" data-kind="${k}" data-id="${id}"${!act || G.coins < e.cost ? " disabled" : ""}>${e.name}${e.cost ? `<small>${e.cost}コイン</small>` : ""}<span class="d">${e.desc} (誤差 ±${e.sigma * 2})</span></button>`;
-    h += `<button class="btn" data-act="gtest" data-id="${id}"${ind.tested || G.coins < COST.gtest ? " disabled" : ""}>${ind.tested ? "遺伝子検査済み" : `遺伝子検査<small>${COST.gtest}コイン</small>`}<span class="d">遺伝子型がすべてわかる</span></button>`;
+    for (const [k, e] of Object.entries(EXPS)) {
+      const locked = e.needs && !U(e.needs);
+      const d = locked ? "研究所で「動物病院と提携」" : `${e.desc}${U(e.tool) ? " (点数)" : " (印象)"}`;
+      h += `<button class="btn" data-act="exp" data-kind="${k}" data-id="${id}"${!act || locked || G.coins < e.cost ? " disabled" : ""}>${e.name}${e.cost ? `<small>${e.cost}コイン</small>` : ""}<span class="d">${d}</span></button>`;
+    }
+    const lv = ind.dna < 1 ? 1 : 2, cost = lv === 2 ? COST.genome : COST.kit, tool = lv === 2 ? "genome" : "kit";
+    const gl = ind.dna >= 2 ? "ゲノム解析済み" : lv === 2 ? "ゲノム解析" : "DNA検査";
+    h += `<button class="btn" data-act="gtest" data-lv="${lv}" data-id="${id}"${ind.dna >= 2 || !U(tool) || G.coins < cost ? " disabled" : ""}>${gl}${ind.dna < 2 && U(tool) ? `<small>${cost}コイン</small>` : ""}<span class="d">${ind.dna >= 2 ? "遺伝子はすべて判明" : U(tool) ? (lv === 2 ? "能力の遺伝子までわかる" : "毛色・体質の遺伝子がわかる") : `研究所で「${lv === 2 ? "ゲノム解析装置" : "DNA検査キット"}」`}</span></button>`;
     const isSel = G.sel[ind.sex] === id;
     h += `<button class="btn${isSel ? "" : " primary"}" data-act="pair" data-id="${id}"${!adult ? " disabled" : ""}>${isSel ? "交配相手から外す" : ind.sex === "M" ? "父にする" : "母にする"}<span class="d">交配カードにセット</span></button>`;
     h += `<button class="btn danger" data-act="sell" data-id="${id}">${G.confirm === id ? "本当に売る？" : `売る<small>+${SELL_PRICE}コイン</small>`}<span class="d">${G.confirm === id ? "もう一度押すと売ります" : "飼育場から手放す"}</span></button>`;
@@ -853,18 +991,23 @@ function renderDetail() {
     if (why) h += `<p class="note">${why}。</p>`;
   }
   const all = TRAITS.flatMap(t => ind.meas[t].map(m => ({ ...m, t }))).sort((a, b) => b.day - a.day);
-  if (all.length) h += `<h3>測定記録</h3><div class="mlog">${all.map(m => `<div><span>${m.day}日目 ${esc(m.src)}</span><span class="mono">${TNAME[m.t]} ${m.v}</span></div>`).join("")}</div>`;
+  if (all.length) h += `<h3>実験の記録</h3><div class="mlog">${all.map(m => `<div><span>${m.day}日目 ${esc(m.src)}</span><span class="${m.num ? "mono" : ""}">${TNAME[m.t]} ${m.num ? m.v : WORD[m.t][bin5(m.v)]}</span></div>`).join("")}</div>`;
+  if (ind.sex === "F" && ind.births.length) h += `<h3>出産の記録</h3><div class="mlog">${ind.births.slice().reverse().map(b => `<div><span>${b.day}日目</span><span>${b.n ? b.n + "匹" : "受胎せず"}</span></div>`).join("")}</div>`;
+  if (ind.sex === "M" && ind.tries) h += `<div class="kv"><span>種付けの記録: ${ind.tries}回中 <b>${ind.hits}</b>回 受胎</span></div>`;
   h += `<h3>遺伝子</h3>`;
-  h += ind.tested ? geneTable(ind.g) + `<p class="note">能力の帯にある縦線は、遺伝子から見込まれる値です (育ちのぶれを除く)。</p>` : `<div class="locked">未検査です。毛色や体つきからある程度は推理できます。たとえば白い子は必ず cc。白い子が生まれたら、両親とも c を隠し持っています。</div>`;
-  h += `<div class="kv"><span class="status ${st.cls}"><span class="ic">${st.ic}</span>${st.text}</span><span>近交係数 <b>${(F * 100).toFixed(1)}%</b></span></div>`;
+  h += ind.dna ? geneTable(ind) : `<div class="locked">遺伝子はわかりません。見た目から推理しましょう。たとえば白い子は必ず cc で、白い子が生まれたら両親とも c を隠し持っています。${U("kit") ? "" : lockNote("DNA検査キット") + "調べられます。"}</div>`;
+  if (ind.dna >= 2) h += `<p class="note">能力の帯にある縦線は、遺伝子から見込まれる値です (育ちのぶれを除く)。</p>`;
   if (ind.sire != null) {
     const pb = (pid, lab) => { const p = get(pid); return p ? `<button data-act="focus" data-id="${pid}"><span class="lab">${lab}</span>${esc(p.name)} <span class="muted">${p.star ? starStr(p.star) : "G" + p.gen}</span></button>` : ""; };
     const sire = get(ind.sire), dam = get(ind.dam);
     h += `<h3>血統</h3><div class="ped">${pb(ind.sire, "父")}${pb(ind.dam, "母")}`;
-    if (sire && sire.sire != null) h += pb(sire.sire, "父方の祖父") + pb(sire.dam, "父方の祖母");
-    if (dam && dam.sire != null) h += pb(dam.sire, "母方の祖父") + pb(dam.dam, "母方の祖母");
+    if (U("pedigree")) {
+      if (sire && sire.sire != null) h += pb(sire.sire, "父方の祖父") + pb(sire.dam, "父方の祖母");
+      if (dam && dam.sire != null) h += pb(dam.sire, "母方の祖父") + pb(dam.dam, "母方の祖母");
+    }
     h += `</div>`;
   }
+  if (U("pedigree")) { const F = inbreeding(id), st = fStatus(F); h += `<div class="kv"><span class="status ${st.cls}"><span class="ic">${st.ic}</span>${st.text}</span><span>近交係数 <b>${(F * 100).toFixed(1)}%</b></span></div>`; }
   $("#detail").innerHTML = h;
 }
 function renderDiary() { $("#diary").innerHTML = G.log.slice(0, 40).map(l => `<div><span class="d">${l.day}日目</span><span>${esc(l.text)}</span></div>`).join(""); }
@@ -878,11 +1021,12 @@ function renderTours() {
   $("#tours").innerHTML = Object.entries(TOURS).map(([k, T]) => {
     const ti = G.tiers[k], tier = TIERS[ti], done = G.entered[k] === G.day;
     const rank = i => {
-      if (T.trait) { const e = estimate(i, T.trait); return e ? e.mean : -1; }
-      const es = TRAITS.map(t => estimate(i, t));
-      return es.every(Boolean) ? es.reduce((a, e) => a + e.mean, 0) / 3 : -1;
+      if (T.trait) { const x = traitInfo(i, T.trait); return x ? x.key : -1; }
+      const xs = TRAITS.map(t => traitInfo(i, t));
+      return xs.every(Boolean) ? xs.reduce((a, x) => a + x.key, 0) / 3 : -1;
     };
-    const opts = adults.slice().sort((a, b) => rank(b) - rank(a)).map(i => { const r = rank(i); return `<option value="${i.id}">${esc(i.name)} ${sexMark(i.sex)} ${r >= 0 ? `(推定 ${Math.round(r)})` : "(未測定)"}</option>`; }).join("");
+    const label = i => (T.trait ? infoLabel(traitInfo(i, T.trait), T.trait) : TRAITS.map(t => { const x = traitInfo(i, t); return x ? infoLabel(x, t) : "？"; }).join("・"));
+    const opts = adults.slice().sort((a, b) => rank(b) - rank(a)).map(i => `<option value="${i.id}">${esc(i.name)} ${sexMark(i.sex)} (${esc(label(i))})</option>`).join("");
     let h = `<div class="panel tour"><div class="tour-head"><div><h2>${T.name}</h2><span class="muted" style="font-size:12.5px">${T.desc}</span></div><span class="tier${G.cleared[k] ? " max" : ""}">${G.cleared[k] ? "王者 制覇" : tier.name}</span></div>`;
     h += `<div class="ladder" aria-label="ランク ${ti + 1}/4">${TIERS.map((_, i) => `<span class="${i < ti || G.cleared[k] ? "on" : i === ti ? "cur" : ""}"></span>`).join("")}</div>`;
     h += `<div class="prize"><span>相手の平均 <b>${tier.mean + T.offset}</b></span><span>優勝 <b>${tier.prize}</b></span><span>2位 <b>${Math.round(tier.prize * PLACE_PAY[1])}</b></span><span>3位 <b>${Math.round(tier.prize * PLACE_PAY[2])}</b></span></div>`;
@@ -891,7 +1035,8 @@ function renderTours() {
     else h += `<div class="enter"><select id="ent-${k}" aria-label="${T.name}に出場するモフ">${opts}</select><button class="btn primary" data-act="enter" data-type="${k}">出場する</button></div>`;
     const L = G.lastTour;
     if (L && L.type === k) {
-      h += `<h3>${L.tier}の結果: ${L.place}位 · +${L.prize}コイン</h3><table class="gtable"><thead><tr><th>順位</th><th>モフ</th><th style="text-align:right">点数</th></tr></thead><tbody>${L.rows.map((r, i) => `<tr class="${r.me ? "me" : ""}"><td class="mono">${i + 1}</td><td>${esc(r.name)}</td><td class="mono" style="text-align:right">${r.score}</td></tr>`).join("")}</tbody></table>`;
+      h += `<h3>${L.tier}の結果: ${L.place}位 · +${L.prize}コイン</h3><table class="gtable"><thead><tr><th>順位</th><th>モフ</th><th style="text-align:right">点数</th></tr></thead><tbody>${L.rows.map((r, i) => `<tr class="${r.me ? "me" : ""}"><td class="mono">${i + 1}</td><td>${esc(r.name)}</td><td class="mono" style="text-align:right">${L.shown ? r.score : "—"}</td></tr>`).join("")}</tbody></table>`;
+      if (!L.shown) h += `<p class="note">点数は、研究所で「${RESEARCH.find(r => r.id === T.tool).name}」を解放すると見られます。</p>`;
     }
     return h + `</div>`;
   }).join("");
@@ -909,25 +1054,37 @@ function renderGacha() {
     ${r < 5 ? `<span class="note" style="align-self:center">飼育場の空きは${r}匹分。売るか広げると引けます。</span>` : ""}`;
   $("#rates").innerHTML = `<thead><tr><th>レア度</th><th style="text-align:right">確率</th><th>群れの質</th></tr></thead><tbody>${RARITY.slice().reverse().map(k => `<tr><td class="stars" style="font-size:13px">${starStr(k.star)}</td><td class="n">${(k.p * 100).toFixed(0)}%</td><td>${["ふつう", "やや良い", "良い", "とても良い", "伝説級"][k.star - 1]}</td></tr>`).join("")}</tbody>`;
   const ids = (G.lastPull || []).filter(id => get(id));
-  $("#reveal").innerHTML = ids.length ? `<h3 style="margin-bottom:8px">迎えたモフ</h3><div class="reveal">${ids.map((id, i) => { const p = get(id); return `<button class="cap${p.star >= 4 ? " r4" : ""}" data-act="focus" data-id="${id}" data-go="farm" style="animation-delay:${i * 120}ms"><span class="ava">${avatar(p)}</span><span class="stars" style="font-size:14px">${starStr(p.star)}</span><b>${esc(p.name)} ${sexMark(p.sex)}</b><span class="muted" style="font-size:11.5px">${coatLabel(p.g)}</span></button>`; }).join("")}</div><p class="note" style="margin-top:8px">タップするとカルテを開きます。</p>` : "";
+  $("#reveal").innerHTML = ids.length ? `<h3 style="margin-bottom:8px">迎えたモフ</h3><div class="reveal">${ids.map((id, i) => { const p = get(id), sp = specials(p); return `<button class="cap${p.star >= 4 || sp.length ? " r4" : ""}" data-act="focus" data-id="${id}" data-go="farm" style="animation-delay:${i * 120}ms"><span class="ava">${avatar(p)}</span><span class="stars" style="font-size:14px">${starStr(p.star)}</span><b>${esc(p.name)} ${sexMark(p.sex)}</b><span class="muted" style="font-size:11.5px">${sp.length ? esc(sp[0]) : coatLabel(p.g)}</span></button>`; }).join("")}</div><p class="note" style="margin-top:8px">タップするとカルテを開きます。</p>` : "";
+}
+
+/* ---------- 描画: 研究所 ---------- */
+function renderLab() {
+  $("#lab").innerHTML = RESEARCH.map(r => {
+    const done = U(r.id), ok = reqOk(r);
+    return `<div class="panel res${done ? " done" : ""}"><div class="res-head"><h3>${r.name}</h3><span class="price">${done ? "解放済み" : r.price + "コイン"}</span></div>
+      <p class="what">${r.what}</p>
+      ${!done && !ok ? `<p class="req">先に: ${r.reqText}</p>` : ""}
+      ${done ? "" : `<button class="btn${ok && G.coins >= r.price ? " primary" : ""}" data-act="buy" data-id="${r.id}"${!ok || G.coins < r.price ? " disabled" : ""}>解放する</button>`}</div>`;
+  }).join("");
 }
 
 let tab = "farm";
+const TABS = ["farm", "tour", "gacha", "lab"];
 function render() {
   renderHud();
   if (tab === "farm") { renderStock(); renderMating(); renderDetail(); renderDiary(); }
   if (tab === "tour") renderTours();
   if (tab === "gacha") renderGacha();
+  if (tab === "lab") renderLab();
   save();
 }
 function setTab(t) {
   tab = t;
   document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", String(x.dataset.tab === t)));
-  for (const v of ["farm", "tour", "gacha"]) $("#view-" + v).hidden = v !== t;
+  for (const v of TABS) $("#view-" + v).hidden = v !== t;
   try { localStorage.setItem(STORE_KEY + "-tab", t); } catch (e) {}
   render();
 }
-
 /* 1列表示のときはカルテが台帳の下に来るので、タップしたらそこまで送る */
 function scrollToDetail() {
   if (!matchMedia("(max-width: 900px)").matches) return;
@@ -936,7 +1093,7 @@ function scrollToDetail() {
 }
 
 let toastT;
-function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2400); }
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2600); }
 
 /* ---------- イベント ---------- */
 function bind() {
@@ -965,7 +1122,7 @@ function bind() {
   document.addEventListener("click", e => {
     const el = e.target.closest("[data-act]");
     if (!el || el.disabled) return;
-    const act = el.dataset.act, id = el.dataset.id != null ? +el.dataset.id : null;
+    const act = el.dataset.act, id = el.dataset.id != null && act !== "buy" ? +el.dataset.id : null;
     if (act !== "sell") G.confirm = null;
     switch (act) {
       case "focus":
@@ -974,7 +1131,7 @@ function bind() {
         if (el.classList.contains("card") || el.classList.contains("pup")) { render(); scrollToDetail(); return; }
         break;
       case "exp": doExp(id, el.dataset.kind); break;
-      case "gtest": geneTest(id); break;
+      case "gtest": geneTest(id, +el.dataset.lv); break;
       case "pair": { const ind = get(id); G.sel[ind.sex] = G.sel[ind.sex] === id ? null : id; G.last = null; break; }
       case "unpair": G.sel[el.dataset.sex] = null; break;
       case "mate": mate(); break;
@@ -992,6 +1149,7 @@ function bind() {
       case "endday": endDay(); break;
       case "enter": { const sel = document.getElementById("ent-" + el.dataset.type); if (sel) enterTour(el.dataset.type, +sel.value); break; }
       case "pull": pull(+el.dataset.n, el.dataset.pay); break;
+      case "buy": buy(el.dataset.id); break;
       default: return;
     }
     render();
@@ -1007,7 +1165,7 @@ function start(data) {
   bind();
   let t = "farm";
   try { t = localStorage.getItem(STORE_KEY + "-tab") || "farm"; } catch (e) {}
-  setTab(["farm", "tour", "gacha"].includes(t) ? t : "farm");
+  setTab(TABS.includes(t) ? t : "farm");
 }
 window.claude?.hot?.snapshot?.(() => ({ game: { ...G, reg: [...G.reg.values()] } }));
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
