@@ -1,5 +1,5 @@
 // 配合ラボのバランス確認用シミュレーション。ゲーム本体の遺伝・大会・寿命ロジックを写し、ボットに遊ばせて殿堂入りまでの日数を測る。
-// 使い方: node tools/balance-sim.js [ゲーム数]  (寿命の倍率ごとに結果を出す) / CAPS=1 node tools/balance-sim.js で飼育枠の上限ごとに比べる
+// 使い方: node tools/balance-sim.js [ゲーム数]  (寿命の倍率ごと) / CAPS=1 で飼育枠の上限ごと / NIGHT=1 で交配方式 (昼に交配 vs 夜にペア) ごとに比べる
 function mulberry32(a){return function(){a|=0;a=(a+0x6D2B79F5)|0;let t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
 const gauss=R=>{let u=0;while(!u)u=R();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*R());};
 function poisson(l,R){const L=Math.exp(-l);let k=0,p=1;do{k++;p*=R();}while(p>L);return k-1;}
@@ -53,10 +53,15 @@ function run(seed,cfg){
      if(place===1){ c.wins=(c.wins||0)+1; S.winAges.push(S.day-c.born); if(tier<3) S.tiers[k]++; else { S.cleared[k]=S.day; S.firstWin[k]=c.gen; } }
    }
    if(["race","contest","show"].every(k=>S.cleared[k])) { S.hall=S.day; break; }
-   // 交配: 素質の高い♂♀から2組まで
-   for(let p=0;p<2;p++){ const room=S.cap-S.stock.length; if(room<3) break;
-     const ms=S.stock.filter(i=>free(i)&&i.sex==="M").sort((a,b)=>idx(b)-idx(a)), fs=S.stock.filter(i=>free(i)&&i.sex==="F").sort((a,b)=>idx(b)-idx(a));
-     if(!ms.length||!fs.length) break; const s=ms[0], d=fs[0]; s.acted=d.acted=S.day;
+   // 交配: 夜にペアで。行動は使わない。1晩の組数は研究所の繁殖小屋で増える (1 → 2 → 3)
+   const slots=cfg.nightly?1+(S.barn2?1:0)+(S.barn3?1:0):2;
+   const bp=cfg.barnPrice||[500,1200];
+   if(cfg.nightly&&!cfg.noBarn){ if(!S.barn2&&S.coins>bp[0]+400){S.coins-=bp[0];S.barn2=1;} else if(S.barn2&&!S.barn3&&S.coins>bp[1]+600){S.coins-=bp[1];S.barn3=1;} }
+   const usedP=new Set();
+   for(let p=0;p<slots;p++){ const room=S.cap-S.stock.length; if(room<2) break;
+     const ok=i=>adult(i)&&!usedP.has(i)&&(cfg.nightly||free(i));
+     const ms=S.stock.filter(i=>ok(i)&&i.sex==="M").sort((a,b)=>idx(b)-idx(a)), fs=S.stock.filter(i=>ok(i)&&i.sex==="F").sort((a,b)=>idx(b)-idx(a));
+     if(!ms.length||!fs.length) break; const s=ms[0], d=fs[0]; usedP.add(s); usedP.add(d); if(!cfg.nightly) s.acted=d.acted=S.day;
      const n=Math.min(Math.max(1,poisson(.2+eff(d,"fer")/100*3.4+eff(s,"fer")/100*.8,R)),room);
      for(let j=0;j<n;j++){ const g=LOCI.map((_,i)=>[0,1].map(q=>{const pr=q?d.g[i]:s.g[i];let a=pr[R()<.5?0:1];if(R()<.005)a^=1;return a;}));
        const c=make(g,S.day,Math.max(s.gen,d.gen)+1,0); c.sex=R()<.5?"M":"F"; S.born++; } }
@@ -73,7 +78,7 @@ function run(seed,cfg){
  const best=S.stock.slice().sort((a,b)=>idx(b)-idx(a))[0];
  return {herd:Math.round(S.herd/Math.max(1,S.day-1)),champDeaths:S.champDeaths,deathAges:S.deathAges,winAges:S.winAges,hall:S.hall,cleared:S.cleared,gen:S.maxGen,firstWin:S.firstWin,deaths:S.deaths,born:S.born,coins:S.coins,bestIdx:best?Math.round(idx(best)):0};
 }
-const scen=process.env.CAPS?[["上限8",{life:1,tradeoff:1,cap0:8,capMax:8}],["上限12",{life:1,tradeoff:1,cap0:12,capMax:12}],["上限16",{life:1,tradeoff:1,cap0:12,capMax:16}],["上限20",{life:1,tradeoff:1,cap0:12,capMax:20}],["上限28",{life:1,tradeoff:1,cap0:12,capMax:28}]]:[["寿命なし",{life:0}],["短め x0.6",{life:.6,tradeoff:1}],["中 x1.0",{life:1,tradeoff:1}],["中 x1.3",{life:1.3,tradeoff:1}],["長め x2.0",{life:2,tradeoff:1}]];
+const scen=process.env.NIGHT?[["昼に交配(旧)",{life:1,tradeoff:1}],["夜 小屋500/1200",{life:1,tradeoff:1,nightly:1}],["夜 1組のみ",{life:1,tradeoff:1,nightly:1,noBarn:1}],["夜 小屋1200/3000",{life:1,tradeoff:1,nightly:1,barnPrice:[1200,3000]}]]:process.env.CAPS?[["上限8",{life:1,tradeoff:1,cap0:8,capMax:8}],["上限12",{life:1,tradeoff:1,cap0:12,capMax:12}],["上限16",{life:1,tradeoff:1,cap0:12,capMax:16}],["上限20",{life:1,tradeoff:1,cap0:12,capMax:20}],["上限28",{life:1,tradeoff:1,cap0:12,capMax:28}]]:[["寿命なし",{life:0}],["短め x0.6",{life:.6,tradeoff:1}],["中 x1.0",{life:1,tradeoff:1}],["中 x1.3",{life:1.3,tradeoff:1}],["長め x2.0",{life:2,tradeoff:1}]];
 const N=+process.argv[2]||60;
 const med=a=>{const s=a.slice().sort((x,y)=>x-y);return s[Math.floor(s.length/2)];};
 const pct=(a,q)=>{const s=a.slice().sort((x,y)=>x-y);return s[Math.floor((s.length-1)*q)];};
