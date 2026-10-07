@@ -611,7 +611,8 @@ const ICON = {
 
 /* ---------- 状態 ---------- */
 const STORE_KEY = "haigo-lab-v3";
-const START_CAP = 12, MAX_CAP = 40, UPKEEP_ADULT = 3, UPKEEP_BABY = 1;
+/* 飼育枠は最大16匹。シミュレーションでは16匹を超えても品種改良はほとんど速くならず、手間だけが増えた */
+const START_CAP = 12, MAX_CAP = 16, UPKEEP_ADULT = 3, UPKEEP_BABY = 1;
 const COST = { health: 40, kit: 80, genome: 150, bank: 100 };
 const SELL_PRICE = 40;
 let G;
@@ -1058,7 +1059,7 @@ function renderPairBar() {
 }
 
 /* ---------- 飼育場 ---------- */
-const expandPrice = () => 300 + Math.max(0, G.cap - START_CAP) * 50;
+const expandPrice = () => 400;
 function farmOrder() {
   const ids = G.stock.slice();
   const val = (i, t) => { const x = traitInfo(i, t); return x ? x.key : -1; };
@@ -1121,7 +1122,7 @@ function renderGacha() {
   let h = `<div class="box banner"><span class="k">開催中 · あと${left}日</span><span class="t">${b.name}</span><p>${b.desc}</p><span class="left">次は「${bannerOf(G.day + left).name}」</span></div>`;
   const opts = [["ticket", 1, "無料で1回", `チケット${G.tickets}枚`], ["coin", 1, "1回", `${PULL_COST}コイン`], ["coin", 5, "5回", `${PULL5_COST}コイン`]];
   h += `<div class="pulls">${opts.map(([pay, n, label, sub]) => { const why = pullWhy(n, pay); return `<button class="btn ${pay === "ticket" ? "go" : ""}" data-act="pull" data-n="${n}" data-pay="${pay}"${why ? " disabled" : ""}>${label}<span class="sub">${why ? (pay === "coin" && why.startsWith("あと") ? `${sub} (${why.replace("あと", "あと")}足りない)` : why) : sub}</span></button>`; }).join("")}</div>`;
-  if (room() < 1) h += `<div class="nextrow"><button class="btn" data-act="tab" data-tab="farm">飼育場で売る</button>${G.cap < MAX_CAP ? `<button class="btn" data-act="expand"${G.coins < expandPrice() ? " disabled" : ""}>飼育枠+4<span class="sub" style="margin-left:4px">${expandPrice()}コイン</span></button>` : ""}</div>`;
+  if (room() < 1) h += `<div class="nextrow"><button class="btn" data-act="tab" data-tab="farm">飼育場で里親を探す</button>${G.cap < MAX_CAP ? `<button class="btn" data-act="expand"${G.coins < expandPrice() ? " disabled" : ""}>飼育枠+4<span class="sub" style="margin-left:4px">${expandPrice()}コイン</span></button>` : ""}</div>`;
   h += `<p class="muted" style="font-size:13px;font-weight:700">1匹ふえるごとに、餌代が1日${UPKEEP_ADULT}コインずつ増える。</p>`;
   const ids = G.pulls.filter(id => get(id));
   if (ids.length) h += `<h3>今日迎えた子</h3><div class="caps">${ids.map(id => capHTML(get(id))).join("")}</div>`;

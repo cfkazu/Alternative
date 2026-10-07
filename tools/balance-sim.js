@@ -1,5 +1,5 @@
 // 配合ラボのバランス確認用シミュレーション。ゲーム本体の遺伝・大会・寿命ロジックを写し、ボットに遊ばせて殿堂入りまでの日数を測る。
-// 使い方: node tools/balance-sim.js [ゲーム数]  (寿命の倍率ごとに結果を出す)
+// 使い方: node tools/balance-sim.js [ゲーム数]  (寿命の倍率ごとに結果を出す) / CAPS=1 node tools/balance-sim.js で飼育枠の上限ごとに比べる
 function mulberry32(a){return function(){a|=0;a=(a+0x6D2B79F5)|0;let t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
 const gauss=R=>{let u=0;while(!u)u=R();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*R());};
 function poisson(l,R){const L=Math.exp(-l);let k=0,p=1;do{k++;p*=R();}while(p>L);return k-1;}
@@ -19,7 +19,7 @@ const TOURS={race:{t:"str",off:0},contest:{t:"cha",off:0},show:{t:null,off:-6}};
 
 function run(seed,cfg){
  const R=mulberry32(seed);
- const S={day:1,coins:400,tickets:1,cap:12,stock:[],tiers:{race:0,contest:0,show:0},cleared:{},hall:null,firstWin:{},deaths:0,champDeaths:0,deathAges:[],winAges:[],maxGen:0,sold:0,born:0};
+ const S={day:1,coins:400,tickets:1,cap:cfg.cap0??12,stock:[],tiers:{race:0,contest:0,show:0},cleared:{},hall:null,firstWin:{},deaths:0,champDeaths:0,deathAges:[],winAges:[],maxGen:0,sold:0,born:0};
  let nid=1;
  function life(g){ if(!cfg.life) return Infinity;
    const L=(14+cnt(g,"lon")*2+gauss(R)*1.5-(base(g).fer-50)/10*cfg.tradeoff)*cfg.life;
@@ -64,16 +64,16 @@ function run(seed,cfg){
    while(S.tickets>0&&S.cap-S.stock.length>2){S.tickets--;gacha();}
    if(S.coins>700&&S.cap-S.stock.length>3&&S.maxGen<3){S.coins-=100;gacha();}
    // 枠を広げる
-   if(S.coins>1200&&S.cap<28){S.coins-=300+(S.cap-12)*50;S.cap+=4;}
+   if(S.coins>1200&&S.cap<(cfg.capMax??16)){S.coins-=300+Math.max(0,S.cap-12)*50;S.cap+=4;}
    // 間引き: 空きを4匹ぶん確保。素質が低い大人から売る
    while(S.cap-S.stock.length<4){ const c=S.stock.filter(adult).sort((a,b)=>idx(a)-idx(b))[0]; if(!c) break; S.stock=S.stock.filter(i=>i!==c); S.coins+=40; S.sold++; }
-   S.coins-=S.stock.reduce((s,i)=>s+(adult(i)?3:1),0);
+   S.herd=(S.herd||0)+S.stock.length; S.coins-=S.stock.reduce((s,i)=>s+(adult(i)?3:1),0);
    S.day++; if(S.tickets<3) S.tickets++;
  }
  const best=S.stock.slice().sort((a,b)=>idx(b)-idx(a))[0];
- return {champDeaths:S.champDeaths,deathAges:S.deathAges,winAges:S.winAges,hall:S.hall,cleared:S.cleared,gen:S.maxGen,firstWin:S.firstWin,deaths:S.deaths,born:S.born,coins:S.coins,bestIdx:best?Math.round(idx(best)):0};
+ return {herd:Math.round(S.herd/Math.max(1,S.day-1)),champDeaths:S.champDeaths,deathAges:S.deathAges,winAges:S.winAges,hall:S.hall,cleared:S.cleared,gen:S.maxGen,firstWin:S.firstWin,deaths:S.deaths,born:S.born,coins:S.coins,bestIdx:best?Math.round(idx(best)):0};
 }
-const scen=[["寿命なし",{life:0}],["短め x0.6",{life:.6,tradeoff:1}],["中 x1.0",{life:1,tradeoff:1}],["中 x1.3",{life:1.3,tradeoff:1}],["長め x2.0",{life:2,tradeoff:1}]];
+const scen=process.env.CAPS?[["上限8",{life:1,tradeoff:1,cap0:8,capMax:8}],["上限12",{life:1,tradeoff:1,cap0:12,capMax:12}],["上限16",{life:1,tradeoff:1,cap0:12,capMax:16}],["上限20",{life:1,tradeoff:1,cap0:12,capMax:20}],["上限28",{life:1,tradeoff:1,cap0:12,capMax:28}]]:[["寿命なし",{life:0}],["短め x0.6",{life:.6,tradeoff:1}],["中 x1.0",{life:1,tradeoff:1}],["中 x1.3",{life:1.3,tradeoff:1}],["長め x2.0",{life:2,tradeoff:1}]];
 const N=+process.argv[2]||60;
 const med=a=>{const s=a.slice().sort((x,y)=>x-y);return s[Math.floor(s.length/2)];};
 const pct=(a,q)=>{const s=a.slice().sort((x,y)=>x-y);return s[Math.floor((s.length-1)*q)];};
@@ -82,5 +82,5 @@ for(const [name,c] of scen){ const cfg={maxDay:200,...c}; const rs=[];for(let s=
   const firsts=k=>rs.filter(r=>r.cleared[k]).map(r=>r.cleared[k]);
   const da=rs.flatMap(r=>r.deathAges), wa=rs.flatMap(r=>r.winAges);
   console.log(`   ${name}: 優勝した子の旅立ち 中央${med(rs.map(r=>r.champDeaths))}匹/ゲーム  旅立ち年齢 中央${da.length?med(da):'-'}日  優勝時の年齢 中央${med(wa)}日 (90%:${pct(wa,.9)})`);
-  console.log(`${name.padEnd(10)} 殿堂入り ${ok.length}/${N}  日数 中央${days.length?med(days):"-"} (25%:${days.length?pct(days,.25):"-"} 75%:${days.length?pct(days,.75):"-"})  世代 中央${med(rs.map(r=>r.gen))}  王者到達日 中央 レース${med(firsts("race"))??"-"} コンテスト${med(firsts("contest"))??"-"} 品評会${firsts("show").length?med(firsts("show")):"-"}  旅立ち${med(rs.map(r=>r.deaths))}匹  誕生${med(rs.map(r=>r.born))}匹`);
+  console.log(`${name.padEnd(10)} 平均頭数${med(rs.map(r=>r.herd))} 殿堂入り ${ok.length}/${N}  日数 中央${days.length?med(days):"-"} (25%:${days.length?pct(days,.25):"-"} 75%:${days.length?pct(days,.75):"-"})  世代 中央${med(rs.map(r=>r.gen))}  王者到達日 中央 レース${med(firsts("race"))??"-"} コンテスト${med(firsts("contest"))??"-"} 品評会${firsts("show").length?med(firsts("show")):"-"}  旅立ち${med(rs.map(r=>r.deaths))}匹  誕生${med(rs.map(r=>r.born))}匹`);
 }
