@@ -49,7 +49,7 @@ function run(seed,cfg){
      c.acted=S.day; const real=T.t?eff(c,T.t):(eff(c,"str")+eff(c,"cha")+eff(c,"fer"))/3;
      const me=clamp(Math.round(real+gauss(R)*(T.t?6:5)),0,100), tier=S.tiers[k];
      let place=1; for(let j=0;j<7;j++) if(clamp(Math.round(TIERS[tier]+T.off+gauss(R)*7),0,100)>me) place++;
-     S.coins+=place<=3?Math.round(PRIZE[tier]*PAY[place-1]):15;
+     S.coins+=place<=3?Math.round(PRIZE[tier]*PAY[place-1]):10;
      if(place===1){ c.wins=(c.wins||0)+1; S.winAges.push(S.day-c.born); if(tier<3) S.tiers[k]++; else { S.cleared[k]=S.day; S.firstWin[k]=c.gen; } }
    }
    if(["race","contest","show"].every(k=>S.cleared[k])) { S.hall=S.day; break; }
@@ -57,8 +57,7 @@ function run(seed,cfg){
    for(let p=0;p<2;p++){ const room=S.cap-S.stock.length; if(room<3) break;
      const ms=S.stock.filter(i=>free(i)&&i.sex==="M").sort((a,b)=>idx(b)-idx(a)), fs=S.stock.filter(i=>free(i)&&i.sex==="F").sort((a,b)=>idx(b)-idx(a));
      if(!ms.length||!fs.length) break; const s=ms[0], d=fs[0]; s.acted=d.acted=S.day;
-     if(R()>.35+.6*eff(s,"fer")/100) continue;
-     const n=Math.min(Math.max(1,poisson(.6+eff(d,"fer")/100*4.4,R)),room);
+     const n=Math.min(Math.max(1,poisson(.2+eff(d,"fer")/100*3.4+eff(s,"fer")/100*.8,R)),room);
      for(let j=0;j<n;j++){ const g=LOCI.map((_,i)=>[0,1].map(q=>{const pr=q?d.g[i]:s.g[i];let a=pr[R()<.5?0:1];if(R()<.005)a^=1;return a;}));
        const c=make(g,S.day,Math.max(s.gen,d.gen)+1,0); c.sex=R()<.5?"M":"F"; S.born++; } }
    // ガチャ

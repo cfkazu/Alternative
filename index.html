@@ -284,6 +284,36 @@ summary { min-height: 44px; display: flex; align-items: center; font-weight: 800
 .day-list .li .ava { width: 40px; height: 40px; }
 .day-title { font: 400 30px var(--font-logo); text-align: center; padding: 6px 0 2px; }
 
+/* ガチャの機械とカプセル */
+.machine { width: 190px; margin: 0 auto; }
+.machine svg { width: 100%; height: auto; display: block; }
+.machine .handle, .machine .globe { transform-box: fill-box; transform-origin: center; }
+.say { text-align: center; font-weight: 800; color: var(--muted); }
+.tray { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+.capsule { border: 0; background: none; cursor: pointer; display: grid; justify-items: center; align-content: center; gap: 6px; min-height: 150px; padding: 6px; font-weight: 800; font-size: 12.5px; color: var(--muted); }
+.shell { position: relative; width: 66px; height: 66px; border-radius: 50%; border: 2.5px solid var(--ink); box-shadow: 0 3px 0 var(--ink); background: linear-gradient(180deg, var(--cap) 0 50%, #fffdf6 50% 100%); overflow: hidden; }
+.shell::after { content: ""; position: absolute; left: 0; right: 0; top: calc(50% - 1.5px); height: 3px; background: var(--ink); }
+.shell::before { content: ""; position: absolute; left: 12px; top: 8px; width: 14px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.6); }
+.shell.rainbow { background: linear-gradient(180deg, transparent 0 50%, #fffdf6 50% 100%), repeating-linear-gradient(90deg, #ff8fa3 0 11px, #ffc23d 11px 22px, #8fd3b0 22px 33px, #8fbfe8 33px 44px); }
+/* レース */
+.track { position: relative; display: grid; gap: 2px; padding: 6px; border: 2px solid var(--ink); border-radius: 14px; background: #d6ebd8; overflow: hidden; }
+.track::after { content: ""; position: absolute; top: 4px; bottom: 4px; right: 46px; width: 8px; background: repeating-linear-gradient(180deg, var(--ink) 0 8px, #fff 8px 16px); border-left: 1px solid var(--ink); border-right: 1px solid var(--ink); }
+.lane { position: relative; height: 40px; border-bottom: 2px dashed rgba(34,49,43,.15); }
+.lane:last-child { border-bottom: 0; }
+.lane.me { background: rgba(255,194,61,.45); border-radius: 8px; }
+.lane .ln { position: absolute; left: 6px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 800; color: rgba(34,49,43,.55); }
+.lane.me .ln { color: var(--ink); }
+.runner { position: absolute; left: 0; top: 3px; width: 34px; height: 34px; z-index: 1; }
+.runner .ava { width: 34px; height: 34px; }
+/* 結果発表 */
+.annc { display: grid; gap: 4px; }
+.annc .row { display: grid; grid-template-columns: 2.4em 36px minmax(0, 1fr) auto; gap: 8px; align-items: center; min-height: 46px; padding: 4px 8px; border-radius: 12px; background: var(--panel-2); font-weight: 700; }
+.annc .row .ava { width: 36px; height: 36px; }
+.annc .row.hid { color: var(--muted); }
+.annc .row.hid .ava { visibility: hidden; }
+.annc .row.me { background: var(--rare-bg); font-weight: 800; }
+.annc .rk { font: 400 18px var(--font-logo); text-align: center; }
+.rosette { width: 92px; height: 112px; margin: 0 auto; display: block; }
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); z-index: 40; background: var(--ink); color: #fff; padding: 9px 16px; border-radius: 14px; font-size: 14px; font-weight: 800; max-width: calc(100% - 32px); text-align: center; }
 body.has-pair .toast { bottom: calc(env(safe-area-inset-bottom, 0px) + 146px); }
 body.locked .toast { bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); }
@@ -292,7 +322,24 @@ body.locked .toast { bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); }
 @media (prefers-reduced-motion: no-preference) {
   .sheet { animation: up .22s ease-out both; }
   @media (min-width: 760px) { .sheet { animation: fade .18s ease-out both; } }
-  .cap, .pup.new { animation: pop .45s cubic-bezier(.2, 1.5, .4, 1) both; }
+  .cap.just, .pup.new { animation: pop .45s cubic-bezier(.2, 1.5, .4, 1) both; }
+  .machine.turn .handle { animation: crank .8s ease-in-out; }
+  .machine.turn .globe { animation: tumble .8s ease-in-out; }
+  .capsule.drop .shell { animation: drop .55s cubic-bezier(.3, 1.4, .5, 1) var(--d, 0s) both; }
+  .capsule.r4 .shell { animation: wobble 1.4s ease-in-out .6s infinite; }
+  .capsule.drop.r4 .shell { animation: drop .55s cubic-bezier(.3, 1.4, .5, 1) var(--d, 0s) both, wobble 1.4s ease-in-out calc(var(--d, 0s) + .8s) infinite; }
+  .runner { animation-name: run; animation-timing-function: cubic-bezier(.35, .1, .6, 1); animation-fill-mode: forwards; }
+  .runner .ava { animation: bob .28s ease-in-out infinite alternate; }
+  .annc .row.just { animation: slidein .35s ease-out both; }
+  .rosette { animation: stamp .45s cubic-bezier(.2, 1.6, .4, 1) both; }
+  @keyframes crank { to { transform: rotate(360deg); } }
+  @keyframes tumble { 25% { transform: rotate(-5deg); } 50% { transform: rotate(4deg); } 75% { transform: rotate(-3deg); } }
+  @keyframes drop { from { transform: translateY(-70px) rotate(-120deg); opacity: 0; } }
+  @keyframes wobble { 0%, 55%, 100% { transform: rotate(0); } 65% { transform: rotate(-12deg); } 75% { transform: rotate(10deg); } 85% { transform: rotate(-6deg); } }
+  @keyframes run { to { left: calc(100% - 40px); } }
+  @keyframes bob { to { transform: translateY(-3px); } }
+  @keyframes slidein { from { transform: translateX(-18px); opacity: 0; } }
+  @keyframes stamp { from { transform: scale(1.8) rotate(-20deg); opacity: 0; } }
   @keyframes up { from { transform: translateY(40px); opacity: 0; } }
   @keyframes fade { from { opacity: 0; } }
   @keyframes pop { from { transform: scale(.5) rotate(-8deg); opacity: 0; } }
@@ -443,6 +490,12 @@ const SENT = {
   str: ["かなり遅かった…", "ちょっと遅め", "ふつうの走り", "速い！", "とても速い！！"],
   cha: ["かなり不評…", "いまいちの反応", "ふつうの反応", "好評！", "大好評！！"],
 };
+/* 幼体の実験は「大人になったときの見込み」を測る。ぶれは大人の1.8倍 */
+const BABY_NOISE = 1.8;
+const SENT_BABY = {
+  str: ["のんびり屋", "ちょっと遅め", "ふつうの走り", "すばしこい！", "とてもすばしこい！！"],
+  cha: ["人見知り…", "いまいちの反応", "ふつうの反応", "愛嬌がある！", "みんなの人気者！！"],
+};
 const LOOK5 = {
   str: ["ほっそり", "やや細め", "ふつうの体格", "がっしり", "かなりがっしり"],
   cha: ["ぼんやり顔", "やや地味な顔", "ふつうの顔", "かわいい顔", "とびきりかわいい"],
@@ -501,9 +554,9 @@ function looksText(ind) {
     if (L.muscle && !L.mega) out.push({ t: "筋肉質" });
     specials(ind).forEach(s => out.push({ t: s, rare: true }));
   }
-  if (L.old === 1) out.push({ t: "白髪まじり" });
+  if (L.old === 1) out.push({ t: "白髪まじり (全盛期を過ぎた)" });
   if (L.old === 2) out.push({ t: "よぼよぼ。そろそろ旅立ちかも", rare: true });
-  if (L.sick) out.push({ t: "元気がない" });
+  if (L.sick) out.push({ t: "生まれつき体が弱い (治らない・能力が下がる)" });
   return out;
 }
 const COAT_FILL = { black: "#2f2a27", brown: "#9b5a2d", white: "#f5f2ec" };
@@ -563,7 +616,7 @@ const COST = { health: 40, kit: 80, genome: 150, bank: 100 };
 const SELL_PRICE = 40;
 let G;
 const kinMemo = new Map();
-const ui = { tab: "farm", sheet: null, flash: null, confirm: null, confirmT: null };
+const ui = { tab: "farm", sheet: null, flash: null, confirm: null, confirmT: null, timer: null };
 
 function newGame(seed) {
   R = mulberry32(seed);
@@ -629,7 +682,9 @@ function fChip(F) {
 
 /* ---------- 測定と、そこからわかること ---------- */
 function measure(ind, t, sigma, src, num) {
-  const v = clamp(Math.round(cur(ind, t) + gauss(R) * sigma), 0, 100);
+  const baby = !isAdult(ind);
+  if (baby) { sigma *= BABY_NOISE; src += "(幼体)"; }
+  const v = clamp(Math.round((baby ? ind.ph[t] : cur(ind, t)) + gauss(R) * sigma), 0, 100);
   ind.meas[t].push({ v, s: sigma, src, day: G.day, num });
   return v;
 }
@@ -639,9 +694,9 @@ function traitInfo(ind, t) {
   if (U("stats") && nums.length) {
     let w = 0, s = 0;
     for (const m of nums) { const wi = 1 / (m.s * m.s); w += wi; s += m.v * wi; }
-    return { kind: "est", mean: s / w, ci: 1.96 * Math.sqrt(1 / w), key: s / w };
+    return { kind: "est", mean: s / w, ci: 1.96 * Math.sqrt(1 / w), key: s / w, n: nums.length };
   }
-  if (nums.length) { const v = nums[nums.length - 1].v; return { kind: "last", v, key: v }; }
+  if (nums.length) { const v = nums[nums.length - 1].v; return { kind: "last", v, key: v, n: nums.length }; }
   if (words.length) { const b = Math.round(words.reduce((a, m) => a + bin5(m.v), 0) / words.length); return { kind: "word", bin: b, key: (BIN5[b][0] + BIN5[b][1]) / 2 }; }
   return null;
 }
@@ -669,8 +724,9 @@ function restWhy(ind) {
   if (ind.acted === G.day) return "今日はもう休み";
   return "";
 }
+const canTest = ind => inStock(ind.id) && ind.acted !== G.day;
 function expWhy(ind, e) {
-  const r = restWhy(ind);
+  const r = isAdult(ind) ? restWhy(ind) : !inStock(ind.id) ? "もういない" : ind.acted === G.day ? "今日はもう休み" : "";
   if (r) return r;
   if (e.needs && !U(e.needs)) return "研究所で動物病院と提携";
   if (G.coins < e.cost) return `コイン不足 (あと${e.cost - G.coins})`;
@@ -681,9 +737,11 @@ function doExp(id, kind) {
   if (expWhy(ind, e)) return;
   G.coins -= e.cost;
   ind.acted = G.day;
-  const num = U(e.tool), v = measure(ind, e.trait, e.sigma, e.verb, num);
+  const baby = !isAdult(ind), num = U(e.tool), v = measure(ind, e.trait, e.sigma, e.verb, num);
   const first = num && ind.meas[e.trait].filter(m => m.num).length === 1;
-  const msg = (num ? `${e.verb}: ${TNAME[e.trait]} ${v}点` : `${e.verb}: ${SENT[e.trait][bin5(v)]}`) + (first || !num && ind.meas[e.trait].length === 1 ? "　(測るたびにぶれる。何回か見てみよう)" : "");
+  const words = baby ? SENT_BABY : SENT;
+  const msg = (num ? `${e.verb}: ${TNAME[e.trait]} ${v}点${baby ? "の見込み" : ""}` : `${e.verb}: ${words[e.trait][bin5(v)]}`)
+    + (baby ? "　(子どものうちは参考程度。大人になると変わることも)" : first || !num && ind.meas[e.trait].length === 1 ? "　(測るたびにぶれる。何回か見てみよう)" : "");
   note(`${ind.name}の${msg}`);
   ui.flash = { cls: "", text: msg };
 }
@@ -692,9 +750,9 @@ function geneTest(id, level) {
   if (ind.dna >= level || G.coins < cost || !U(level === 2 ? "genome" : "kit")) return;
   G.coins -= cost; ind.dna = level;
   const found = [];
-  if (dose(ind.g, "D") === 1) found.push("病気 d を隠し持っていた");
-  if (dose(ind.g, "X") === 1) found.push("ムキムキの x を隠し持っていた");
-  if (qDose(ind.g) && !isAdult(ind)) found.push("多産の Q を持っている");
+  if (dose(ind.g, "D") === 1) found.push("体が弱くなる遺伝子を1本隠し持っていた");
+  if (dose(ind.g, "X") === 1) found.push("超筋肉の遺伝子を1本隠し持っていた");
+  if (qDose(ind.g) && !isAdult(ind)) found.push("多産の遺伝子を持っている");
   note(`${ind.name}の${level === 2 ? "ゲノム解析" : "DNA検査"}${found.length ? ": " + found.join("、") : ""}`);
   ui.flash = { cls: found.length ? "" : "ok", text: found.length ? `判明！ ${found.join("、")}` : "遺伝子がわかった。下の「遺伝子」を開こう" };
 }
@@ -745,20 +803,16 @@ function mate() {
   const s = get(G.sel.M), d = get(G.sel.F), frozen = banked(s);
   if (!frozen) s.acted = G.day;
   d.acted = G.day;
-  s.tries++;
-  if (R() > 0.35 + 0.6 * (frozen ? s.ph.fer : cur(s, "fer")) / 100) {
-    d.births.push({ day: G.day, n: 0 });
-    note(`${s.name}×${d.name}: 子ができなかった`);
-    ui.flash = { cls: "bad", text: `今回は子ができなかった…　${frozen ? "母" : "2匹とも"}今日はお休み。子ができるかは父の生殖力しだい`, ids: [] };
-    return;
-  }
-  s.hits++;
-  const born = Math.max(1, poisson(0.6 + cur(d, "fer") / 100 * 4.4, R)), n = Math.min(born, room()), ids = [];
+  /* 交配すれば必ず1匹以上うまれる。生殖力は子の数に効く (おもに母、父も少し) */
+  const sFer = frozen ? s.ph.fer : cur(s, "fer");
+  const born = Math.max(1, poisson(0.2 + cur(d, "fer") / 100 * 3.4 + sFer / 100 * 0.8, R)), n = born, ids = [];
+  s.tries++; s.hits += born;
   d.births.push({ day: G.day, n: born });
   for (let k = 0; k < n; k++) ids.push(addInd({ g: childGenome(s.g, d.g, R), sex: R() < 0.5 ? "M" : "F", star: 0, sire: s.id, dam: d.id, gen: Math.max(s.gen, d.gen) + 1, born: G.day }).id);
-  const lost = born - n;
-  note(`${s.name}×${d.name}: ${born}匹うまれた${lost ? ` (${lost}匹は里親へ)` : ""}`);
-  ui.flash = { cls: lost ? "bad" : "ok", text: `${born}匹うまれた！${lost ? `　空きがなく${lost}匹は里親へ…` : ""}`, ids };
+  const lost = Math.max(0, G.stock.length + 0 - G.cap);
+  note(`${s.name}×${d.name}: ${born}匹うまれた`);
+  ui.flash = { cls: "ok", text: `${born}匹うまれた！`, ids };
+  if (lost) ui.sheet = { kind: "keep", ids, over: lost, pick: [] };
 }
 
 /* ---------- 大会 ---------- */
@@ -773,32 +827,57 @@ const TIERS = [
   { name: "上級", s: "上", mean: 68, prize: 400 },
   { name: "王者", s: "王", mean: 80, prize: 1000 },
 ];
-const PLACE_PAY = [1, 0.3, 0.15];
+const PLACE_PAY = [1, 0.3, 0.15], ENTRY_PAY = 10;
 function enterTour(type, id) {
   const ind = get(id), T = TOURS[type], tier = TIERS[G.tiers[type]];
   if (!ind || restWhy(ind) || G.entered[type] === G.day) return;
   ind.acted = G.day; G.entered[type] = G.day;
   const score = T.trait ? measure(ind, T.trait, 6, T.short + "大会", U(T.tool))
     : clamp(Math.round((cur(ind, "str") + cur(ind, "cha") + cur(ind, "fer")) / 3 + gauss(R) * 5), 0, 100);
-  const rows = [{ name: ind.name, score, me: true }];
-  for (let i = 0; i < 7; i++) rows.push({ name: "野良の" + makeName(R), score: clamp(Math.round(tier.mean + T.offset + gauss(R) * 7), 0, 100), me: false });
+  const rows = [{ name: ind.name, score, me: true, id: ind.id }];
+  for (let i = 0; i < 7; i++) {
+    const sc = clamp(Math.round(tier.mean + T.offset + gauss(R) * 7), 0, 100);
+    const g = gachaGenome(RARITY[Math.min(4, G.tiers[type] + 1)], BANNERS[0], R);
+    rows.push({ name: "野良の" + makeName(R), score: sc, me: false, g, sex: R() < .5 ? "M" : "F", look: { str: sc, cha: sc, fer: 55 } });
+  }
+  rows.forEach((r, i) => (r.lane = (i * 5 + 3) % 8));
   rows.sort((a, b) => b.score - a.score || (a.me ? -1 : b.me ? 1 : 0));
   const place = rows.findIndex(r => r.me) + 1;
-  const prize = place <= 3 ? Math.round(tier.prize * PLACE_PAY[place - 1]) : 15;
+  const prize = place <= 3 ? Math.round(tierPrize(type) * PLACE_PAY[place - 1]) : ENTRY_PAY;
   G.coins += prize;
   let up = "";
   if (place === 1) {
     ind.wins++;
     if (G.tiers[type] < 3) { G.tiers[type]++; up = `${TIERS[G.tiers[type]].name}に昇格！`; }
     else if (!G.cleared[type]) { G.cleared[type] = true; up = "王者の称号を獲得！"; }
+    else { G.defense = G.defense || {}; G.defense[type] = (G.defense[type] || 0) + 1; up = "防衛成功！"; }
     if (!G.hallDay && Object.values(G.cleared).every(Boolean)) { G.hallDay = G.day; up += " 殿堂入り！！"; }
   }
   G.tourRes[type] = { day: G.day, tier: tier.name, rows, place, prize, shown: U(T.tool), who: ind.id, up };
   note(`${T.name}${tier.name}: ${ind.name} ${place}位 +${prize}${up ? " " + up : ""}`);
 }
 
+/* 王者を制覇したあとは防衛戦。防衛するたびに賞金が減っていく (1000 → 500 → 333 …、下限150) */
+function tierPrize(type) {
+  const base = TIERS[G.tiers[type]].prize;
+  if (!G.cleared[type]) return base;
+  return Math.max(150, Math.round(base / (2 + ((G.defense || {})[type] || 0))));
+}
+
 /* ---------- 別れ ---------- */
-const LETTERS = ["山の上はすずしいよ。みんな元気？", "旅先でもまだ走ってるよ。", "子どもたちによろしく。", "海を見た。しょっぱかった。", "おいしい草を見つけたから、少し送るね。", "大会、見に行ったよ。がんばってたね。"];
+const LETTERS = ["山の上はすずしいよ。みんな元気？", "旅先でもまだ走ってるよ。", "海を見た。しょっぱかった。", "おいしい草を見つけたから、少し送るね。", "大会、見に行ったよ。がんばってたね。", "星がたくさん見える村にいるよ。", "雨やどりした木の下で、昔の話をしたよ。", "旅の仲間ができた。そっちのみんなに似てる。", "朝の霧がきれいな谷についた。", "今日はよく眠れた。また手紙を書くね。"];
+function letterFor(ind) {
+  const own = [];
+  if (ind.wins) own.push(`${ind.wins}回の優勝、旅先でもつい自慢しちゃう。`);
+  if (isMega(ind.g)) own.push("旅先で岩を持ち上げたら、村じゅうで大さわぎになった。");
+  if (ind.sex === "F" && ind.births.some(b => b.n)) own.push("子どもたちは元気？ ちゃんと食べてるかな。");
+  if (ind.sex === "M" && ind.hits) own.push(`${ind.hits}匹の子どもたちによろしく。`);
+  if (coat(ind.g).key === "white") own.push("雪の中だと、みんなにぜんぜん見つけてもらえない。");
+  const recent = G.log.slice(0, 60).map(l => l.text).join("\n");
+  const fresh = list => list.filter(t => !recent.includes(t));
+  const pool = fresh(own).length && R() < .7 ? fresh(own) : fresh(LETTERS);
+  return pool[Math.floor(R() * pool.length)] || LETTERS[0];
+}
 const LETTER_GIFT = 60;
 function depart(ind, voluntary) {
   G.stock = G.stock.filter(x => x !== ind.id);
@@ -806,7 +885,7 @@ function depart(ind, voluntary) {
   if (G.sel.M === ind.id && !G.bank.includes(ind.id)) G.sel.M = null;
   ind.goneDay = G.day; ind.goneAge = ageOf(ind); ind.sentOff = voluntary;
   G.album.unshift(ind.id);
-  if (voluntary) G.letters.push({ id: ind.id, day: G.day + 2 + Math.floor(R() * 3) });
+  G.letters.push({ id: ind.id, day: G.day + 2 + Math.floor(R() * 3), gift: voluntary });
   note(`${ind.name}が旅立った (生後${ind.goneAge}日${ind.wins ? `・優勝${ind.wins}回` : ""})`);
 }
 function sendOff(id) {
@@ -828,6 +907,7 @@ function bankSire(id) {
 const upkeep = () => G.stock.reduce((s, id) => s + (isAdult(get(id)) ? UPKEEP_ADULT : UPKEEP_BABY), 0);
 function endDay() {
   const cost = upkeep(), oldBanner = bannerOf(G.day);
+  const before = new Map(G.stock.map(id => [id, stage(get(id))]));
   G.coins -= cost;
   G.day++;
   const gotTicket = G.tickets < MAX_TICKETS;
@@ -835,13 +915,13 @@ function endDay() {
   G.tourRes = {}; G.pulls = [];
   const gone = G.stock.map(get).filter(i => ageOf(i) >= i.L);
   gone.forEach(i => depart(i, false));
+  const aging = G.stock.map(get).filter(i => stage(i) !== before.get(i.id) && ["old1", "old2"].includes(stage(i))).map(i => ({ id: i.id, st: stage(i) }));
   const due = G.letters.filter(l => l.day <= G.day);
   G.letters = G.letters.filter(l => l.day > G.day);
-  const letters = due.map(l => ({ id: l.id, text: LETTERS[Math.floor(R() * LETTERS.length)] }));
-  G.coins += letters.length * LETTER_GIFT;
-  letters.forEach(l => note(`${get(l.id).name}から手紙が届いた (+${LETTER_GIFT})`));
+  const letters = due.map(l => ({ id: l.id, text: letterFor(get(l.id)), gift: l.gift !== false }));
+  for (const l of letters) { if (l.gift) G.coins += LETTER_GIFT; note(`${get(l.id).name}から手紙「${l.text}」${l.gift ? ` (+${LETTER_GIFT})` : ""}`); }
   const grown = G.stock.map(get).filter(i => ageOf(i) === ADULT_AGE);
-  const info = { cost, gotTicket, grown: grown.map(i => i.id), gone: gone.map(i => i.id), letters, banner: bannerOf(G.day) !== oldBanner ? bannerOf(G.day).name : null };
+  const info = { cost, gotTicket, grown: grown.map(i => i.id), gone: gone.map(i => i.id), aging, letters, banner: bannerOf(G.day) !== oldBanner ? bannerOf(G.day).name : null };
   note(`${G.day}日目の朝 (餌代 −${cost})`);
   grown.forEach(i => { const sp = specials(i); note(sp.length ? `${i.name}が大人に…${sp.join("、")}！` : `${i.name}が大人になった`); });
   ui.sheet = { kind: "day", info };
@@ -864,7 +944,7 @@ function pull(n, pay) {
   }
   G.pulls.push(...ids);
   ids.map(get).forEach(i => note(`ガチャ: ${i.name} ★${i.star}${specials(i).length ? "・" + specials(i)[0] : ""}`));
-  ui.sheet = { kind: "gacha", ids };
+  ui.sheet = { kind: "gacha", ids, phase: calm() ? "tray" : "turn", opened: [], just: [] };
 }
 
 function buy(id) {
@@ -932,7 +1012,7 @@ function badges(ind) {
   if (G.sel.M === ind.id) b.push(`<span class="chip pa">父</span>`);
   if (G.sel.F === ind.id) b.push(`<span class="chip pa">母</span>`);
   if (!isAdult(ind)) b.push(`<span class="chip">幼体 あと${ADULT_AGE - (G.day - ind.born)}日</span>`);
-  else if (ind.acted === G.day) b.push(`<span class="chip zz">zzz 休み</span>`);
+  if (inStock(ind.id) && ind.acted === G.day) b.push(`<span class="chip zz">zzz 休み</span>`);
   const st = stage(ind);
   if (st === "old1") b.push(`<span class="chip zz">白髪</span>`);
   if (st === "old2") b.push(`<span class="chip red">そろそろ</span>`);
@@ -953,7 +1033,7 @@ function renderTop() {
     <button class="btn go next" data-act="endday">次の日へ ▶</button>`;
 }
 function renderNav() {
-  const ready = G.stock.map(get).filter(canAct).length;
+  const ready = G.stock.map(get).filter(canTest).length;
   const open = Object.keys(TOURS).some(k => G.entered[k] !== G.day) && ready;
   const buyable = RESEARCH.some(r => !U(r.id) && reqOk(r) && G.coins >= r.price);
   const items = [
@@ -978,20 +1058,21 @@ function renderPairBar() {
 }
 
 /* ---------- 飼育場 ---------- */
-const expandPrice = () => 300 + (G.cap - START_CAP) * 50;
+const expandPrice = () => 300 + Math.max(0, G.cap - START_CAP) * 50;
 function farmOrder() {
   const ids = G.stock.slice();
   const val = (i, t) => { const x = traitInfo(i, t); return x ? x.key : -1; };
-  const key = { new: i => -i.id, ready: i => (canAct(i) ? 0 : 1) * 1e6 - i.id, str: i => -val(i, "str"), cha: i => -val(i, "cha"), fer: i => -val(i, "fer"), star: i => -i.star * 1000 - i.id }[G.sort] || (i => -i.id);
+  const key = { new: i => -i.id, ready: i => (canAct(i) ? 0 : 1) * 1e6 - i.id, str: i => -val(i, "str"), cha: i => -val(i, "cha"), fer: i => -val(i, "fer"), star: i => -i.star * 1000 - i.id,
+    old: i => ({ old2: 0, old1: 1 }[stage(i)] ?? 2) * 1e4 - ageOf(i), unk: i => -TRAITS.filter(t => !i.meas[t].length).length * 1e6 - i.id }[G.sort] || (i => -i.id);
   return ids.sort((a, b) => key(get(a)) - key(get(b)));
 }
 function renderFarm() {
   const ids = farmOrder(), price = expandPrice();
-  const sorts = [["new", "新しい順"], ["ready", "動ける子が先"], ["str", "強さ順"], ["cha", "魅力順"], ["fer", "生殖力順"], ["star", "レア度順"]];
+  const sorts = [["new", "新しい順"], ["ready", "動ける子が先"], ["str", "強さ順"], ["cha", "魅力順"], ["fer", "生殖力順"], ["star", "レア度順"], ["old", "旅立ちが近い順"], ["unk", "未測定が先"]];
   let h = `<div class="boss"><span class="ava">${BOSS_SVG}</span><p class="bubble"><span class="who">所長</span>${bossLine()}</p></div>`;
   h += `<div class="bar-row"><h2>飼育場<small class="num">${G.stock.length}/${G.cap}匹</small></h2>
     <span style="display:flex;gap:8px;flex-wrap:wrap"><select id="sort" aria-label="並び順">${sorts.map(([v, l]) => `<option value="${v}"${G.sort === v ? " selected" : ""}>${l}</option>`).join("")}</select>
-    ${G.cap < MAX_CAP ? `<button class="btn" data-act="expand"${G.coins < price ? " disabled" : ""}>飼育枠+4<span class="sub" style="margin-left:4px">${price}コイン</span></button>` : ""}</span></div>`;
+    ${G.cap < MAX_CAP ? `<button class="btn" data-act="expand"${G.coins < price ? " disabled" : ""}>${ui.confirm === "expand" ? `本当に広げる？` : "飼育枠+4"}<span class="sub" style="margin-left:4px">${price}コイン</span></button>` : ""}</span></div>`;
   h += `<div class="list">${ids.map(id => {
     const ind = get(id), sel = G.sel.M === id || G.sel.F === id;
     return `<button class="box mofu${sel ? " sel" : ""}" data-act="open" data-id="${id}">
@@ -1009,8 +1090,12 @@ function renderFarm() {
 /* ---------- 大会 ---------- */
 function tourLine(won) {
   const ready = G.stock.map(get).filter(canAct);
-  if (!ready.length) return "今日出られる子がいない。明日またおいで。";
-  if (won) return `王者の称号は ${won}/3。残りも王者で優勝すれば殿堂入りだ。`;
+  if (!ready.length) return G.stock.some(i => isAdult(get(i))) ? "今日はみんな行動ずみ。大会に出すなら、実験や交配の前に出そう。" : "大人のモフがいない。子どもが育つまで待とう。";
+  const left = Object.keys(TOURS).filter(k => !G.cleared[k]).map(k => [k, G.tiers[k]]).sort((a, b) => a[1] - b[1]);
+  if (!left.length) return "全部制覇した。防衛戦で腕だめしだ。";
+  const [k, t] = left[0];
+  if (won) return `王者の称号は ${won}/3。いちばん遅れているのは${TOURS[k].name}の${TIERS[t].name}だ。`;
+  if (Object.values(G.tiers).some(x => x > 0)) return `いい調子だ。${TOURS[k].name}はまだ${TIERS[t].name}。種目ごとに得意な子を育てよう。`;
   return "3種目すべて「王者」で優勝すれば殿堂入りだ。まずは初級で勝って、上のランクに上がろう。";
 }
 function renderTour() {
@@ -1022,7 +1107,7 @@ function renderTour() {
     const ti = G.tiers[k], tier = TIERS[ti], res = G.tourRes[k], done = G.entered[k] === G.day;
     let e = `<div class="box ev"><div class="h"><div><h2>${T.name}</h2><p class="d">${T.desc}</p></div>${G.cleared[k] ? `<span class="chip gold">王者制覇</span>` : ""}</div>`;
     e += `<div class="ladder">${TIERS.map((x, i) => `<span class="${i < ti || G.cleared[k] ? "on" : i === ti ? "cur" : ""}">${x.name}</span>`).join("")}</div>`;
-    e += `<div class="facts"><span>相手 平均<b>${tier.mean + T.offset}</b>点</span><span>賞金 優勝<b>${tier.prize}</b>・2位<b>${Math.round(tier.prize * PLACE_PAY[1])}</b>・3位<b>${Math.round(tier.prize * PLACE_PAY[2])}</b>コイン</span></div>`;
+    e += `<div class="facts"><span>相手 平均<b>${tier.mean + T.offset}</b>点</span><span>${G.cleared[k] ? "防衛戦 " : ""}賞金 優勝<b>${tierPrize(k)}</b>・2位<b>${Math.round(tierPrize(k) * PLACE_PAY[1])}</b>・3位<b>${Math.round(tierPrize(k) * PLACE_PAY[2])}</b>・参加賞<b>${ENTRY_PAY}</b>コイン</span></div>`;
     if (res && res.day === G.day) e += `<button class="btn wide" data-act="result" data-type="${k}">今日の結果: ${res.place}位・+${res.prize}コイン${res.up ? " " + res.up : ""}</button>`;
     else if (!done) e += `<button class="btn go wide" data-act="entry" data-type="${k}">出場する子を選ぶ</button>`;
     return e + `</div>`;
@@ -1035,7 +1120,7 @@ function renderGacha() {
   const b = bannerOf(G.day), left = BANNER_DAYS - ((G.day - 1) % BANNER_DAYS);
   let h = `<div class="box banner"><span class="k">開催中 · あと${left}日</span><span class="t">${b.name}</span><p>${b.desc}</p><span class="left">次は「${bannerOf(G.day + left).name}」</span></div>`;
   const opts = [["ticket", 1, "無料で1回", `チケット${G.tickets}枚`], ["coin", 1, "1回", `${PULL_COST}コイン`], ["coin", 5, "5回", `${PULL5_COST}コイン`]];
-  h += `<div class="pulls">${opts.map(([pay, n, label, sub]) => { const why = pullWhy(n, pay); return `<button class="btn ${pay === "ticket" ? "go" : ""}" data-act="pull" data-n="${n}" data-pay="${pay}"${why ? " disabled" : ""}>${label}<span class="sub">${why ? (pay === "coin" && why.startsWith("あと") ? `${sub}・${why}` : why) : sub}</span></button>`; }).join("")}</div>`;
+  h += `<div class="pulls">${opts.map(([pay, n, label, sub]) => { const why = pullWhy(n, pay); return `<button class="btn ${pay === "ticket" ? "go" : ""}" data-act="pull" data-n="${n}" data-pay="${pay}"${why ? " disabled" : ""}>${label}<span class="sub">${why ? (pay === "coin" && why.startsWith("あと") ? `${sub} (${why.replace("あと", "あと")}足りない)` : why) : sub}</span></button>`; }).join("")}</div>`;
   if (room() < 1) h += `<div class="nextrow"><button class="btn" data-act="tab" data-tab="farm">飼育場で売る</button>${G.cap < MAX_CAP ? `<button class="btn" data-act="expand"${G.coins < expandPrice() ? " disabled" : ""}>飼育枠+4<span class="sub" style="margin-left:4px">${expandPrice()}コイン</span></button>` : ""}</div>`;
   h += `<p class="muted" style="font-size:13px;font-weight:700">1匹ふえるごとに、餌代が1日${UPKEEP_ADULT}コインずつ増える。</p>`;
   const ids = G.pulls.filter(id => get(id));
@@ -1077,24 +1162,24 @@ function mofuSheet(id) {
   if (!ind) return sheetHead("いない");
   const here = inStock(id), order = farmOrder(), idx = order.indexOf(id);
   const prev = idx > 0 ? order[idx - 1] : null, next = idx >= 0 && idx < order.length - 1 ? order[idx + 1] : null;
-  const nextReady = order.slice(idx + 1).concat(order.slice(0, Math.max(0, idx))).find(x => canAct(get(x)));
-  const rest = restWhy(ind);
+  const nextReady = order.slice(idx + 1).concat(order.slice(0, Math.max(0, idx))).find(x => canTest(get(x)));
+  const rest = isAdult(ind) || !inStock(id) ? restWhy(ind) : ind.acted === G.day ? "今日はもう休み" : "";
   let h = sheetHead(`${esc(ind.name)} <span class="muted">${sexMark(ind.sex)}</span>`,
     `<button class="iconbtn" data-act="open" data-id="${prev}" aria-label="前の子"${prev == null ? " disabled" : ""}>◀</button><button class="iconbtn" data-act="open" data-id="${next}" aria-label="次の子"${next == null ? " disabled" : ""}>▶</button>`);
   h += `<div class="sheet-body">`;
   h += `<div class="who-big">${ava(ind, 84)}<div class="t"><div class="kv">${starStr(ind.star)}${badges(ind)}</div>
     <span class="o">${ind.star ? "ガチャ出身" : `${ind.gen}代目・自家産`} · ${here ? `生後${ageOf(ind)}日` : `生後${ind.goneAge ?? "?"}日で旅立った`}${ind.wins ? ` · 優勝${ind.wins}回` : ""}</span>
-    <span class="chip ${here && !rest ? "ok" : "zz"}" style="justify-self:start">${!here ? (banked(ind) ? "遺伝子バンクに保存中" : `${ind.goneDay ?? "?"}日目に旅立った`) : rest ? rest : "今日あと1回動ける"}</span></div></div>`;
+    <span class="chip ${here && !rest ? "ok" : "zz"}" style="justify-self:start">${!here ? (banked(ind) ? "遺伝子バンクに保存中" : `${ind.goneDay ?? "?"}日目に旅立った`) : rest ? rest : isAdult(ind) ? "今日あと1回動ける" : `幼体 (あと${ADULT_AGE - ageOf(ind)}日)・実験ならできる`}</span></div></div>`;
   if (ui.flash) {
     h += `<div class="flash ${ui.flash.cls}">${esc(ui.flash.text)}</div>`;
   }
   h += `<div class="looks">${looksText(ind).map(x => `<span class="${x.rare ? "rare" : ""}">${esc(x.t)}</span>`).join("")}</div>`;
-  h += `<div class="big-meters">${TRAITS.map(t => { const i = traitInfo(ind, t); return `<div class="r"><b>${TNAME[t]}</b>${track(ind, t)}<span class="v${i ? "" : " muted"}">${infoText(i, t)}</span></div>`; }).join("")}</div>`;
+  h += `<div class="big-meters">${TRAITS.map(t => { const i = traitInfo(ind, t); return `<div class="r"><b>${TNAME[t]}</b>${track(ind, t)}<span class="v${i ? "" : " muted"}">${infoText(i, t)}${i && i.n ? `<small class="muted" style="font-weight:700"> ${i.n}回</small>` : ""}</span></div>`; }).join("")}</div>`;
   if (here) {
     h += `<div class="acts">`;
     for (const [k, e] of Object.entries(EXPS)) {
       const why = expWhy(ind, e);
-      h += `<button class="btn${why ? "" : " go"}" data-act="exp" data-kind="${k}" data-id="${id}"${why ? " disabled" : ""}>${e.name}<span class="sub">${why || `${e.hint}${e.cost ? `・${e.cost}コイン` : ""}${U(e.tool) ? "" : "・ざっくり"}`}</span></button>`;
+      h += `<button class="btn${why ? "" : " go"}" data-act="exp" data-kind="${k}" data-id="${id}"${why ? " disabled" : ""}>${e.name}<span class="sub">${why || (isAdult(ind) ? `${e.hint}${e.cost ? `・${e.cost}コイン` : ""}${U(e.tool) ? "" : "・ざっくり"}` : `将来の見込み・参考程度${e.cost ? `・${e.cost}コイン` : ""}`)}</span></button>`;
     }
     const lv = ind.dna < 1 ? 1 : 2, cost = lv === 2 ? COST.genome : COST.kit, tool = lv === 2 ? "genome" : "kit";
     const gWhy = ind.dna >= 2 ? "全部わかっている" : !U(tool) ? `研究所で${lv === 2 ? "ゲノム解析装置" : "DNA検査キット"}` : G.coins < cost ? `あと${cost - G.coins}コイン` : "";
@@ -1116,8 +1201,8 @@ function mofuSheet(id) {
   if (all.length || ind.births.length || ind.tries) {
     h += `<details><summary>記録</summary><div class="rec">`;
     h += all.map(m => `<div><span>${m.day}日目 ${esc(m.src)}</span><b>${TNAME[m.t]} ${m.num ? m.v : WORD[m.t][bin5(m.v)]}</b></div>`).join("");
-    h += ind.births.slice().reverse().map(b => `<div><span>${b.day}日目 出産</span><b>${b.n ? b.n + "匹" : "できず"}</b></div>`).join("");
-    if (ind.sex === "M" && ind.tries) h += `<div><span>種付け</span><b>${ind.tries}回中${ind.hits}回 成功</b></div>`;
+    h += ind.births.filter(b => b.n).slice().reverse().map(b => `<div><span>${b.day}日目 出産</span><b>${b.n}匹</b></div>`).join("");
+    if (ind.sex === "M" && ind.tries) h += `<div><span>父になった回数</span><b>${ind.tries}回・子ども${ind.hits}匹</b></div>`;
     h += `</div></details>`;
   }
   h += `<details${ind.dna ? " open" : ""}><summary>遺伝子${ind.dna ? "" : " (未検査)"}</summary>${ind.dna ? geneTable(ind) : `<p class="lock">遺伝子は見えない。見た目から推理しよう。白い子は必ず cc。白い子が生まれたら、両親とも c を隠し持っている。</p>`}</details>`;
@@ -1205,53 +1290,100 @@ function mateSheet() {
   }
   const bankList = G.bank.map(get).filter(banked).filter(x => x.id !== G.sel.M);
   if (bankList.length) h += `<details><summary>遺伝子バンクの父 (${bankList.length})</summary><div class="pups">${bankList.map(x => `<button class="box pup" data-act="pair" data-id="${x.id}">${ava(x, 48)}${esc(x.name)}${x.wins ? `<span class="stars">優勝${x.wins}</span>` : ""}</button>`).join("")}</div></details>`;
-  if (s && d && !ui.flash) h += `<p class="legend">子ができるかは父の生殖力、何匹うまれるかは母の生殖力しだい。</p>`;
+  if (s && d && !ui.flash) h += `<p class="legend">何匹うまれるかは、おもに母の生殖力しだい (父も少し効く)。</p>`;
   const why = mateWhy(), tight = !why && room() < 4, conf = ui.confirm === "mate";
-  if (tight) h += `<p class="flash bad">飼育場の空きは${room()}匹分。あふれた子は里親に出すことになる。</p>`;
+  if (tight) h += `<p class="flash bad">飼育場の空きは${room()}匹分。あふれたら、里親に出す子を選ぶことになる。</p>`;
   h += `<button class="btn ${why ? "" : conf ? "warn" : "go"} wide" data-act="mate"${why ? " disabled" : ""} style="min-height:52px;font-size:17px">${why || (conf ? "それでも交配する" : "交配する")}${why ? "" : `<span class="sub" style="margin-left:6px">2匹とも今日の行動を使う</span>`}</button>`;
   return h + `</div>`;
 }
 /* 相手の平均とくらべた手応え。実力がわかっていなければ出さない */
-function odds(k, mean) {
+/* 確かな推定 (統計ノートで±10以内) でなければ「?」を付けて、当てにならないことを見せる */
+function odds(k, mean, sure) {
   if (k < 0) return "";
-  const d = k - mean;
-  return d >= 10 ? `<span class="chip ok">勝てそう</span>` : d >= 0 ? `<span class="chip gold">いい勝負</span>` : `<span class="chip red">厳しそう</span>`;
+  const d = k - mean, q = sure ? "" : "?";
+  return d >= 10 ? `<span class="chip ok">勝てそう${q}</span>` : d >= 0 ? `<span class="chip gold">いい勝負${q}</span>` : `<span class="chip red">厳しそう${q}</span>`;
 }
 function entrySheet(type) {
   const T = TOURS[type], tier = TIERS[G.tiers[type]];
   const rank = i => (T.trait ? (traitInfo(i, T.trait) || { key: -1 }).key : showKey(i));
-  const label = i => (T.trait ? infoText(traitInfo(i, T.trait), T.trait) : TRAITS.map(t => infoText(traitInfo(i, t), t)).join(" / "));
+  const lbl = (i, t) => { const x = traitInfo(i, t); return x ? infoText(x, t) : `？(見た目: ${lookWord(i, t)})`; };
+  const label = i => (T.trait ? lbl(i, T.trait) : TRAITS.map(t => infoText(traitInfo(i, t), t)).join(" / "));
+  const sure = i => (T.trait ? [T.trait] : TRAITS).every(t => { const x = traitInfo(i, t); return x && x.kind === "est" && x.ci <= 10; });
   const list = G.stock.map(get).filter(isAdult).sort((a, b) => (canAct(b) - canAct(a)) || rank(b) - rank(a));
   let h = sheetHead(`${T.name} ${tier.name}`) + `<div class="sheet-body"><p class="muted" style="font-weight:700;font-size:13.5px">${T.desc}。相手の平均は${tier.mean + T.offset}点くらい。出場した子は今日はもう休み。</p><div>`;
-  h += list.map(i => { const why = restWhy(i); return `<div class="row-pick${why ? " off" : ""}">${ava(i, 48)}<span class="t"><b>${esc(i.name)} ${sexMark(i.sex)} ${starStr(i.star)}</b><span>${T.trait ? TNAME[T.trait] : "強さ / 魅力 / 生殖力"}: ${label(i)}</span>${odds(rank(i), tier.mean + T.offset)}</span><button class="btn ${why ? "" : "go"}" data-act="enter" data-type="${type}" data-id="${i.id}"${why ? " disabled" : ""}>${why ? "休み" : "出す"}</button></div>`; }).join("") || `<p class="lock">大人のモフがいない。</p>`;
+  h += list.map(i => { const why = restWhy(i); return `<div class="row-pick${why ? " off" : ""}">${ava(i, 48)}<span class="t"><b>${esc(i.name)} ${sexMark(i.sex)} ${starStr(i.star)}</b><span>${T.trait ? TNAME[T.trait] : "強さ / 魅力 / 生殖力"}: ${label(i)}</span>${odds(rank(i), tier.mean + T.offset, sure(i))}</span><button class="btn ${why ? "" : "go"}" data-act="enter" data-type="${type}" data-id="${i.id}"${why ? " disabled" : ""}>${why ? "休み" : "出す"}</button></div>`; }).join("") || `<p class="lock">大人のモフがいない。</p>`;
   return h + `</div></div>`;
 }
 function resultSheet(type) {
-  const T = TOURS[type], r = G.tourRes[type];
+  const T = TOURS[type], r = G.tourRes[type], s = ui.sheet;
   if (!r) return sheetHead(T.name);
-  const who = get(r.who);
-  let h = sheetHead(`${T.name} ${r.tier}`) + `<div class="sheet-body"><div class="result-big">${who ? `<div style="display:flex;justify-content:center">${ava(who, 72)}</div>` : ""}<span class="p${r.place === 1 ? " win" : ""}">${r.place === 1 ? "優勝！" : r.place + "位"}</span><b>${who ? esc(who.name) : ""} · +${r.prize}コイン</b>${r.up ? `<span class="chip gold" style="justify-self:center;font-size:14px">${r.up}</span>` : ""}</div>`;
-  h += `<table class="gtable"><tbody>${r.rows.map((x, i) => `<tr class="${x.me ? "me" : ""}"><td class="num">${i + 1}</td><td>${esc(x.name)}</td><td class="num" style="text-align:right">${r.shown ? x.score : "—"}</td></tr>`).join("")}</tbody></table>`;
+  const who = get(r.who), sc = x => (r.shown ? x.score : "—");
+  if (s.phase === "race") {
+    const times = raceTimes(r.rows), lanes = r.rows.map((x, i) => ({ x, t: times[i] })).sort((a, b) => a.x.lane - b.x.lane);
+    return sheetHead(`${T.name} ${r.tier}`) + `<div class="sheet-body"><p class="say">よーい……スタート！</p><div class="track">${lanes.map(({ x, t }) => `<div class="lane${x.me ? " me" : ""}"><span class="ln">${esc(x.name)}</span><span class="runner" style="animation-duration:${t.toFixed(2)}s">${rowAvatar(x, 34)}</span></div>`).join("")}</div><button class="btn wide" data-act="skip">結果へ ▶</button></div>`;
+  }
+  if (s.phase === "announce") {
+    const n = s.shown;
+    let h = sheetHead(`${T.name} ${r.tier}`) + `<div class="sheet-body"><p class="say">${n === 0 ? "審査員が点数をつけている……" : n >= 8 ? "そして優勝は……" : "結果発表！"}</p><div class="annc">`;
+    h += r.rows.map((x, i) => { const rank = i + 1, open = rank > 8 - n, just = rank === 9 - n;
+      return open ? `<div class="row${x.me ? " me" : ""}${just ? " just" : ""}"><span class="rk">${rank}</span>${rowAvatar(x, 36)}<span>${esc(x.name)}</span><b class="num">${sc(x)}</b></div>`
+        : `<div class="row hid"><span class="rk">${rank}</span><span class="ava"></span><span>？？？</span><b></b></div>`; }).join("");
+    return h + `</div><button class="btn wide" data-act="skip">結果へ ▶</button></div>`;
+  }
+  let h = sheetHead(`${T.name} ${r.tier}`) + `<div class="sheet-body"><div class="result-big">${r.place <= 3 ? rosette(r.place) : who ? `<div style="display:flex;justify-content:center">${ava(who, 72)}</div>` : ""}<span class="p${r.place === 1 ? " win" : ""}">${r.place === 1 ? "優勝！" : r.place + "位"}</span><b>${who ? esc(who.name) : ""} · +${r.prize}コイン</b>${r.up ? `<span class="chip gold" style="justify-self:center;font-size:14px">${r.up}</span>` : ""}</div>`;
+  h += `<table class="gtable"><tbody>${r.rows.map((x, i) => `<tr class="${x.me ? "me" : ""}"><td class="num">${i + 1}</td><td>${esc(x.name)}</td><td class="num" style="text-align:right">${sc(x)}</td></tr>`).join("")}</tbody></table>`;
   if (!r.shown) h += `<p class="legend">点数は研究所の「${RESEARCH.find(x => x.id === T.tool).name}」で見られる。</p>`;
   return h + `<button class="btn go wide" data-act="close">OK</button></div>`;
+}
+/* 生まれた子が空きを超えたとき、里親に出す子をプレイヤーが選ぶ */
+const FOSTER_BABY = 20;
+function keepSheet(k) {
+  const left = k.over - k.pick.length;
+  let h = `<div class="sheet-head"><span class="grab"></span><h2>里親に出す子を選ぶ</h2></div><div class="sheet-body">`;
+  h += `<p class="flash">飼育場があふれた。生まれた子から<b>${k.over}匹</b>、里親に出す子を選んでね。${left > 0 ? `あと${left}匹。` : ""}</p>`;
+  h += `<div class="caps">${k.ids.filter(get).map(id => { const p = get(id), on = k.pick.includes(id); return `<button class="box cap${on ? " sp" : ""}" data-act="keep-pick" data-id="${id}" aria-pressed="${on}">${ava(p, 60)}<span>${esc(p.name)} ${sexMark(p.sex)}</span><span class="s">${on ? "里親に出す" : coatLabel(p.g)}</span></button>`; }).join("")}</div>`;
+  h += `<p class="legend">選んだ子には里親からお礼 (1匹${FOSTER_BABY}コイン)。幼体でも「走らせる」などで見込みは測れるが、今はこの中から決める。</p>`;
+  return h + `<button class="btn ${left ? "" : "go"} wide" data-act="keep-done"${left ? " disabled" : ""}>${left ? `あと${left}匹選ぶ` : "この子たちを里親に出す"}</button></div>`;
 }
 function daySheet(info) {
   let h = `<div class="sheet-head"><span class="grab"></span><h2 style="text-align:center">朝</h2><button class="iconbtn" data-act="close" aria-label="閉じる">×</button></div><div class="sheet-body"><div class="day-title">${G.day}日目</div><div class="day-list">`;
   h += `<div class="li">${ICON.coin}<span>餌代 −${info.cost}コイン → 残り <b class="num" style="color:${G.coins < 0 ? "var(--danger)" : "inherit"}">${fmt(G.coins)}</b></span></div>`;
   if (info.gotTicket) h += `<div class="li">${ICON.ticket}<span>ガチャチケット +1</span></div>`;
   for (const id of info.grown) { const i = get(id); if (!i) continue; const sp = specials(i); h += `<div class="li">${ava(i, 40)}<span><b>${esc(i.name)}</b>が大人になった${sp.length ? `……<b style="color:var(--rare)">${esc(sp.join("、"))}！</b>` : ""}</span></div>`; }
-  for (const id of info.gone || []) { const i = get(id); if (!i) continue; h += `<div class="li">${ava(i, 40)}<span><b>${esc(i.name)}</b>が旅に出た。生後${i.goneAge}日${i.wins ? `・優勝${i.wins}回` : ""}。ありがとう。</span></div>`; }
-  for (const l of info.letters || []) { const i = get(l.id); if (!i) continue; h += `<div class="li">${ava(i, 40)}<span><b>${esc(i.name)}</b>から手紙:「${esc(l.text)}」 <b>+${LETTER_GIFT}コイン</b></span></div>`; }
+  for (const a of info.aging || []) { const i = get(a.id); if (!i) continue; h += `<div class="li">${ava(i, 40)}<span>${a.st === "old1" ? `<b>${esc(i.name)}</b>に白髪が出てきた。全盛期を過ぎて、これから少しずつ力が落ちていく。` : `<b>${esc(i.name)}</b>がよぼよぼに。あと数日で旅立ちそう。送り出すなら今のうち。`}</span></div>`; }
+  for (const id of info.gone || []) { const i = get(id); if (!i) continue; const kids = i.sex === "F" ? i.births.reduce((a, b) => a + b.n, 0) : i.hits; h += `<div class="box" style="display:flex;gap:12px;align-items:center;padding:12px;background:var(--panel-2);box-shadow:none">${ava(i, 56)}<span><b style="font-size:16px">${esc(i.name)}が旅に出た</b><br><span class="muted" style="font-weight:700;font-size:13px">生後${i.goneAge}日${i.wins ? `・優勝${i.wins}回` : ""}${kids ? `・子ども${kids}匹` : ""}。ありがとう。そのうち手紙が届くかも。</span></span></div>`; }
+  for (const l of info.letters || []) { const i = get(l.id); if (!i) continue; h += `<div class="li">${ava(i, 40)}<span><b>${esc(i.name)}</b>から手紙:「${esc(l.text)}」${l.gift ? ` <b>+${LETTER_GIFT}コイン</b>` : ""}</span></div>`; }
   if (info.banner) h += `<div class="li">${ICON.gacha.replace('<svg', '<svg class="ico" style="width:22px;height:22px;color:var(--brand)"')}<span>ガチャが「${info.banner}」に</span></div>`;
   if (G.coins < 0) h += `<p class="flash bad">コインがマイナス。大会で稼ぐか、売って餌代を減らそう。</p>`;
   return h + `</div><button class="btn go wide" data-act="close" style="min-height:52px;font-size:17px">今日もがんばる</button></div>`;
 }
-function gachaSheet(ids) {
-  const sp = ids.map(get).filter(i => specials(i).length);
-  let h = sheetHead("ガチャ結果") + `<div class="sheet-body">`;
+const CAP_COLOR = ["#8fd3b0", "#8fbfe8", "#c9a3f0", "#ffc23d"];
+function machineSVG(turning) {
+  const balls = [[78, 92, "#8fd3b0"], [104, 98, "#8fbfe8"], [130, 90, "#ff8fa3"], [90, 70, "#ffc23d"], [118, 68, "#c9a3f0"], [66, 70, "#8fbfe8"], [142, 66, "#8fd3b0"], [104, 46, "#ff8fa3"]];
+  return `<div class="machine${turning ? " turn" : ""}"><svg viewBox="0 0 210 220" aria-hidden="true">
+    <g class="globe"><circle cx="105" cy="74" r="66" fill="#eaf6fb" stroke="#22312b" stroke-width="4"/>${balls.map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="13" fill="${c}" stroke="#22312b" stroke-width="2.5"/>`).join("")}<path d="M62 40 q16 -18 40 -20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/></g>
+    <rect x="38" y="132" width="134" height="80" rx="16" fill="#23805f" stroke="#22312b" stroke-width="4"/>
+    <text x="105" y="157" text-anchor="middle" font-family="Dela Gothic One, sans-serif" font-size="15" fill="#fff">モフガチャ</text>
+    <rect x="60" y="170" width="46" height="28" rx="8" fill="#17533e" stroke="#22312b" stroke-width="3"/>
+    <g class="handle"><circle cx="146" cy="184" r="17" fill="#ffc23d" stroke="#22312b" stroke-width="4"/><rect x="142" y="166" width="8" height="36" rx="4" fill="#fffdf6" stroke="#22312b" stroke-width="3"/></g>
+  </svg></div>`;
+}
+function gachaSheet(g) {
+  if (g.phase === "turn") return sheetHead("ガチャ") + `<div class="sheet-body">${machineSVG(true)}<p class="say">ガラガラ……</p></div>`;
+  const left = g.ids.filter(id => !g.opened.includes(id));
+  let h = sheetHead("ガチャ") + `<div class="sheet-body">`;
+  const sp = g.ids.filter(id => g.opened.includes(id)).map(get).filter(i => specials(i).length);
   if (sp.length) h += `<p class="flash">特異体質！ ${esc(sp.map(i => `${i.name}: ${specials(i)[0]}`).join(" / "))}</p>`;
-  h += `<div class="caps">${ids.map(id => capHTML(get(id))).join("")}</div><p class="legend">タップすると詳しく見られる。</p>`;
-  return h + `<button class="btn go wide" data-act="close">OK</button></div>`;
+  h += `<div class="tray">${g.ids.map((id, k) => {
+    const p = get(id);
+    if (g.opened.includes(id)) { const c = capHTML(p); return g.just.includes(id) ? c.replace('class="box cap', `style="animation-delay:${g.just.indexOf(id) * 140}ms" class="box just cap`) : c; }
+    const star = p.star, shell = star >= 5 ? `<span class="shell rainbow"></span>` : `<span class="shell" style="--cap:${CAP_COLOR[star - 1]}"></span>`;
+    return `<button class="capsule${g.dropped ? "" : " drop"}${star >= 4 ? " r4" : ""}" data-act="cap" data-id="${id}" style="--d:${k * 110}ms" aria-label="カプセルをあける">${shell}<span>タップであける</span></button>`;
+  }).join("")}</div>`;
+  g.dropped = true;
+  if (left.length > 1) h += `<button class="btn wide" data-act="cap-all">ぜんぶあける</button>`;
+  else if (!left.length) h += `<p class="legend">タップすると詳しく見られる。</p><button class="btn go wide" data-act="close">OK</button>`;
+  return h + `</div>`;
 }
 function renderSheet() {
   const root = $("#sheet-root"), el = $("#sheet"), s = ui.sheet;
@@ -1260,12 +1392,39 @@ function renderSheet() {
   if (!s) { el.innerHTML = ""; return; }
   const top = el.dataset.key === sheetKey(s) ? el.scrollTop : 0;
   el.innerHTML = s.kind === "mofu" ? mofuSheet(s.id) : s.kind === "mate" ? mateSheet() : s.kind === "entry" ? entrySheet(s.type)
-    : s.kind === "result" ? resultSheet(s.type) : s.kind === "day" ? daySheet(s.info) : gachaSheet(s.ids);
+    : s.kind === "result" ? resultSheet(s.type) : s.kind === "day" ? daySheet(s.info) : s.kind === "keep" ? keepSheet(s) : gachaSheet(s);
   el.classList.toggle("tall", s.kind === "mofu");
   el.scrollTop = top;
   if (el.dataset.key !== sheetKey(s)) { el.dataset.key = sheetKey(s); el.focus({ preventScroll: true }); }
 }
 const sheetKey = s => s.kind + ":" + (s.id ?? s.type ?? "");
+
+/* ---------- 演出 ---------- */
+const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* 大会の相手は飼育場にいないので、絵を描くための仮の個体を作る */
+function rowAvatar(r, size) {
+  if (r.me) { const i = get(r.id); return i ? ava(i, size) : ""; }
+  return ava({ id: r.name.length, g: r.g, sex: r.sex, look: r.look, L: 99, born: G.day - 5, ph: r.look }, size);
+}
+function raceTimes(rows) {
+  const top = rows[0].score;
+  return rows.map((r, i) => 2.6 + (top - r.score) * .05 + i * .03);
+}
+function schedule() {
+  clearTimeout(ui.timer);
+  const s = ui.sheet;
+  if (!s) return;
+  if (s.kind === "gacha" && s.phase === "turn") ui.timer = setTimeout(() => { s.phase = "tray"; render(); }, 900);
+  else if (s.kind === "result" && s.phase === "race") { const r = G.tourRes[s.type]; ui.timer = setTimeout(() => { s.phase = "done"; render(); }, (Math.max(...raceTimes(r.rows)) + .6) * 1000); }
+  else if (s.kind === "result" && s.phase === "announce") ui.timer = setTimeout(() => { s.shown++; if (s.shown > 8) s.phase = "done"; render(); }, s.shown === 0 ? 500 : s.shown >= 6 ? 950 : 480);
+}
+/* 品評会でおなじみのロゼット。1〜3位に金・銀・銅 */
+function rosette(place) {
+  const c = ["#f2b300", "#b9c3c9", "#c7834a"][place - 1], c2 = ["#ffd75e", "#e3e8eb", "#e2a873"][place - 1];
+  let petals = "";
+  for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; petals += `<circle cx="${(46 + Math.cos(a) * 30).toFixed(1)}" cy="${(42 + Math.sin(a) * 30).toFixed(1)}" r="9" fill="${c}" stroke="#22312b" stroke-width="2"/>`; }
+  return `<svg class="rosette" viewBox="0 0 92 112" aria-label="${place}位のロゼット"><path d="M30 60 L18 108 L32 100 L40 110 L46 64 Z M62 60 L74 108 L60 100 L52 110 L46 64 Z" fill="${c}" stroke="#22312b" stroke-width="2.5" stroke-linejoin="round"/>${petals}<circle cx="46" cy="42" r="25" fill="${c2}" stroke="#22312b" stroke-width="2.5"/><text x="46" y="51" text-anchor="middle" font-family="Dela Gothic One, sans-serif" font-size="24" fill="#22312b">${place}</text></svg>`;
+}
 
 /* ---------- 全体 ---------- */
 function render() {
@@ -1273,11 +1432,12 @@ function render() {
   const v = { farm: renderFarm, tour: renderTour, gacha: renderGacha, lab: renderLab }[ui.tab]();
   $("#main").innerHTML = `<div class="view">${v}</div>`;
   renderPairBar(); renderSheet();
+  schedule();
   save();
 }
 let toastT;
 function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2200); }
-function arm(key) { ui.confirm = key; clearTimeout(ui.confirmT); ui.confirmT = setTimeout(() => { if (ui.confirm === key) { ui.confirm = null; render(); } }, 4000); }
+function arm(key) { ui.confirm = key; clearTimeout(ui.confirmT); ui.confirmT = setTimeout(() => { if (ui.confirm === key) { ui.confirm = null; render(); } }, 6000); }
 
 document.addEventListener("click", e => {
   const el = e.target.closest("[data-act]");
@@ -1288,7 +1448,7 @@ document.addEventListener("click", e => {
   switch (act) {
     case "tab": ui.tab = el.dataset.tab; ui.sheet = null; window.scrollTo(0, 0); try { localStorage.setItem(STORE_KEY + "-tab", ui.tab); } catch (err) {} break;
     case "open": ui.flash = null; ui.sheet = { kind: "mofu", id }; break;
-    case "close": ui.sheet = null; ui.flash = null; break;
+    case "close": if (ui.sheet && ui.sheet.kind === "keep") return; ui.sheet = null; ui.flash = null; break;
     case "exp": doExp(id, el.dataset.kind); break;
     case "gtest": geneTest(id, +el.dataset.lv); break;
     case "pair": { const ind = get(id); G.sel[ind.sex] = G.sel[ind.sex] === id ? null : id; ui.flash = null;
@@ -1305,10 +1465,18 @@ document.addEventListener("click", e => {
     case "reset": if (keep !== "reset") { arm("reset"); break; } newGame(Date.now() >>> 0); ui.tab = "farm"; ui.sheet = null; toast("新しい牧場をはじめた"); break;
     case "endday": endDay(); break;
     case "entry": ui.sheet = { kind: "entry", type: el.dataset.type }; break;
-    case "enter": enterTour(el.dataset.type, id); ui.sheet = { kind: "result", type: el.dataset.type }; break;
-    case "result": ui.sheet = { kind: "result", type: el.dataset.type }; break;
+    case "enter": enterTour(el.dataset.type, id); ui.sheet = { kind: "result", type: el.dataset.type, phase: calm() ? "done" : el.dataset.type === "race" ? "race" : "announce", shown: 0 }; break;
+    case "result": ui.sheet = { kind: "result", type: el.dataset.type, phase: "done" }; break;
+    case "skip": if (ui.sheet) ui.sheet.phase = "done"; break;
+    case "keep-pick": { const k = ui.sheet; if (!k || k.kind !== "keep") break; if (k.pick.includes(id)) k.pick = k.pick.filter(x => x !== id); else if (k.pick.length < k.over) k.pick.push(id); break; }
+    case "keep-done": { const k = ui.sheet; if (!k || k.pick.length !== k.over) break;
+      for (const x of k.pick) { const p = get(x); G.stock = G.stock.filter(y => y !== x); G.coins += FOSTER_BABY; note(`${p.name}を里親に出した (+${FOSTER_BABY})`); }
+      ui.flash = { cls: "ok", text: `${k.ids.length - k.over}匹を迎えた。${k.over}匹は里親のもとへ。`, ids: k.ids.filter(x => !k.pick.includes(x)) };
+      ui.sheet = { kind: "mate" }; break; }
+    case "cap": { const g = ui.sheet; if (g && !g.opened.includes(id)) { g.opened.push(id); g.just = [id]; } break; }
+    case "cap-all": { const g = ui.sheet; if (g) { g.just = g.ids.filter(x => !g.opened.includes(x)); g.opened = g.ids.slice(); } break; }
     case "pull": pull(+el.dataset.n, el.dataset.pay); break;
-    case "expand": { const p = expandPrice(); if (G.cap >= MAX_CAP || G.coins < p) break; G.coins -= p; G.cap = Math.min(MAX_CAP, G.cap + 4); note(`飼育場を${G.cap}匹分に (−${p})`); toast(`飼育場が${G.cap}匹分に広がった`); break; }
+    case "expand": { const p = expandPrice(); if (G.cap >= MAX_CAP || G.coins < p) break; if (keep !== "expand") { arm("expand"); break; } G.coins -= p; G.cap = Math.min(MAX_CAP, G.cap + 4); note(`飼育場を${G.cap}匹分に (−${p})`); toast(`飼育場が${G.cap}匹分に広がった`); break; }
     default: return;
   }
   render();
@@ -1316,7 +1484,7 @@ document.addEventListener("click", e => {
 document.addEventListener("change", e => { if (e.target.id === "sort") { G.sort = e.target.value; render(); } });
 document.addEventListener("keydown", e => {
   if (!ui.sheet) return;
-  if (e.key === "Escape") { ui.sheet = null; ui.flash = null; render(); }
+  if (e.key === "Escape" && ui.sheet.kind !== "keep") { ui.sheet = null; ui.flash = null; render(); }
 });
 
 /* ---------- 起動 ---------- */
