@@ -476,7 +476,6 @@ const RESEARCH = [
   { id: "vet", name: "動物病院と提携", price: 300, what: "健康診断ができる。生殖力が点数で出る" },
   { id: "eye", name: "観察眼の修行", price: 200, what: "見た目の印象が細かくなる (3段階→5段階)" },
   { id: "pedigree", name: "血統書", price: 200, what: "祖父母までの血統と近親度がわかる" },
-  { id: "stats", name: "統計ノート", price: 400, req: ["watch", "score", "vet"], reqText: "点数が出る道具をどれか1つ", what: "測った点数から実力を推定 (±幅つき)" },
   { id: "kit", name: "DNA検査キット", price: 600, what: "毛色・体質の遺伝子を調べられる (1匹80)" },
   { id: "genome", name: "ゲノム解析装置", price: 1500, req: ["kit"], reqText: "DNA検査キット", what: "能力の遺伝子まで全部調べられる (1匹150)" },
   { id: "sim", name: "交配シミュレータ", price: 1000, req: ["kit"], reqText: "DNA検査キット", what: "検査済みの親なら、子の確率が出る" },
@@ -668,6 +667,7 @@ function restore(d) {
   kinMemo.clear();
   G = { ...d, unlocks: d.unlocks || {}, tourRes: d.tourRes || {}, pulls: d.pulls || [], bank: d.bank || [], album: d.album || [], letters: d.letters || [], pairs: d.pairs || [], reg: new Map(d.reg.map(r => [r.id, r])) };
   R = mulberry32((Date.now() ^ (d.day * 7919)) >>> 0);
+  if (G.unlocks.stats && !G.statsRefund) { G.coins += 400; G.statsRefund = true; delete G.unlocks.stats; note("統計ノートが最初から使えるようになったので、購入代の400コインを返金"); }
   /* 寿命が入る前のセーブ: 足りない遺伝子を補い、年齢を若い大人にそろえる */
   for (const r of G.reg.values()) {
     r.births = r.births || []; r.tries = r.tries || 0; r.hits = r.hits || 0;
@@ -707,7 +707,8 @@ function measure(ind, t, sigma, src, num) {
 /* 統計ノートがあれば推定値±幅、点数の記録があれば前回の点数、印象しかなければ印象の平均 */
 function traitInfo(ind, t, noParent) {
   const nums = ind.meas[t].filter(m => m.num), words = ind.meas[t].filter(m => !m.num);
-  if (U("stats") && nums.length) {
+  /* 点数の記録が1つでもあれば、誤差の大きさで重みをつけて推定値と幅を出す (統計ノートは最初から使える) */
+  if (nums.length) {
     let w = 0, s = 0;
     for (const m of nums) { const wi = 1 / (m.s * m.s); w += wi; s += m.v * wi; }
     return { kind: "est", mean: s / w, ci: 1.96 * Math.sqrt(1 / w), key: s / w, n: nums.length };
@@ -873,7 +874,7 @@ function breedNight() {
 const TOURS = {
   race: { name: "モフレース", short: "レース", desc: "強さで勝負", trait: "str", offset: 0, tool: "watch" },
   contest: { name: "美モフコンテスト", short: "コンテスト", desc: "魅力で勝負", trait: "cha", offset: 0, tool: "score" },
-  show: { name: "品評会", short: "品評会", desc: "3つの能力の平均で勝負", trait: null, offset: -6, tool: "stats" },
+  show: { name: "品評会", short: "品評会", desc: "3つの能力の平均で勝負", trait: null, offset: -6, tool: null },
 };
 const TIERS = [
   { name: "初級", s: "初", mean: 40, prize: 80 },
@@ -886,7 +887,7 @@ function enterTour(type, id) {
   const ind = get(id), T = TOURS[type], tier = TIERS[G.tiers[type]];
   if (!ind || restWhy(ind) || G.entered[type] === G.day) return;
   ind.acted = G.day; G.entered[type] = G.day;
-  const score = T.trait ? measure(ind, T.trait, 6, T.short + "大会", U(T.tool))
+  const score = T.trait ? measure(ind, T.trait, 6, T.short + "大会", !T.tool || U(T.tool))
     : clamp(Math.round((cur(ind, "str") + cur(ind, "cha") + cur(ind, "fer")) / 3 + gauss(R) * 5), 0, 100);
   const rows = [{ name: ind.name, score, me: true, id: ind.id }];
   for (let i = 0; i < 7; i++) {
@@ -907,7 +908,7 @@ function enterTour(type, id) {
     else { G.defense = G.defense || {}; G.defense[type] = (G.defense[type] || 0) + 1; up = "防衛成功！"; }
     if (!G.hallDay && Object.values(G.cleared).every(Boolean)) { G.hallDay = G.day; up += " 殿堂入り！！"; }
   }
-  G.tourRes[type] = { day: G.day, tier: tier.name, rows, place, prize, shown: U(T.tool), who: ind.id, up };
+  G.tourRes[type] = { day: G.day, tier: tier.name, rows, place, prize, shown: !T.tool || U(T.tool), who: ind.id, up };
   note(`${T.name}${tier.name}: ${ind.name} ${place}位 +${prize}${up ? " " + up : ""}`);
 }
 
@@ -1364,7 +1365,7 @@ function mateSheet() {
   return h + `</div>`;
 }
 /* 相手の平均とくらべた手応え。実力がわかっていなければ出さない */
-/* 確かな推定 (統計ノートで±10以内) でなければ「?」を付けて、当てにならないことを見せる */
+/* 確かな推定 (±10以内) でなければ「?」を付けて、当てにならないことを見せる */
 function odds(k, mean, sure) {
   if (k < 0) return "";
   const d = k - mean, q = sure ? "" : "?";
