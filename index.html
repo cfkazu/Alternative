@@ -139,12 +139,14 @@ select { min-height: 44px; padding: 6px 10px; border: 2px solid var(--ink); bord
 .meters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 6px; }
 .m { display: grid; gap: 2px; min-width: 0; }
 .m .top-l { display: flex; justify-content: space-between; gap: 4px; font-size: 11.5px; }
-.m .ml { color: var(--muted); font-weight: 700; }
+.m .ml { color: var(--muted); font-weight: 700; white-space: nowrap; }
 .m .mv { font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .m .mv.q { color: var(--muted); }
 .trk { position: relative; display: block; height: 8px; border-radius: 4px; background: var(--panel-2); border: 1.5px solid var(--soft); overflow: hidden; }
 .trk .band { position: absolute; top: 0; bottom: 0; opacity: .35; }
 .trk .band.vague { opacity: .2; }
+.trk .band.guess { opacity: .12; }
+.m .mv.g, .big-meters .v.g { color: var(--muted); font-weight: 700; }
 .trk .dot { position: absolute; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #fff; }
 .trk .gen { position: absolute; top: -2px; bottom: -2px; width: 2px; margin-left: -1px; background: var(--ink); }
 
@@ -183,7 +185,7 @@ select { min-height: 44px; padding: 6px 10px; border: 2px solid var(--ink); bord
 .looks span { font-size: 12.5px; font-weight: 700; padding: 3px 9px; border-radius: 99px; background: var(--panel-2); }
 .looks span.rare { background: var(--rare-bg); color: var(--rare); font-weight: 800; }
 .big-meters { display: grid; gap: 8px; }
-.big-meters .r { display: grid; grid-template-columns: 4em minmax(0, 1fr) 6.4em; gap: 10px; align-items: center; font-size: 13.5px; }
+.big-meters .r { display: grid; grid-template-columns: 4em minmax(60px, 1fr) max-content; gap: 10px; align-items: center; font-size: 13.5px; }
 .big-meters .r .v { text-align: right; font-weight: 800; white-space: nowrap; }
 .big-meters .trk { height: 12px; border-radius: 6px; }
 .big-meters .trk .dot { width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; }
@@ -376,6 +378,7 @@ let R = mulberry32(20261006);
 /* ---------- 遺伝子座 ---------- */
 const TRAITS = ["str", "cha", "fer"];
 const TNAME = { str: "強さ", cha: "魅力", fer: "生殖力" };
+const TSHORT2 = { str: "強さ", cha: "魅力", fer: "繁殖" };
 const ADD = { str: 4, cha: 4, fer: 3 };
 const LOCI = [];
 for (const t of TRAITS) for (let i = 1; i <= ADD[t]; i++) LOCI.push({ id: t + i, trait: t, kind: "add" });
@@ -690,7 +693,7 @@ function measure(ind, t, sigma, src, num) {
   return v;
 }
 /* 統計ノートがあれば推定値±幅、点数の記録があれば前回の点数、印象しかなければ印象の平均 */
-function traitInfo(ind, t) {
+function traitInfo(ind, t, noParent) {
   const nums = ind.meas[t].filter(m => m.num), words = ind.meas[t].filter(m => !m.num);
   if (U("stats") && nums.length) {
     let w = 0, s = 0;
@@ -699,12 +702,37 @@ function traitInfo(ind, t) {
   }
   if (nums.length) { const v = nums[nums.length - 1].v; return { kind: "last", v, key: v, n: nums.length }; }
   if (words.length) { const b = Math.round(words.reduce((a, m) => a + bin5(m.v), 0) / words.length); return { kind: "word", bin: b, key: (BIN5[b][0] + BIN5[b][1]) / 2 }; }
-  return null;
+  return guess(ind, t, noParent);
 }
-function infoText(i, t) {
+/* 測る前の第一印象。大人は見た目から、幼体は親についてわかっていることから。当たるとは限らない */
+const BIN3 = [[0, 40], [40, 68], [68, 100]];
+const GUESS = {
+  str: ["かなり遅そう", "遅そう", "ふつうそう", "速そう", "かなり速そう"],
+  cha: ["かなり地味そう", "地味そう", "ふつうそう", "人気出そう", "大人気になりそう"],
+  fer: ["子はかなり少なそう", "子は少なそう", "ふつうそう", "子だくさんそう", "かなり子だくさんそう"],
+};
+/* 一覧の狭い欄用の短い言い方 */
+const GUESS_SHORT = {
+  str: ["鈍足そう", "遅そう", "ふつう?", "速そう", "俊足そう"],
+  cha: ["かなり地味", "地味そう", "ふつう?", "人気そう", "大人気そう"],
+  fer: ["かなり少産", "少産そう", "ふつう?", "多産そう", "超多産そう"],
+};
+function guessFrom(v, src) {
+  if (U("eye")) { const b = bin5(v); return { kind: "guess", src, word: b, lo: BIN5[b][0], hi: BIN5[b][1], key: (BIN5[b][0] + BIN5[b][1]) / 2 }; }
+  const b = bin3(v), w = [1, 2, 3][b];
+  return { kind: "guess", src, word: w, lo: BIN3[b][0], hi: BIN3[b][1], key: (BIN3[b][0] + BIN3[b][1]) / 2 };
+}
+function guess(ind, t, noParent) {
+  if (isAdult(ind) || !inStock(ind.id)) return guessFrom(lookVal(ind, t), "look");
+  if (noParent || ind.sire == null) return null;
+  const ks = [ind.sire, ind.dam].map(get).filter(Boolean).map(p => traitInfo(p, t, true)).filter(Boolean).map(i => i.key);
+  return ks.length ? guessFrom(ks.reduce((a, b) => a + b, 0) / ks.length, "parent") : null;
+}
+function infoText(i, t, short) {
   if (!i) return "？";
   if (i.kind === "est") return `${Math.round(i.mean)}±${Math.round(i.ci)}`;
   if (i.kind === "last") return String(i.v);
+  if (i.kind === "guess") return (short ? GUESS_SHORT : GUESS)[t][i.word];
   return WORD[t][i.bin] + "?";
 }
 /* 品評会用: わかっている能力だけで平均。何もわからなければ -1 */
@@ -1004,6 +1032,7 @@ function track(ind, t) {
   let s = "";
   if (i && i.kind === "est") { const lo = clamp(i.mean - i.ci, 0, 100), hi = clamp(i.mean + i.ci, 0, 100); s += `<span class="band" style="left:${lo}%;width:${hi - lo}%;background:var(--${t})"></span><span class="dot" style="left:${clamp(i.mean, 0, 100)}%;background:var(--${t})"></span>`; }
   else if (i && i.kind === "last") s += `<span class="dot" style="left:${i.v}%;background:var(--${t})"></span>`;
+  else if (i && i.kind === "guess") s += `<span class="band guess" style="left:${i.lo}%;width:${i.hi - i.lo}%;background:var(--${t})"></span>`;
   else if (i) { const [a, b] = BIN5[i.bin]; s += `<span class="band vague" style="left:${a}%;width:${b - a}%;background:var(--${t})"></span>`; }
   if (gv != null) s += `<span class="gen" style="left:${clamp(gv, 0, 100)}%"></span>`;
   return `<span class="trk">${s}</span>`;
@@ -1079,7 +1108,7 @@ function renderFarm() {
     return `<button class="box mofu${sel ? " sel" : ""}" data-act="open" data-id="${id}">
       ${ava(ind, 56)}
       <span style="min-width:0"><span class="head"><span class="nm">${esc(ind.name)}</span><span class="sx">${sexMark(ind.sex)}</span>${starStr(ind.star)}${badges(ind)}</span>
-      <span class="meters">${TRAITS.map(t => { const i = traitInfo(ind, t); return `<span class="m"><span class="top-l"><span class="ml">${TNAME[t]}</span><span class="mv${i ? "" : " q"}">${infoText(i, t)}</span></span>${track(ind, t)}</span>`; }).join("")}</span></span>
+      <span class="meters">${TRAITS.map(t => { const i = traitInfo(ind, t); return `<span class="m"><span class="top-l"><span class="ml">${TSHORT2[t]}</span><span class="mv${!i ? " q" : i.kind === "guess" ? " g" : ""}">${infoText(i, t, true)}</span></span>${track(ind, t)}</span>`; }).join("")}</span></span>
     </button>`;
   }).join("") || `<p class="bubble">誰もいない…ガチャで迎えよう。</p>`}</div>`;
   if (G.album.length) h += `<details class="box" style="box-shadow:none"><summary>思い出アルバム (${G.album.length})</summary><div class="caps">${G.album.map(get).filter(Boolean).map(i => `<button class="box cap${i.wins ? " sp" : ""}" data-act="open" data-id="${i.id}">${ava(i, 60)}<span>${esc(i.name)} ${sexMark(i.sex)}</span><span class="s">生後${i.goneAge}日${i.wins ? `・優勝${i.wins}` : ""}${banked(i) ? "・遺伝子保存" : ""}</span></button>`).join("")}</div></details>`;
@@ -1175,7 +1204,7 @@ function mofuSheet(id) {
     h += `<div class="flash ${ui.flash.cls}">${esc(ui.flash.text)}</div>`;
   }
   h += `<div class="looks">${looksText(ind).map(x => `<span class="${x.rare ? "rare" : ""}">${esc(x.t)}</span>`).join("")}</div>`;
-  h += `<div class="big-meters">${TRAITS.map(t => { const i = traitInfo(ind, t); return `<div class="r"><b>${TNAME[t]}</b>${track(ind, t)}<span class="v${i ? "" : " muted"}">${infoText(i, t)}${i && i.n ? `<small class="muted" style="font-weight:700"> ${i.n}回</small>` : ""}</span></div>`; }).join("")}</div>`;
+  h += `<div class="big-meters">${TRAITS.map(t => { const i = traitInfo(ind, t); return `<div class="r"><b>${TNAME[t]}</b>${track(ind, t)}<span class="v${!i ? " muted" : i.kind === "guess" ? " g" : ""}">${infoText(i, t)}${i && i.kind === "guess" ? `<small style="font-weight:700"> (${i.src === "look" ? "見た目" : "親から"})</small>` : ""}${i && i.n ? `<small class="muted" style="font-weight:700"> ${i.n}回</small>` : ""}</span></div>`; }).join("")}</div>`;
   if (here) {
     h += `<div class="acts">`;
     for (const [k, e] of Object.entries(EXPS)) {
@@ -1258,7 +1287,7 @@ function histSVG(t, pr, s, d) {
   });
   for (const [p, lab] of [[s, "♂"], [d, "♀"]]) {
     const i = traitInfo(p, t);
-    if (!i || i.kind === "word") continue;
+    if (!i || i.kind === "word" || i.kind === "guess") continue;
     const x = clamp(i.key, 0, 100) / 100 * W;
     svg += `<line x1="${x}" x2="${x}" y1="2" y2="${H}" stroke="var(--ink)" stroke-width="1.4" stroke-dasharray="3 2"/><text x="${clamp(x, 8, W - 8)}" y="${H + 12}" font-size="10" font-weight="800" text-anchor="middle" fill="var(--muted)">${lab}</text>`;
   }
@@ -1307,7 +1336,7 @@ function odds(k, mean, sure) {
 function entrySheet(type) {
   const T = TOURS[type], tier = TIERS[G.tiers[type]];
   const rank = i => (T.trait ? (traitInfo(i, T.trait) || { key: -1 }).key : showKey(i));
-  const lbl = (i, t) => { const x = traitInfo(i, t); return x ? infoText(x, t) : `？(見た目: ${lookWord(i, t)})`; };
+  const lbl = (i, t) => infoText(traitInfo(i, t), t);
   const label = i => (T.trait ? lbl(i, T.trait) : TRAITS.map(t => infoText(traitInfo(i, t), t)).join(" / "));
   const sure = i => (T.trait ? [T.trait] : TRAITS).every(t => { const x = traitInfo(i, t); return x && x.kind === "est" && x.ci <= 10; });
   const list = G.stock.map(get).filter(isAdult).sort((a, b) => (canAct(b) - canAct(a)) || rank(b) - rank(a));
