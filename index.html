@@ -710,7 +710,7 @@ function traitInfo(ind, t, noParent) {
   /* 点数の記録が1つでもあれば、誤差の大きさで重みをつけて推定値と幅を出す (統計ノートは最初から使える) */
   if (nums.length) {
     let w = 0, s = 0;
-    for (const m of nums) { const wi = 1 / (m.s * m.s); w += wi; s += m.v * wi; }
+    for (const m of nums) { const wi = Math.pow(0.9, G.day - m.day) / (m.s * m.s); w += wi; s += m.v * wi; }
     return { kind: "est", mean: s / w, ci: 1.96 * Math.sqrt(1 / w), key: s / w, n: nums.length };
   }
   if (nums.length) { const v = nums[nums.length - 1].v; return { kind: "last", v, key: v, n: nums.length }; }
@@ -779,13 +779,21 @@ function doExp(id, kind) {
   if (expWhy(ind, e)) return;
   G.coins -= e.cost;
   ind.acted = G.day;
+  const before = traitInfo(ind, e.trait);
   const baby = !isAdult(ind), num = U(e.tool), v = measure(ind, e.trait, e.sigma, e.verb, num);
-  const first = num && ind.meas[e.trait].filter(m => m.num).length === 1;
+  const after = traitInfo(ind, e.trait), first = num && after.n === 1;
   const words = baby ? SENT_BABY : SENT;
-  const msg = (num ? `${e.verb}: ${TNAME[e.trait]} ${v}点${baby ? "の見込み" : ""}` : `${e.verb}: ${words[e.trait][bin5(v)]}`)
-    + (baby ? "　(子どものうちは参考程度。大人になると変わることも)" : first || !num && ind.meas[e.trait].length === 1 ? "　(測るたびにぶれる。何回か見てみよう)" : "");
+  let msg = num ? `${e.verb}: ${TNAME[e.trait]} ${v}点${baby ? "の見込み" : ""}` : `${e.verb}: ${words[e.trait][bin5(v)]}`;
+  if (num && !first && before && before.kind === "est") msg += `　${moodWord(v - before.mean, before.ci)}。これまでの${after.n}回を合わせると ${Math.round(after.mean)}±${Math.round(after.ci)}`;
+  else if (baby) msg += "　(子どものうちは参考程度。大人になると変わることも)";
+  else if (first || !num && ind.meas[e.trait].length === 1) msg += "　(その日の調子で点数はぶれる。何回か測ると本当の実力が見えてくる)";
   note(`${ind.name}の${msg}`);
   ui.flash = { cls: "", text: msg };
+}
+/* 今回の点数がいつもとどれだけ違ったかを、その日の調子として伝える */
+function moodWord(diff, ci) {
+  const band = Math.max(8, ci);
+  return diff > band ? "今日は調子がよかったみたい" : diff < -band ? "今日は調子が出なかったみたい" : "いつもどおりの出来";
 }
 function geneTest(id, level) {
   const ind = get(id), cost = level === 2 ? COST.genome : COST.kit;
@@ -1240,7 +1248,7 @@ function mofuSheet(id) {
     h += `<div class="flash ${ui.flash.cls}">${esc(ui.flash.text)}</div>`;
   }
   h += `<div class="looks">${looksText(ind).map(x => `<span class="${x.rare ? "rare" : ""}">${esc(x.t)}</span>`).join("")}</div>`;
-  h += `<div class="big-meters">${TRAITS.map(t => { const i = traitInfo(ind, t); return `<div class="r"><b>${TNAME[t]}</b>${track(ind, t)}<span class="v${!i ? " muted" : i.kind === "guess" ? " g" : ""}">${infoText(i, t)}${i && i.kind === "guess" ? `<small style="font-weight:700"> (${i.src === "look" ? "見た目" : "親から"})</small>` : ""}${i && i.n ? `<small class="muted" style="font-weight:700"> ${i.n}回</small>` : ""}</span></div>`; }).join("")}</div>`;
+  h += `<div class="big-meters">${TRAITS.map(t => { const i = traitInfo(ind, t); return `<div class="r"><b>${TNAME[t]}</b>${track(ind, t)}<span class="v${!i ? " muted" : i.kind === "guess" ? " g" : ""}">${infoText(i, t)}${i && i.kind === "guess" ? `<small style="font-weight:700"> (${i.src === "look" ? "見た目" : "親から"})</small>` : ""}${i && i.n ? `<small class="muted" style="font-weight:700"> ${i.n === 1 ? "1回だけ" : `${i.n}回の平均`}</small>` : ""}</span></div>`; }).join("")}</div>`;
   if (here) {
     h += `<div class="acts">`;
     for (const [k, e] of Object.entries(EXPS)) {
