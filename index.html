@@ -6,350 +6,300 @@
 <title>配合ラボ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Old+Mincho:wght@700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap">
 <style>
-/* Layout: 研究ノート風の牧場。所持品バー + タブ (飼育場 / 大会 / ガチャ / 研究所)。飼育場は左に台帳カード、右に交配カードとカルテ */
+/* Layout: スマホゲーム風。上に所持品バー、下にタブバー、中身は1列。モフの詳細・交配・大会・結果はすべて下から出るシート */
+/* 単一テーマ (牧草地のライト) に意図的に固定 */
 :root {
-  --bg: #edf1ee;
-  --paper-grid: #e1e8e3;
-  --surface: #fbfcfb;
-  --surface-2: #f2f5f3;
-  --ink: #15201a;
-  --muted: #56635c;
-  --line: #d2dbd5;
-  --accent: #1d5c47;
-  --accent-ink: #ffffff;
-  --accent-soft: #d7eae1;
-  --rare: #a86a00;
-  --rare-soft: #f7ebcf;
-  --tile: #dfe8e2;
-  --outline: rgba(20, 24, 22, .55);
+  color-scheme: light;
+  --bg: #bfe3cf;
+  --bg-dot: #aad6bd;
+  --panel: #fffdf6;
+  --panel-2: #eef5ec;
+  --ink: #22312b;
+  --muted: #5b6b63;
+  --soft: #d3e2d6;
+  --brand: #23805f;
+  --brand-bg: #d2efdf;
+  --btn: #ffc23d;
+  --coin: #f2a900;
   --str: #eb6834;
   --cha: #2a78d6;
   --fer: #1baf7a;
-  --ok: #2c7a4b;
-  --caution: #9a5b00;
-  --danger: #b42318;
-  --ok-soft: #dcefe3;
-  --caution-soft: #f6ead2;
-  --danger-soft: #f8dedb;
-  --font-display: "Zen Old Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
-  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --r: 10px;
+  --rare: #9a6200;
+  --rare-bg: #ffefc2;
+  --danger: #c93c3c;
+  --danger-bg: #fde2df;
+  --ok: #23734a;
+  --ok-bg: #d8f1e2;
+  --tile: #e2efe4;
+  --outline: rgba(34, 49, 43, .6);
+  --font-logo: "Dela Gothic One", "Hiragino Sans", sans-serif;
+  --font: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --r: 14px;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f1412; --paper-grid: #151c18; --surface: #161d19; --surface-2: #1c2420;
-    --ink: #e5ece7; --muted: #9ba9a1; --line: #2b3631;
-    --accent: #6fc3a3; --accent-ink: #0b1511; --accent-soft: #1d3a2f;
-    --rare: #e8b54a; --rare-soft: #3a2e14;
-    --tile: #2a3631; --outline: rgba(230, 238, 233, .55);
-    --str: #d95926; --cha: #3987e5; --fer: #199e70;
-    --ok: #5fc08a; --caution: #e0a64a; --danger: #f07a6c;
-    --ok-soft: #173326; --caution-soft: #3a2c14; --danger-soft: #3d1c19;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0f1412; --paper-grid: #151c18; --surface: #161d19; --surface-2: #1c2420;
-  --ink: #e5ece7; --muted: #9ba9a1; --line: #2b3631;
-  --accent: #6fc3a3; --accent-ink: #0b1511; --accent-soft: #1d3a2f;
-  --rare: #e8b54a; --rare-soft: #3a2e14;
-  --tile: #2a3631; --outline: rgba(230, 238, 233, .55);
-  --str: #d95926; --cha: #3987e5; --fer: #199e70;
-  --ok: #5fc08a; --caution: #e0a64a; --danger: #f07a6c;
-  --ok-soft: #173326; --caution-soft: #3a2c14; --danger-soft: #3d1c19;
-  color-scheme: dark;
-}
-
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
   background-color: var(--bg);
-  background-image:
-    linear-gradient(var(--paper-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--paper-grid) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image: radial-gradient(var(--bg-dot) 1.6px, transparent 1.8px);
+  background-size: 22px 22px;
   color: var(--ink);
-  font: 15px/1.65 var(--font-body);
+  font: 500 15px/1.6 var(--font);
+  padding-top: 62px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
 }
-.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 64px; display: grid; gap: 20px; }
-button, input, select { font: inherit; color: inherit; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+body.has-pair { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 150px); }
+body.locked { overflow: hidden; }
+button, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+b, strong { font-weight: 800; }
+.num { font-variant-numeric: tabular-nums; }
 .muted { color: var(--muted); }
-h2 { font: 700 21px/1.3 var(--font-display); margin: 0; }
-h3 { font: 700 14px/1.4 var(--font-body); margin: 0; }
-.note { font-size: 12.5px; color: var(--muted); margin: 0; max-width: 70ch; }
 
-/* header */
-.masthead { display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: end; justify-content: space-between; }
-.eyebrow { font: 600 11px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
-h1 { font: 900 clamp(32px, 5.5vw, 50px)/1.05 var(--font-display); margin: 0; letter-spacing: .02em; }
-h1 .moff { color: var(--accent); }
-.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; counter-reset: s; font-size: 12.5px; }
-.steps li { counter-increment: s; display: flex; align-items: center; gap: 6px; padding: 4px 12px 4px 4px; border-radius: 99px; background: var(--surface); border: 1px solid var(--line); }
-.steps li::before { content: counter(s); font: 600 11px/1 var(--font-mono); width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
-
-/* status bar */
-.hud { position: relative; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 22px; padding: 10px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: 0 6px 18px -14px rgba(0,0,0,.35); }
-@media (min-width: 700px) { .hud { position: sticky; top: env(safe-area-inset-top, 0px); } }
-.hud .stat { display: grid; line-height: 1.15; }
-.hud .stat .l { font-size: 11px; color: var(--muted); }
-.hud .stat .v { font: 600 18px var(--font-mono); font-variant-numeric: tabular-nums; }
-.hud .stat .v.neg { color: var(--danger); }
-.hud .spacer { flex: 1 1 auto; }
-.trophies { display: flex; flex-wrap: wrap; gap: 4px; }
-.trophies span { font: 600 11px var(--font-mono); padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); }
-.trophies span.won { background: var(--rare-soft); color: var(--rare); border-color: transparent; }
-
-/* tabs */
-.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
-.tab { border: 0; background: none; padding: 10px 14px 11px; cursor: pointer; color: var(--muted); font-weight: 700; border-bottom: 3px solid transparent; margin-bottom: -1px; }
-.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
-@media (max-width: 480px) { .tab { padding: 10px 8px 11px; font-size: 14px; } .tab .badge { margin-left: 3px; } }
-.tab .badge { font: 600 10.5px var(--font-mono); margin-left: 6px; padding: 0 6px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); }
-
-select, .btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 10px; font-size: 13px; }
-.btn { cursor: pointer; font-weight: 700; }
-.btn:hover:not(:disabled) { border-color: var(--accent); }
-.btn:disabled { opacity: .45; cursor: not-allowed; }
-.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.btn.danger { color: var(--danger); }
-.btn.big { padding: 10px 16px; font-size: 15px; }
-.btn.block { width: 100%; }
-.btn small { font-weight: 400; opacity: .8; margin-left: 4px; }
-
-/* farm */
-.farm { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 410px); gap: 22px; align-items: start; }
-.side { display: grid; gap: 16px; }
-@media (max-width: 900px) { .farm { grid-template-columns: minmax(0, 1fr); } }
-.ledger-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 10px; }
-.ledger-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin-top: 12px; }
-.card { position: relative; text-align: left; display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 8px 12px; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); cursor: pointer; }
-.card:hover { border-color: var(--muted); }
-.card.focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.card.tired .ava { opacity: .6; }
-.ava { width: 58px; height: 58px; border-radius: 50%; background: var(--tile); display: block; }
+/* ---- 部品 ---- */
+.box { background: var(--panel); border: 2px solid var(--ink); border-radius: var(--r); box-shadow: 0 3px 0 var(--ink); }
+.btn { min-height: 44px; padding: 8px 14px; border: 2px solid var(--ink); border-radius: 12px; background: var(--panel); box-shadow: 0 3px 0 var(--ink); font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-align: center; }
+.btn:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+.btn.go { background: var(--btn); }
+.btn.brand { background: var(--brand); color: #fff; }
+.btn.warn { background: var(--danger-bg); color: var(--danger); }
+.btn:disabled { background: var(--panel-2); color: var(--muted); border-color: var(--soft); box-shadow: 0 3px 0 var(--soft); cursor: not-allowed; }
+.btn.wide { width: 100%; }
+.btn .sub { display: block; font-size: 12px; font-weight: 700; opacity: .85; }
+.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 800; line-height: 1; padding: 4px 8px; border-radius: 99px; background: var(--panel-2); color: var(--muted); white-space: nowrap; }
+.chip.pa { background: var(--brand); color: #fff; }
+.chip.zz { background: #e6e8e4; color: var(--muted); }
+.chip.gold { background: var(--rare-bg); color: var(--rare); }
+.chip.red { background: var(--danger-bg); color: var(--danger); }
+.chip.ok { background: var(--ok-bg); color: var(--ok); }
+.stars { color: var(--coin); font-size: 12px; letter-spacing: -1px; -webkit-text-stroke: .4px var(--rare); }
+.ava { display: block; border-radius: 50%; background: var(--tile); border: 2px solid var(--ink); flex: none; overflow: hidden; }
 .ava svg { width: 100%; height: 100%; display: block; }
-.meta { min-width: 0; display: grid; align-content: center; }
-.nm { font-weight: 700; font-size: 15px; display: flex; flex-wrap: wrap; gap: 2px 6px; align-items: baseline; }
-.sx { font-style: normal; color: var(--muted); font-size: 13px; }
-.stars { font-size: 11px; color: var(--rare); letter-spacing: -.05em; }
-.sub { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
-.tags:empty { display: none; }
-.tag { font-size: 10.5px; font-weight: 700; padding: 0 7px; border-radius: 4px; line-height: 18px; background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
-.tag.role { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.tag.bad { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
-.tag.win, .tag.rare { background: var(--rare-soft); color: var(--rare); border-color: transparent; }
+.ico { width: 18px; height: 18px; flex: none; }
+h1, h2, h3 { margin: 0; line-height: 1.3; }
+h2 { font-size: 19px; font-weight: 800; }
+h3 { font-size: 15px; font-weight: 800; }
+p { margin: 0; }
 
-.est { grid-column: 1 / -1; display: grid; gap: 4px; }
-.erow { display: grid; grid-template-columns: 3.4em minmax(0, 1fr) 6.4em; align-items: center; gap: 8px; font-size: 11.5px; }
-.erow .lbl { color: var(--muted); }
-.trk { position: relative; display: block; height: 10px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
-.trk .band { position: absolute; top: 0; bottom: 0; opacity: .3; }
-.trk .band.vague { opacity: .16; }
-.trk .dot { position: absolute; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid var(--surface); }
-.trk .gen { position: absolute; top: -1px; bottom: -1px; width: 2px; margin-left: -1px; background: var(--ink); }
-.erow .v { font: 600 11.5px var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.erow .v.word { font-family: var(--font-body); font-weight: 500; }
-.erow .v.unk { color: var(--muted); font-weight: 400; }
+/* ---- 上の所持品バー ---- */
+.top { position: fixed; top: 0; left: 0; right: 0; z-index: 20; background: var(--panel); border-bottom: 2px solid var(--ink); padding-top: env(safe-area-inset-top, 0px); }
+.top-in { max-width: 1100px; margin: 0 auto; padding-inline: 12px; height: 60px; display: flex; align-items: center; gap: 8px; }
+.logo { font: 400 20px var(--font-logo); color: var(--brand); margin-right: 6px; white-space: nowrap; }
+.pill { display: inline-flex; align-items: center; gap: 5px; height: 34px; padding: 0 10px; border-radius: 99px; background: var(--panel-2); border: 2px solid var(--ink); font-weight: 800; font-size: 15px; white-space: nowrap; }
+.pill.low { background: var(--danger-bg); color: var(--danger); }
+.pill .feed { font-size: 11px; color: var(--muted); font-weight: 700; }
+.top .grow { flex: 1; }
+.top .next { min-height: 42px; padding: 6px 12px; }
+@media (max-width: 520px) {
+  .logo { display: none; }
+  .top-in { gap: 6px; padding-inline: 10px; }
+  .pill { padding: 0 8px; font-size: 14px; }
+  .pill .feed { display: none; }
+  .top .next { padding: 6px 10px; font-size: 14px; }
+}
 
-/* panels */
-.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 12px; }
-.pair { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
-.slot { display: grid; justify-items: center; gap: 4px; padding: 10px 6px; border: 1px dashed var(--line); border-radius: 8px; min-height: 98px; text-align: center; font-size: 13px; }
-.slot.filled { border-style: solid; }
-.slot .ava { width: 50px; height: 50px; }
-.slot .who { font-weight: 700; }
-.slot .x { font-size: 11px; border: 0; background: none; color: var(--muted); cursor: pointer; text-decoration: underline; }
-.cross { font: 700 20px var(--font-display); color: var(--muted); }
-.status { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
-.status.ok { background: var(--ok-soft); color: var(--ok); }
-.status.caution { background: var(--caution-soft); color: var(--caution); }
-.status.danger { background: var(--danger-soft); color: var(--danger); }
-.status .ic { font-family: var(--font-mono); }
-.kv { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; align-items: center; }
-.kv b { font-family: var(--font-mono); font-weight: 600; }
-.hist { display: grid; gap: 2px; }
-.hist-top { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; }
-.hist-top .mono { font-size: 12px; }
+/* ---- 下のタブバー ---- */
+.nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 20; background: var(--panel); border-top: 2px solid var(--ink); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.nav-in { max-width: 640px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
+.nav button { position: relative; border: 0; background: none; min-height: 64px; display: grid; justify-items: center; align-content: center; gap: 2px; font-size: 12px; font-weight: 800; color: var(--muted); cursor: pointer; }
+.nav button svg { width: 26px; height: 26px; }
+.nav button[aria-current="page"] { color: var(--brand); }
+.nav button[aria-current="page"]::before { content: ""; position: absolute; inset: 6px 14px; border-radius: 14px; background: var(--brand-bg); z-index: -1; }
+.nav .bd { position: absolute; top: 5px; left: 50%; margin-left: 8px; font-size: 10px; line-height: 1; padding: 3px 5px; border-radius: 99px; background: var(--danger); color: #fff; border: 1.5px solid var(--panel); white-space: nowrap; }
+
+/* ---- 画面 ---- */
+.view { max-width: 1100px; margin: 0 auto; padding-inline: 16px; padding-block: 14px 24px; display: grid; gap: 14px; }
+
+/* 所長のひとこと */
+.boss { display: flex; gap: 10px; align-items: center; }
+.boss .ava { width: 52px; height: 52px; background: #f6f1e4; }
+.bubble { position: relative; flex: 1; background: var(--panel); border: 2px solid var(--ink); border-radius: 14px; padding: 8px 12px; font-weight: 700; font-size: 14px; }
+.bubble::before { content: ""; position: absolute; left: -8px; top: 50%; margin-top: -6px; border: 6px solid transparent; border-right: 8px solid var(--ink); border-left: 0; }
+.bubble .who { display: block; font-size: 11px; color: var(--muted); }
+
+.bar-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.bar-row h2 small { font-size: 14px; color: var(--muted); margin-left: 6px; }
+select { min-height: 44px; padding: 6px 10px; border: 2px solid var(--ink); border-radius: 12px; background: var(--panel); font-weight: 700; }
+
+/* モフ一覧 */
+.list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
+@media (max-width: 700px) { .list { grid-template-columns: minmax(0, 1fr); } }
+.mofu { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 10px; align-items: center; padding: 10px 12px; text-align: left; cursor: pointer; }
+.mofu:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+.mofu.sel { background: #f2fbf5; border-color: var(--brand); box-shadow: 0 3px 0 var(--brand); }
+.mofu .ava { width: 56px; height: 56px; }
+.mofu .head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; min-width: 0; }
+.mofu .nm { font-weight: 800; font-size: 16px; }
+.mofu .sx { color: var(--muted); font-weight: 800; }
+.meters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 6px; }
+.m { display: grid; gap: 2px; min-width: 0; }
+.m .top-l { display: flex; justify-content: space-between; gap: 4px; font-size: 11.5px; }
+.m .ml { color: var(--muted); font-weight: 700; }
+.m .mv { font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m .mv.q { color: var(--muted); }
+.trk { position: relative; display: block; height: 8px; border-radius: 4px; background: var(--panel-2); border: 1.5px solid var(--soft); overflow: hidden; }
+.trk .band { position: absolute; top: 0; bottom: 0; opacity: .35; }
+.trk .band.vague { opacity: .2; }
+.trk .dot { position: absolute; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #fff; }
+.trk .gen { position: absolute; top: -2px; bottom: -2px; width: 2px; margin-left: -1px; background: var(--ink); }
+
+/* 交配バー */
+.pairbar { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 66px); z-index: 19; padding-inline: 12px; pointer-events: none; }
+.pairbar .box { pointer-events: auto; max-width: 620px; margin: 0 auto 6px; display: flex; align-items: center; gap: 8px; padding: 8px 10px; }
+.pairbar .ava { width: 40px; height: 40px; }
+.pairbar .who { font-size: 13px; font-weight: 800; min-width: 0; flex: 1; line-height: 1.3; }
+.pairbar .who span { display: block; color: var(--muted); font-size: 11.5px; font-weight: 700; }
+.pairbar .x { font-weight: 800; color: var(--muted); }
+.slot-empty { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--muted); display: grid; place-items: center; color: var(--muted); font-weight: 800; flex: none; }
+
+/* シート */
+.scrim { position: fixed; inset: 0; z-index: 30; background: rgba(20, 30, 26, .45); }
+.sheet { position: fixed; z-index: 31; left: 0; right: 0; bottom: 0; max-height: 90vh; overflow: auto; overscroll-behavior: contain; background: var(--panel); border-top: 2px solid var(--ink); border-radius: 20px 20px 0 0; padding: 0 16px calc(env(safe-area-inset-bottom, 0px) + 20px); }
+@media (min-width: 760px) {
+  .sheet { left: 50%; right: auto; bottom: auto; top: 50%; transform: translate(-50%, -50%); width: min(560px, calc(100% - 32px)); max-height: 86vh; border: 2px solid var(--ink); border-radius: 20px; box-shadow: 0 5px 0 var(--ink); padding-bottom: 20px; }
+}
+.sheet-head { position: sticky; top: 0; z-index: 1; background: var(--panel); display: flex; align-items: center; gap: 8px; padding: 12px 0 10px; border-bottom: 2px solid var(--soft); margin-bottom: 12px; }
+.sheet-head .grab { position: absolute; top: 5px; left: 50%; width: 40px; height: 4px; margin-left: -20px; border-radius: 2px; background: var(--soft); }
+.sheet-head h2 { flex: 1; min-width: 0; }
+.iconbtn { width: 44px; height: 44px; flex: none; border: 2px solid var(--ink); border-radius: 12px; background: var(--panel); box-shadow: 0 2px 0 var(--ink); font-weight: 800; font-size: 18px; cursor: pointer; display: grid; place-items: center; }
+.iconbtn:disabled { opacity: .35; cursor: not-allowed; }
+.sheet-body { display: grid; gap: 14px; }
+.who-big { display: flex; gap: 12px; align-items: center; }
+.who-big .ava { width: 84px; height: 84px; }
+.who-big .t { display: grid; gap: 4px; min-width: 0; }
+.who-big .nm { font-size: 21px; font-weight: 800; line-height: 1.2; }
+.who-big .o { font-size: 12.5px; color: var(--muted); font-weight: 700; }
+.flash { border: 2px solid var(--ink); border-radius: 12px; padding: 10px 12px; font-weight: 800; background: var(--rare-bg); }
+.flash.ok { background: var(--ok-bg); }
+.flash.bad { background: var(--danger-bg); color: var(--danger); }
+.looks { display: flex; flex-wrap: wrap; gap: 5px; }
+.looks span { font-size: 12.5px; font-weight: 700; padding: 3px 9px; border-radius: 99px; background: var(--panel-2); }
+.looks span.rare { background: var(--rare-bg); color: var(--rare); font-weight: 800; }
+.big-meters { display: grid; gap: 8px; }
+.big-meters .r { display: grid; grid-template-columns: 4em minmax(0, 1fr) 6.4em; gap: 10px; align-items: center; font-size: 13.5px; }
+.big-meters .r .v { text-align: right; font-weight: 800; white-space: nowrap; }
+.big-meters .trk { height: 12px; border-radius: 6px; }
+.big-meters .trk .dot { width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; }
+.acts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.acts .btn { flex-direction: column; gap: 0; padding: 8px 10px; min-height: 58px; }
+.acts .btn .sub { font-size: 11.5px; }
+.nextrow { display: flex; gap: 8px; }
+.nextrow .btn { flex: 1; }
+details { border: 2px solid var(--soft); border-radius: 12px; padding: 0 12px; }
+details[open] { padding-bottom: 10px; }
+summary { min-height: 44px; display: flex; align-items: center; font-weight: 800; cursor: pointer; }
+.rec { display: grid; gap: 2px; font-size: 13px; }
+.rec div { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; border-bottom: 1px dashed var(--soft); }
+.gtable { width: 100%; border-collapse: collapse; font-size: 13px; }
+.gtable td, .gtable th { padding: 6px 4px; border-bottom: 1px dashed var(--soft); text-align: left; vertical-align: top; }
+.gtable th { font-size: 11.5px; color: var(--muted); }
+.gtable tr.me td { background: var(--brand-bg); font-weight: 800; }
+.al { display: inline-flex; gap: 3px; flex-wrap: wrap; }
+.al span { font: 800 12px var(--font); padding: 0 6px; border-radius: 6px; background: var(--panel-2); border: 1.5px solid var(--soft); }
+.al span.hi { background: var(--brand-bg); border-color: var(--brand); }
+.legend { font-size: 12px; color: var(--muted); }
+.ped { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.ped .btn { justify-content: flex-start; font-size: 13px; min-height: 44px; }
+.ped .btn .l { color: var(--muted); font-size: 11.5px; }
+
+.pair-big { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.pslot { display: grid; justify-items: center; gap: 4px; text-align: center; padding: 10px 6px; border: 2px dashed var(--soft); border-radius: 14px; font-weight: 800; }
+.pslot.on { border-style: solid; border-color: var(--ink); }
+.pslot .ava { width: 60px; height: 60px; }
+.pslot .btn { min-height: 36px; padding: 2px 12px; font-size: 13px; box-shadow: 0 2px 0 var(--ink); }
+.cross { font: 400 22px var(--font-logo); color: var(--muted); }
 .hist svg { width: 100%; height: auto; display: block; }
-.prow { display: grid; grid-template-columns: 6.5em minmax(0, 1fr); gap: 8px; align-items: center; font-size: 12.5px; }
-.stack { display: flex; height: 18px; border-radius: 4px; overflow: hidden; gap: 2px; }
-.stack span { display: flex; align-items: center; justify-content: center; font: 600 10.5px var(--font-mono); min-width: 0; white-space: nowrap; overflow: hidden; }
-.locked { padding: 12px; border: 1px dashed var(--line); border-radius: 8px; font-size: 12.5px; color: var(--muted); background: var(--surface-2); }
-.locked b { color: var(--ink); }
-
-.actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-.actions .btn { text-align: left; display: grid; gap: 0; padding: 8px 10px; }
-.actions .btn .d { font-weight: 400; font-size: 11.5px; color: var(--muted); }
-.actions .btn.primary .d { color: inherit; opacity: .85; }
-.looks { display: flex; flex-wrap: wrap; gap: 4px; }
-.looks span { font-size: 12px; padding: 1px 8px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); }
-.looks span.rare { background: var(--rare-soft); color: var(--rare); border-color: transparent; font-weight: 700; }
-.mlog { display: grid; gap: 2px; font-size: 12px; max-height: 150px; overflow: auto; }
-.mlog div { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px dotted var(--line); padding: 2px 0; }
-
-.gtable { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-.gtable th { text-align: left; font-weight: 700; color: var(--muted); font-size: 11px; letter-spacing: .06em; padding: 6px 4px; border-bottom: 1px solid var(--line); }
-.gtable td { padding: 6px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
-.gtable tr.me td { background: var(--accent-soft); font-weight: 700; }
-.alle { display: inline-flex; gap: 3px; flex-wrap: wrap; }
-.alle span { font: 600 11.5px var(--font-mono); padding: 0 5px; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--line); }
-.alle span.hi { background: var(--accent-soft); border-color: transparent; }
-.ped { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; font-size: 12.5px; }
-.ped button { text-align: left; border: 1px solid var(--line); background: var(--surface-2); border-radius: 6px; padding: 4px 8px; cursor: pointer; }
-.ped .lab { font-size: 11px; color: var(--muted); display: block; }
+.hist .ht { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; }
+.stack { display: flex; height: 22px; border-radius: 6px; overflow: hidden; gap: 2px; border: 1.5px solid var(--ink); }
+.stack span { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; min-width: 0; white-space: nowrap; overflow: hidden; }
+.prow { display: grid; grid-template-columns: 4em minmax(0, 1fr); gap: 8px; align-items: center; font-size: 13px; font-weight: 700; }
+.kv { display: flex; flex-wrap: wrap; gap: 6px; }
+.lock { border: 2px dashed var(--soft); border-radius: 12px; padding: 10px 12px; font-size: 13.5px; color: var(--muted); font-weight: 700; }
 .pups { display: flex; flex-wrap: wrap; gap: 8px; }
-.pup { display: grid; justify-items: center; gap: 2px; font-size: 11px; border: 1px solid var(--line); border-radius: 8px; padding: 6px; background: var(--surface-2); cursor: pointer; min-width: 68px; }
-.pup .ava { width: 44px; height: 44px; }
-.diary { display: grid; gap: 4px; font-size: 12.5px; max-height: 260px; overflow: auto; }
-.diary div { display: grid; grid-template-columns: 3.4em 1fr; gap: 8px; }
-.diary .d { font-family: var(--font-mono); color: var(--muted); font-size: 11.5px; }
+.pup { display: grid; justify-items: center; gap: 2px; font-size: 12px; font-weight: 800; padding: 8px; min-width: 76px; cursor: pointer; }
+.pup .ava { width: 48px; height: 48px; }
 
-/* tournaments */
-.tours { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; align-items: start; }
-.tour { display: grid; gap: 10px; }
-.tour-head { display: flex; justify-content: space-between; gap: 10px; align-items: start; }
-.tier { font: 600 12px var(--font-mono); padding: 2px 10px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
-.tier.max { background: var(--rare-soft); color: var(--rare); }
-.ladder { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
-.ladder span { height: 6px; border-radius: 3px; background: var(--line); }
-.ladder span.on { background: var(--accent); }
-.ladder span.cur { background: var(--accent); opacity: .45; }
-.prize { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); }
-.prize b { color: var(--ink); font-family: var(--font-mono); font-weight: 600; }
-.enter { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
-.enter select { min-width: 0; }
-.hall { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 14px 16px; border-radius: var(--r); background: var(--rare-soft); color: var(--rare); font-weight: 700; }
-.hall b { font: 900 22px var(--font-display); }
+/* 大会 */
+.hall { padding: 14px 16px; display: flex; gap: 12px; align-items: center; background: var(--rare-bg); }
+.hall b { font: 400 22px var(--font-logo); color: var(--rare); }
+.events { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 12px; }
+.ev { padding: 14px; display: grid; gap: 10px; align-content: start; }
+.ev .h { display: flex; justify-content: space-between; align-items: start; gap: 8px; }
+.ev .d { font-size: 13px; color: var(--muted); font-weight: 700; }
+.ladder { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.ladder span { text-align: center; font-size: 11.5px; font-weight: 800; padding: 3px 0; border-radius: 8px; background: var(--panel-2); color: var(--muted); }
+.ladder span.on { background: var(--brand); color: #fff; }
+.ladder span.cur { background: var(--btn); color: var(--ink); outline: 2px solid var(--ink); }
+.facts { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.facts b { color: var(--ink); }
+.row-pick { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--soft); }
+.row-pick .ava { width: 48px; height: 48px; }
+.row-pick .t { min-width: 0; }
+.row-pick .t b { display: block; }
+.row-pick .t span { font-size: 13px; color: var(--muted); font-weight: 700; }
+.row-pick.off { opacity: .55; }
+.result-big { text-align: center; display: grid; gap: 4px; padding: 6px 0; }
+.result-big .p { font: 400 34px var(--font-logo); }
+.result-big .p.win { color: var(--rare); }
 
-/* gacha */
-.gacha { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 22px; align-items: start; }
-@media (max-width: 900px) { .gacha { grid-template-columns: minmax(0, 1fr); } }
-.banner { position: relative; overflow: hidden; border-radius: var(--r); padding: 22px; display: grid; gap: 10px; background: var(--accent); color: var(--accent-ink); }
-.banner::after { content: ""; position: absolute; right: -40px; top: -40px; width: 220px; height: 220px; border-radius: 50%; border: 28px solid currentColor; opacity: .08; }
-.banner .k { font: 600 11px var(--font-mono); letter-spacing: .14em; opacity: .85; }
-.banner .t { font: 900 clamp(26px, 4vw, 36px)/1.1 var(--font-display); }
-.banner p { margin: 0; max-width: 46ch; }
-.banner .left { font: 600 12px var(--font-mono); opacity: .85; }
-.pullrow { display: flex; flex-wrap: wrap; gap: 8px; }
-.rates { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-.rates td, .rates th { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: left; }
-.rates th { color: var(--muted); font-size: 11px; font-weight: 700; }
-.rates td.n { font-family: var(--font-mono); text-align: right; }
-.reveal { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
-.cap { display: grid; justify-items: center; gap: 4px; padding: 14px 8px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); text-align: center; font-size: 13px; cursor: pointer; }
-.cap.r4 { border-color: var(--rare); box-shadow: 0 0 0 1px var(--rare); background: var(--rare-soft); }
-.cap .ava { width: 64px; height: 64px; }
+/* ガチャ */
+.banner { padding: 18px; display: grid; gap: 6px; background: var(--brand); color: #fff; overflow: hidden; position: relative; }
+.banner .k { font-size: 12px; font-weight: 800; opacity: .9; }
+.banner .t { font: 400 clamp(24px, 6vw, 32px)/1.15 var(--font-logo); }
+.banner .left { font-size: 13px; font-weight: 800; opacity: .9; }
+.banner::after { content: ""; position: absolute; right: -30px; bottom: -50px; width: 160px; height: 160px; border-radius: 50%; background: rgba(255,255,255,.1); }
+.pulls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.pulls .btn { flex-direction: column; gap: 0; min-height: 64px; padding: 6px; }
+.why { font-size: 12.5px; font-weight: 700; color: var(--danger); }
+.caps { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.cap { display: grid; justify-items: center; gap: 3px; padding: 10px 6px; text-align: center; font-size: 13px; font-weight: 800; cursor: pointer; }
+.cap .ava { width: 60px; height: 60px; }
+.cap.sp { background: var(--rare-bg); }
+.cap .s { font-size: 11.5px; color: var(--muted); font-weight: 700; }
+.cap.sp .s { color: var(--rare); font-weight: 800; }
+.rates { width: 100%; border-collapse: collapse; font-size: 13px; }
+.rates td { padding: 5px 4px; border-bottom: 1px dashed var(--soft); }
+.rates td:nth-child(2) { text-align: right; font-weight: 800; }
 
-/* research */
-.lab { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
-.res { display: grid; gap: 8px; align-content: start; }
-.res.done { background: var(--surface-2); }
-.res-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-.res .price { font: 600 13px var(--font-mono); white-space: nowrap; }
-.res .what { font-size: 13px; margin: 0; }
-.res .req { font-size: 11.5px; color: var(--caution); margin: 0; }
+/* 研究所 */
+.labs { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.res { padding: 12px 14px; display: grid; gap: 8px; align-content: start; }
+.res.done { background: var(--panel-2); box-shadow: none; border-color: var(--soft); }
+.res .h { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.res .w { font-size: 13.5px; font-weight: 700; color: var(--muted); }
+.res .req { font-size: 12.5px; font-weight: 800; color: var(--danger); }
 
-.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); background: var(--ink); color: var(--bg); padding: 8px 16px; border-radius: 12px; font-size: 13px; font-weight: 700; z-index: 10; max-width: calc(100% - 32px); text-align: center; }
+.diary { display: grid; gap: 4px; font-size: 13px; max-height: 260px; overflow: auto; }
+.diary div { display: grid; grid-template-columns: 3.6em 1fr; gap: 6px; }
+.diary .d { color: var(--muted); font-weight: 800; }
+.day-list { display: grid; gap: 8px; }
+.day-list .li { display: flex; gap: 10px; align-items: center; font-weight: 700; }
+.day-list .li .ava { width: 40px; height: 40px; }
+.day-title { font: 400 30px var(--font-logo); text-align: center; padding: 6px 0 2px; }
+
+.toast { position: fixed; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top, 0px) + 70px); z-index: 40; background: var(--ink); color: #fff; padding: 9px 16px; border-radius: 14px; font-size: 14px; font-weight: 800; max-width: calc(100% - 32px); text-align: center; }
+.footer { display: flex; justify-content: center; padding-top: 8px; }
+.footer .btn { font-size: 13px; min-height: 40px; color: var(--muted); }
 @media (prefers-reduced-motion: no-preference) {
-  .card, .btn { transition: border-color .15s, background-color .15s; }
-  .cap { animation: pop .5s cubic-bezier(.2, 1.4, .4, 1) both; }
-  .pup.new { animation: pop .45s ease-out both; }
-  @keyframes pop { from { transform: scale(.6) rotate(-6deg); opacity: 0; } to { transform: none; opacity: 1; } }
+  .sheet { animation: up .22s ease-out both; }
+  @media (min-width: 760px) { .sheet { animation: fade .18s ease-out both; } }
+  .cap, .pup.new { animation: pop .45s cubic-bezier(.2, 1.5, .4, 1) both; }
+  @keyframes up { from { transform: translateY(40px); opacity: 0; } }
+  @keyframes fade { from { opacity: 0; } }
+  @keyframes pop { from { transform: scale(.5) rotate(-8deg); opacity: 0; } }
 }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="masthead">
-    <div>
-      <span class="eyebrow">Breeding Lab · 遺伝子は見えない</span>
-      <h1>配合ラボ <span class="moff">モフ</span></h1>
-    </div>
-    <ol class="steps" aria-label="遊び方">
-      <li>ガチャで仲間を迎える</li>
-      <li>見た目と実験で実力を推理する</li>
-      <li>研究所で見る力を磨く</li>
-      <li>配合して強い子を作る</li>
-      <li>大会で殿堂入り</li>
-    </ol>
-  </header>
-
-  <div class="hud" id="hud"></div>
-
-  <div class="tabs" role="tablist">
-    <button class="tab" role="tab" id="tab-farm" data-tab="farm" aria-selected="true">飼育場</button>
-    <button class="tab" role="tab" id="tab-tour" data-tab="tour" aria-selected="false">大会</button>
-    <button class="tab" role="tab" id="tab-gacha" data-tab="gacha" aria-selected="false">ガチャ</button>
-    <button class="tab" role="tab" id="tab-lab" data-tab="lab" aria-selected="false">研究所</button>
-  </div>
-
-  <section id="view-farm" class="farm">
-    <div>
-      <div class="ledger-head">
-        <div>
-          <h2>飼育台帳</h2>
-          <span class="muted" style="font-size:13px" id="ledger-hint"></span>
-        </div>
-        <div class="ledger-tools">
-          <select id="f-sort" aria-label="並び順">
-            <option value="new">新しい順</option>
-            <option value="str">強さの印象順</option>
-            <option value="cha">魅力の印象順</option>
-            <option value="fer">生殖力の印象順</option>
-            <option value="star">レア度順</option>
-          </select>
-          <button class="btn" id="expand"></button>
-        </div>
-      </div>
-      <div class="grid" id="stock"></div>
-    </div>
-    <aside class="side">
-      <div class="panel" id="mating"></div>
-      <div class="panel" id="detail"></div>
-      <div class="panel"><h3>日誌</h3><div class="diary" id="diary"></div></div>
-    </aside>
-  </section>
-
-  <section id="view-tour" hidden>
-    <div style="display:grid;gap:14px">
-      <div id="hall"></div>
-      <div class="tours" id="tours"></div>
-      <p class="note">大会は種目ごとに1日1回。優勝すると次のランクに上がります。3種目すべての「王者」ランクで優勝すると殿堂入りです。出場した結果は、そのモフの実力の手がかりにもなります。</p>
-    </div>
-  </section>
-
-  <section id="view-gacha" class="gacha" hidden>
-    <div style="display:grid;gap:14px;min-width:0">
-      <div class="banner" id="banner"></div>
-      <div class="pullrow" id="pullrow"></div>
-      <div id="reveal"></div>
-    </div>
-    <aside class="panel">
-      <h3>提供割合</h3>
-      <table class="rates" id="rates"></table>
-      <p class="note">★はそのモフが来た群れの質を表します。遺伝子は1匹ずつ違うので、★5でも実際の能力は確かめるまでわかりません。</p>
-      <p class="note">ごくまれに「特異体質」のモフが混じっています。ガチャチケットは毎日1枚もらえます (最大3枚)。</p>
-    </aside>
-  </section>
-
-  <section id="view-lab" hidden>
-    <div style="display:grid;gap:14px">
-      <div class="panel" style="gap:4px"><h2>研究所</h2><p class="note">最初は見た目と「なんとなくの印象」しかわかりません。コインで道具や設備をそろえると、見える情報が増えていきます。</p></div>
-      <div class="lab" id="lab"></div>
-    </div>
-  </section>
-
-  <div style="display:flex;justify-content:flex-end"><button class="btn danger" id="reset-game">はじめからやり直す</button></div>
-</div>
-<div class="toast" id="toast" hidden></div>
+<header class="top"><div class="top-in" id="top"></div></header>
+<main id="main"></main>
+<div class="pairbar" id="pairbar" hidden></div>
+<nav class="nav" aria-label="メニュー"><div class="nav-in" id="nav"></div></nav>
+<div id="sheet-root" hidden><div class="scrim" data-act="close"></div><div class="sheet" id="sheet" role="dialog" aria-modal="true" tabindex="-1"></div></div>
+<div class="toast" id="toast" role="status" hidden></div>
 
 <script>
 (() => {
@@ -376,7 +326,7 @@ const TNAME = { str: "強さ", cha: "魅力", fer: "生殖力" };
 const ADD = { str: 4, cha: 4, fer: 3 };
 const LOCI = [];
 for (const t of TRAITS) for (let i = 1; i <= ADD[t]; i++) LOCI.push({ id: t + i, trait: t, kind: "add" });
-/* f = 大文字側 (1) の頻度。X の x は超筋肉 (ミオスタチン欠損型)、Q は多産型 (ブールーラ型) */
+/* f = 大文字側 (1) の頻度。x は超筋肉 (ミオスタチン欠損型)、Q は多産型 (ブールーラ型) */
 [
   { id: "M", up: "M", lo: "m", f: 0.2, dna: "筋肉" },
   { id: "X", up: "X", lo: "x", f: 0.9, dna: "超筋肉" },
@@ -428,12 +378,12 @@ const RARITY = [
   { star: 5, p: 0.01, f: 0.78 },
 ];
 const BANNERS = [
-  { name: "いつものガチャ", desc: "ピックアップなし。どんなモフが来るかはお楽しみ。", mod: {} },
-  { name: "筋肉フェス", desc: "筋肉質なモフが出やすい。まれに「めっちゃムキムキ」も。強いが子は少なめ。", mod: { M: 0.6, X: 0.7 } },
-  { name: "キラキラ魅力祭", desc: "かわいいモフが出やすい。コンテスト狙いに。", mod: { cha: 0.15 } },
-  { name: "多産の春", desc: "子だくさんの家系が出やすい。たくさん産む母を探すなら今。", mod: { fer: 0.15, Q: 0.15 } },
-  { name: "まっしろ祭", desc: "色素のない白いモフが出やすい。", mod: { C: 0.3 } },
-  { name: "まだら模様フェア", desc: "まだら模様のモフが出やすい。", mod: { P: 0.75 } },
+  { name: "いつものガチャ", desc: "ピックアップなし", mod: {} },
+  { name: "筋肉フェス", desc: "筋肉質な子が出やすい。まれにムキムキも", mod: { M: 0.6, X: 0.7 } },
+  { name: "キラキラ魅力祭", desc: "かわいい子が出やすい", mod: { cha: 0.15 } },
+  { name: "多産の春", desc: "子だくさんの家系が出やすい", mod: { fer: 0.15, Q: 0.15 } },
+  { name: "まっしろ祭", desc: "白い子が出やすい", mod: { C: 0.3 } },
+  { name: "まだら模様フェア", desc: "まだら模様の子が出やすい", mod: { P: 0.75 } },
 ];
 const BANNER_DAYS = 4;
 const bannerOf = day => BANNERS[Math.floor((day - 1) / BANNER_DAYS) % BANNERS.length];
@@ -451,15 +401,15 @@ function rollRarity(r) { let x = r(); for (const k of RARITY) { if ((x -= k.p) <
 
 /* ---------- 研究 ---------- */
 const RESEARCH = [
-  { id: "eye", name: "観察眼の修行", price: 200, what: "見た目の印象を5段階で言い分けられるようになる (最初は3段階)。" },
-  { id: "watch", name: "ストップウォッチ", price: 250, what: "「走らせる」やレースの結果が、印象ではなく点数でわかる。" },
-  { id: "score", name: "審査員の採点表", price: 250, what: "「写真審査」やコンテストの結果が、印象ではなく点数でわかる。" },
-  { id: "vet", name: "動物病院と提携", price: 300, what: "健康診断 (1回40コイン) で生殖力を点数で測れる。それまでは見た目と出産記録が頼り。" },
-  { id: "pedigree", name: "血統書", price: 200, what: "祖父母までの血統と、近親交配の度合い (近交係数) がわかる。" },
-  { id: "stats", name: "統計ノート", price: 400, req: ["watch", "score", "vet"], reqText: "点数で測れる道具をどれか1つ", what: "点数の記録をまとめて、能力の推定値と誤差の幅を出す。" },
-  { id: "kit", name: "DNA検査キット", price: 600, what: "1匹80コインで、毛色・筋肉・病気・特異体質の遺伝子がわかる。" },
-  { id: "genome", name: "ゲノム解析装置", price: 1500, req: ["kit"], reqText: "DNA検査キット", what: "1匹150コインで、能力の遺伝子まで全部わかる。" },
-  { id: "sim", name: "交配シミュレータ", price: 1000, req: ["kit"], reqText: "DNA検査キット", what: "検査済みの親どうしなら、交配する前に子の毛色や能力の確率がわかる。" },
+  { id: "watch", name: "ストップウォッチ", price: 250, what: "かけっこ・レースの結果が点数で出る" },
+  { id: "score", name: "審査員の採点表", price: 250, what: "写真審査・コンテストの結果が点数で出る" },
+  { id: "vet", name: "動物病院と提携", price: 300, what: "健康診断ができる。生殖力が点数で出る" },
+  { id: "eye", name: "観察眼の修行", price: 200, what: "見た目の印象が細かくなる (3段階→5段階)" },
+  { id: "pedigree", name: "血統書", price: 200, what: "祖父母までの血統と近親度がわかる" },
+  { id: "stats", name: "統計ノート", price: 400, req: ["watch", "score", "vet"], reqText: "点数が出る道具をどれか1つ", what: "測った点数から実力を推定 (±幅つき)" },
+  { id: "kit", name: "DNA検査キット", price: 600, what: "毛色・体質の遺伝子を調べられる (1匹80)" },
+  { id: "genome", name: "ゲノム解析装置", price: 1500, req: ["kit"], reqText: "DNA検査キット", what: "能力の遺伝子まで全部調べられる (1匹150)" },
+  { id: "sim", name: "交配シミュレータ", price: 1000, req: ["kit"], reqText: "DNA検査キット", what: "検査済みの親なら、子の確率が出る" },
 ];
 const U = k => !!(G.unlocks && G.unlocks[k]);
 const reqOk = r => !r.req || r.req.some(U);
@@ -474,17 +424,17 @@ const bin5 = v => (v < 30 ? 0 : v < 45 ? 1 : v < 60 ? 2 : v < 75 ? 3 : 4);
 const BIN5 = [[0, 30], [30, 45], [45, 60], [60, 75], [75, 100]];
 const bin3 = v => (v < 40 ? 0 : v < 68 ? 1 : 2);
 const WORD = {
-  str: ["かなり遅い", "遅め", "ふつう", "速い", "とても速い"],
-  cha: ["かなり不評", "いまいち", "ふつう", "好評", "大好評"],
-  fer: ["かなり低い", "低め", "ふつう", "高め", "とても高い"],
+  str: ["鈍足", "遅め", "ふつう", "速い", "俊足"],
+  cha: ["不評", "いまいち", "ふつう", "好評", "大人気"],
+  fer: ["低い", "低め", "ふつう", "高め", "高い"],
 };
 const SENT = {
-  str: ["かなり遅かった", "遅めだった", "ふつうだった", "速かった", "とても速かった"],
-  cha: ["かなり不評だった", "いまいちだった", "ふつうだった", "好評だった", "大好評だった"],
+  str: ["かなり遅かった…", "ちょっと遅め", "ふつうの走り", "速い！", "とても速い！！"],
+  cha: ["かなり不評…", "いまいちの反応", "ふつうの反応", "好評！", "大好評！！"],
 };
 const LOOK5 = {
   str: ["ほっそり", "やや細め", "ふつうの体格", "がっしり", "かなりがっしり"],
-  cha: ["ぼんやりした顔", "やや地味な顔", "ふつうの顔", "かわいい顔", "とびきりかわいい顔"],
+  cha: ["ぼんやり顔", "やや地味な顔", "ふつうの顔", "かわいい顔", "とびきりかわいい"],
   fer: ["毛がパサパサ", "毛ツヤいまいち", "毛ツヤふつう", "毛ツヤ良好", "毛ツヤつやつや"],
 };
 const LOOK3 = { str: [0, 2, 3], cha: [1, 2, 3], fer: [0, 2, 4] };
@@ -501,12 +451,12 @@ const lookWord = (ind, t) => (U("eye") ? LOOK5[t][bin5(ind.look[t])] : LOOK5[t][
 function specials(ind) {
   const L = looks(ind), out = [];
   if (L.mega) out.push("めっちゃムキムキ");
-  if (L.q) out.push(ind.sex === "M" ? (L.q === 2 ? "睾丸がとんでもなくデカい" : "睾丸がめちゃくちゃデカい") : (L.q === 2 ? "お腹まわりがとんでもなくふっくら" : "お腹まわりがやけにふっくら"));
+  if (L.q) out.push(ind.sex === "M" ? (L.q === 2 ? "睾丸がとんでもなくデカい" : "睾丸がめちゃくちゃデカい") : (L.q === 2 ? "お腹がとんでもなくふっくら" : "お腹まわりがやけにふっくら"));
   return out;
 }
 function looksText(ind) {
   const L = looks(ind), out = [{ t: coatLabel(ind.g) }];
-  if (!L.adult) { out.push({ t: `幼体 (あと${ADULT_AGE - (G.day - ind.born)}日で大人)` }, { t: "体つきはまだわからない" }); }
+  if (!L.adult) out.push({ t: "体つきはまだわからない" });
   else {
     for (const t of TRAITS) out.push({ t: lookWord(ind, t) });
     if (L.muscle && !L.mega) out.push({ t: "筋肉質" });
@@ -549,6 +499,16 @@ function avatar(ind) {
   if (L.sick) s += `<g transform="rotate(-25 40 25)"><rect x="33" y="22.5" width="14" height="5" rx="1.5" fill="#f3e3c3" stroke="#b49a6a" stroke-width=".8"/><path d="M38 23.5v3 M42 23.5v3" stroke="#b49a6a" stroke-width=".7"/></g>`;
   return svgVars(s + `</g></svg>`);
 }
+/* 所長 (白衣にメガネのモフ) */
+const BOSS_SVG = `<svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="21" cy="21" rx="5" ry="8" fill="#d9c7a7" stroke="#22312b" stroke-width="1.2"/><ellipse cx="43" cy="21" rx="5" ry="8" fill="#d9c7a7" stroke="#22312b" stroke-width="1.2"/><ellipse cx="32" cy="38" rx="18" ry="17" fill="#d9c7a7" stroke="#22312b" stroke-width="1.2"/><path d="M15 44 q17 16 34 0 v12 h-34z" fill="#ffffff" stroke="#22312b" stroke-width="1.2"/><path d="M32 47 v9" stroke="#22312b" stroke-width="1"/><circle cx="26" cy="35" r="5" fill="#fff" stroke="#22312b" stroke-width="1.6"/><circle cx="38" cy="35" r="5" fill="#fff" stroke="#22312b" stroke-width="1.6"/><path d="M31 35 h2" stroke="#22312b" stroke-width="1.6"/><circle cx="26" cy="35.5" r="2" fill="#141414"/><circle cx="38" cy="35.5" r="2" fill="#141414"/><path d="M28.5 43 q3.5 2.4 7 0" fill="none" stroke="#141414" stroke-width="1.3" stroke-linecap="round"/></svg>`;
+const ICON = {
+  farm: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7v9H3z"/><path d="M9.5 20v-5h5v5"/></svg>`,
+  tour: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 13v4M8 20h8"/></svg>`,
+  gacha: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M4 12h16"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>`,
+  lab: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M7.5 15h9"/></svg>`,
+  coin: `<svg class="ico" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="#f2a900" stroke="#22312b" stroke-width="2"/><path d="M10 6v8" stroke="#22312b" stroke-width="2" stroke-linecap="round"/></svg>`,
+  ticket: `<svg class="ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M2 6h16v2.5a1.5 1.5 0 0 0 0 3V14H2v-2.5a1.5 1.5 0 0 0 0-3z" fill="#ff8fa3" stroke="#22312b" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
+};
 
 /* ---------- 状態 ---------- */
 const STORE_KEY = "haigo-lab-v3";
@@ -557,19 +517,19 @@ const COST = { health: 40, kit: 80, genome: 150 };
 const SELL_PRICE = 40;
 let G;
 const kinMemo = new Map();
+const ui = { tab: "farm", sheet: null, flash: null, confirm: null, confirmT: null };
 
 function newGame(seed) {
   R = mulberry32(seed);
   kinMemo.clear();
-  G = { day: 1, coins: 400, tickets: 1, cap: START_CAP, reg: new Map(), stock: [], nextId: 1, sel: { M: null, F: null }, focus: null, sort: "new",
+  G = { day: 1, coins: 400, tickets: 1, cap: START_CAP, reg: new Map(), stock: [], nextId: 1, sel: { M: null, F: null }, sort: "new",
     tiers: { race: 0, contest: 0, show: 0 }, cleared: { race: false, contest: false, show: false }, entered: {}, hallDay: null,
-    unlocks: {}, log: [], last: null, lastTour: null, lastPull: null, confirm: null };
+    unlocks: {}, log: [], tourRes: {}, pulls: [] };
   const b = BANNERS[0];
   [[2, "M"], [1, "F"], [1, "M"], [2, "F"]].forEach(([star, sex]) => {
     addInd({ g: gachaGenome(RARITY[star - 1], b, R), sex, star, sire: null, dam: null, gen: 0, born: -99 });
   });
-  G.focus = G.stock[0];
-  note("牧場を開きました。まずは見た目を観察して、「走らせる」「写真審査」で実力を確かめてみましょう。");
+  note("牧場を開いた");
 }
 function addInd({ g, sex, star, sire, dam, gen, born }) {
   const ph = pheno(g, R);
@@ -584,14 +544,15 @@ const get = id => G.reg.get(id);
 const inStock = id => G.stock.includes(id);
 const room = () => G.cap - G.stock.length;
 const canAct = ind => inStock(ind.id) && isAdult(ind) && ind.acted !== G.day;
-function note(text) { G.log.unshift({ day: G.day, text }); if (G.log.length > 80) G.log.length = 80; }
 const isSpecial = ind => isMega(ind.g) || qDose(ind.g) > 0;
+function note(text) { G.log.unshift({ day: G.day, text }); if (G.log.length > 80) G.log.length = 80; }
 
 function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify({ ...G, reg: [...G.reg.values()] })); } catch (e) { /* 保存できない環境 */ } }
 function restore(d) {
   if (!d || !Array.isArray(d.reg) || !Array.isArray(d.stock) || typeof d.day !== "number") return false;
   kinMemo.clear();
-  G = { ...d, unlocks: d.unlocks || {}, reg: new Map(d.reg.map(r => [r.id, r])), confirm: null };
+  G = { ...d, unlocks: d.unlocks || {}, tourRes: d.tourRes || {}, pulls: d.pulls || [], reg: new Map(d.reg.map(r => [r.id, r])) };
+  for (const r of G.reg.values()) { r.births = r.births || []; r.tries = r.tries || 0; r.hits = r.hits || 0; }
   R = mulberry32((Date.now() ^ (d.day * 7919)) >>> 0);
   return true;
 }
@@ -609,11 +570,10 @@ function kin(a, b) {
   return v;
 }
 function inbreeding(id) { const r = get(id); return r && r.sire != null ? kin(r.sire, r.dam) : 0; }
-function fStatus(F) {
-  if (F >= 0.2) return { cls: "danger", ic: "!!", text: "強い近親交配" };
-  if (F >= 0.06) return { cls: "caution", ic: "!", text: "近親交配" };
-  if (F > 0) return { cls: "ok", ic: "~", text: "遠縁" };
-  return { cls: "ok", ic: "✓", text: "血縁なし" };
+function fChip(F) {
+  if (F >= 0.2) return `<span class="chip red">近親度 ${(F * 100).toFixed(1)}%・かなり濃い</span>`;
+  if (F >= 0.06) return `<span class="chip gold">近親度 ${(F * 100).toFixed(1)}%・やや濃い</span>`;
+  return `<span class="chip ok">近親度 ${(F * 100).toFixed(1)}%</span>`;
 }
 
 /* ---------- 測定と、そこからわかること ---------- */
@@ -622,7 +582,7 @@ function measure(ind, t, sigma, src, num) {
   ind.meas[t].push({ v, s: sigma, src, day: G.day, num });
   return v;
 }
-/* 見せ方: 統計ノートがあれば推定値±幅、点数の記録があれば前回の点数、印象しかなければ印象の平均 */
+/* 統計ノートがあれば推定値±幅、点数の記録があれば前回の点数、印象しかなければ印象の平均 */
 function traitInfo(ind, t) {
   const nums = ind.meas[t].filter(m => m.num), words = ind.meas[t].filter(m => !m.num);
   if (U("stats") && nums.length) {
@@ -630,37 +590,61 @@ function traitInfo(ind, t) {
     for (const m of nums) { const wi = 1 / (m.s * m.s); w += wi; s += m.v * wi; }
     return { kind: "est", mean: s / w, ci: 1.96 * Math.sqrt(1 / w), key: s / w };
   }
-  if (nums.length) { const v = nums[nums.length - 1].v; return { kind: "last", v, n: nums.length, key: v }; }
-  if (words.length) { const b = Math.round(words.reduce((a, m) => a + bin5(m.v), 0) / words.length); return { kind: "word", bin: b, n: words.length, key: (BIN5[b][0] + BIN5[b][1]) / 2 }; }
+  if (nums.length) { const v = nums[nums.length - 1].v; return { kind: "last", v, key: v }; }
+  if (words.length) { const b = Math.round(words.reduce((a, m) => a + bin5(m.v), 0) / words.length); return { kind: "word", bin: b, key: (BIN5[b][0] + BIN5[b][1]) / 2 }; }
   return null;
 }
-const infoLabel = (i, t) => (!i ? "未測定" : i.kind === "est" ? `推定${Math.round(i.mean)}` : i.kind === "last" ? `前回${i.v}` : `${WORD[t][i.bin]}?`);
+function infoText(i, t) {
+  if (!i) return "？";
+  if (i.kind === "est") return `${Math.round(i.mean)}±${Math.round(i.ci)}`;
+  if (i.kind === "last") return String(i.v);
+  return WORD[t][i.bin] + "?";
+}
+/* 品評会用: わかっている能力だけで平均。何もわからなければ -1 */
+function showKey(ind) {
+  const ks = TRAITS.map(t => traitInfo(ind, t)).filter(Boolean).map(i => i.key);
+  return ks.length ? ks.reduce((a, b) => a + b, 0) / ks.length : -1;
+}
 
-/* ---------- 実験・検査・交配 ---------- */
+/* ---------- 行動 ---------- */
 const EXPS = {
-  race: { name: "走らせる", trait: "str", sigma: 10, cost: 0, desc: "強さの手がかり", verb: "かけっこ", tool: "watch" },
-  photo: { name: "写真審査", trait: "cha", sigma: 10, cost: 0, desc: "魅力の手がかり", verb: "写真審査", tool: "score" },
-  health: { name: "健康診断", trait: "fer", sigma: 8, cost: COST.health, desc: "生殖力を測る", verb: "健康診断", tool: "vet", needs: "vet" },
+  race: { name: "走らせる", trait: "str", sigma: 10, cost: 0, hint: "強さの手がかり", verb: "かけっこ", tool: "watch" },
+  photo: { name: "写真審査", trait: "cha", sigma: 10, cost: 0, hint: "魅力の手がかり", verb: "写真審査", tool: "score" },
+  health: { name: "健康診断", trait: "fer", sigma: 8, cost: COST.health, hint: "生殖力を測る", verb: "健康診断", tool: "vet", needs: "vet" },
 };
+function restWhy(ind) {
+  if (!inStock(ind.id)) return "もういない";
+  if (!isAdult(ind)) return `幼体・あと${ADULT_AGE - (G.day - ind.born)}日`;
+  if (ind.acted === G.day) return "今日はもう休み";
+  return "";
+}
+function expWhy(ind, e) {
+  const r = restWhy(ind);
+  if (r) return r;
+  if (e.needs && !U(e.needs)) return "研究所で動物病院と提携";
+  if (G.coins < e.cost) return `コイン不足 (あと${e.cost - G.coins})`;
+  return "";
+}
 function doExp(id, kind) {
   const ind = get(id), e = EXPS[kind];
-  if (!canAct(ind) || G.coins < e.cost || (e.needs && !U(e.needs))) return;
+  if (expWhy(ind, e)) return;
   G.coins -= e.cost;
   ind.acted = G.day;
   const num = U(e.tool), v = measure(ind, e.trait, e.sigma, e.verb, num);
-  const msg = num ? `${ind.name}の${e.verb}: ${TNAME[e.trait]} ${v}点` : `${ind.name}の${e.verb}: ${SENT[e.trait][bin5(v)]}`;
-  note(msg); toast(msg);
+  const msg = num ? `${e.verb}: ${TNAME[e.trait]} ${v}点` : `${e.verb}: ${SENT[e.trait][bin5(v)]}`;
+  note(`${ind.name}の${msg}`);
+  ui.flash = { cls: "", text: msg };
 }
 function geneTest(id, level) {
   const ind = get(id), cost = level === 2 ? COST.genome : COST.kit;
   if (ind.dna >= level || G.coins < cost || !U(level === 2 ? "genome" : "kit")) return;
   G.coins -= cost; ind.dna = level;
   const found = [];
-  if (dose(ind.g, "D") === 1) found.push("病気遺伝子 d の保因者");
-  if (dose(ind.g, "X") === 1) found.push("超筋肉 x を隠し持っている");
-  if (qDose(ind.g) && !isAdult(ind)) found.push("多産遺伝子 Q を持っている");
-  note(`${ind.name}の${level === 2 ? "ゲノム解析" : "DNA検査"}が終わりました${found.length ? "。" + found.join("、") : ""}`);
-  toast(`${ind.name}の遺伝子がわかりました`);
+  if (dose(ind.g, "D") === 1) found.push("病気 d を隠し持っていた");
+  if (dose(ind.g, "X") === 1) found.push("ムキムキの x を隠し持っていた");
+  if (qDose(ind.g) && !isAdult(ind)) found.push("多産の Q を持っている");
+  note(`${ind.name}の${level === 2 ? "ゲノム解析" : "DNA検査"}${found.length ? ": " + found.join("、") : ""}`);
+  ui.flash = { cls: found.length ? "" : "ok", text: found.length ? `判明！ ${found.join("、")}` : "遺伝子がわかった。下の「遺伝子」を開こう" };
 }
 
 let predCache = { key: "", val: null };
@@ -694,42 +678,51 @@ function predict(s, d) {
   predCache = { key, val: out };
   return out;
 }
-function mate() {
+function mateWhy() {
   const s = get(G.sel.M), d = get(G.sel.F);
-  if (!s || !d || !canAct(s) || !canAct(d) || room() < 1) return;
+  if (!s || !d) return !s ? "父 ♂ を選んでね" : "母 ♀ を選んでね";
+  const rs = restWhy(s), rd = restWhy(d);
+  if (rs) return `${s.name}: ${rs}`;
+  if (rd) return `${d.name}: ${rd}`;
+  if (room() < 1) return "飼育場が満員";
+  return "";
+}
+function mate() {
+  if (mateWhy()) return;
+  const s = get(G.sel.M), d = get(G.sel.F);
   s.acted = d.acted = G.day;
   s.tries++;
   if (R() > 0.35 + 0.6 * s.ph.fer / 100) {
     d.births.push({ day: G.day, n: 0 });
-    G.last = { msg: `${s.name} × ${d.name}: 今回は受胎しませんでした`, ids: [] };
-    note(G.last.msg);
+    note(`${s.name}×${d.name}: 受胎ならず`);
+    ui.flash = { cls: "bad", text: "受胎ならず…　2匹とも今日はお休み", ids: [] };
     return;
   }
   s.hits++;
   const born = Math.max(1, poisson(0.6 + d.ph.fer / 100 * 4.4, R)), n = Math.min(born, room()), ids = [];
   d.births.push({ day: G.day, n: born });
   for (let k = 0; k < n; k++) ids.push(addInd({ g: childGenome(s.g, d.g, R), sex: R() < 0.5 ? "M" : "F", star: 0, sire: s.id, dam: d.id, gen: Math.max(s.gen, d.gen) + 1, born: G.day }).id);
-  G.last = { msg: `${s.name} × ${d.name}: ${born}匹生まれました${born > n ? ` (空きがなく${born - n}匹は里親へ)` : ""}`, ids };
-  note(G.last.msg);
-  G.focus = ids[0];
+  const lost = born - n;
+  note(`${s.name}×${d.name}: ${born}匹うまれた${lost ? ` (${lost}匹は里親へ)` : ""}`);
+  ui.flash = { cls: lost ? "bad" : "ok", text: `${born}匹うまれた！${lost ? `　空きがなく${lost}匹は里親へ…` : ""}`, ids };
 }
 
 /* ---------- 大会 ---------- */
 const TOURS = {
-  race: { name: "モフレース", short: "レース", desc: "走りと力くらべ。強さで決まる", trait: "str", offset: 0, tool: "watch" },
-  contest: { name: "美モフコンテスト", short: "コンテスト", desc: "見た目と愛嬌の審査。魅力で決まる", trait: "cha", offset: 0, tool: "score" },
-  show: { name: "品評会", short: "品評会", desc: "体格・容姿・繁殖力の総合審査。3能力の平均で決まる", trait: null, offset: -6, tool: "stats" },
+  race: { name: "モフレース", short: "レース", desc: "強さで勝負", trait: "str", offset: 0, tool: "watch" },
+  contest: { name: "美モフコンテスト", short: "コンテスト", desc: "魅力で勝負", trait: "cha", offset: 0, tool: "score" },
+  show: { name: "品評会", short: "品評会", desc: "3つの能力の平均で勝負", trait: null, offset: -6, tool: "stats" },
 };
 const TIERS = [
-  { name: "初級", mean: 40, prize: 80 },
-  { name: "中級", mean: 55, prize: 180 },
-  { name: "上級", mean: 68, prize: 400 },
-  { name: "王者", mean: 80, prize: 1000 },
+  { name: "初級", s: "初", mean: 40, prize: 80 },
+  { name: "中級", s: "中", mean: 55, prize: 180 },
+  { name: "上級", s: "上", mean: 68, prize: 400 },
+  { name: "王者", s: "王", mean: 80, prize: 1000 },
 ];
 const PLACE_PAY = [1, 0.3, 0.15];
 function enterTour(type, id) {
   const ind = get(id), T = TOURS[type], tier = TIERS[G.tiers[type]];
-  if (!ind || !canAct(ind) || G.entered[type] === G.day) return;
+  if (!ind || restWhy(ind) || G.entered[type] === G.day) return;
   ind.acted = G.day; G.entered[type] = G.day;
   const score = T.trait ? measure(ind, T.trait, 6, T.short + "大会", U(T.tool))
     : clamp(Math.round((ind.ph.str + ind.ph.cha + ind.ph.fer) / 3 + gauss(R) * 5), 0, 100);
@@ -739,64 +732,84 @@ function enterTour(type, id) {
   const place = rows.findIndex(r => r.me) + 1;
   const prize = place <= 3 ? Math.round(tier.prize * PLACE_PAY[place - 1]) : 15;
   G.coins += prize;
-  let msg = `${T.name} ${tier.name}: ${ind.name}は${place}位${U(T.tool) ? ` (${score}点)` : ""} 賞金 ${prize}コイン`;
+  let up = "";
   if (place === 1) {
     ind.wins++;
-    if (G.tiers[type] < 3) { G.tiers[type]++; msg += `。${TIERS[G.tiers[type]].name}に昇格`; }
-    else if (!G.cleared[type]) { G.cleared[type] = true; msg += "。王者の称号を獲得"; }
-    if (!G.hallDay && Object.values(G.cleared).every(Boolean)) { G.hallDay = G.day; msg += "。殿堂入り達成！"; }
+    if (G.tiers[type] < 3) { G.tiers[type]++; up = `${TIERS[G.tiers[type]].name}に昇格！`; }
+    else if (!G.cleared[type]) { G.cleared[type] = true; up = "王者の称号を獲得！"; }
+    if (!G.hallDay && Object.values(G.cleared).every(Boolean)) { G.hallDay = G.day; up += " 殿堂入り！！"; }
   }
-  G.lastTour = { type, tier: tier.name, rows, place, prize, shown: U(T.tool) };
-  note(msg);
-  toast(place === 1 ? `優勝！ +${prize}コイン` : `${place}位 · +${prize}コイン`);
+  G.tourRes[type] = { day: G.day, tier: tier.name, rows, place, prize, shown: U(T.tool), who: ind.id, up };
+  note(`${T.name}${tier.name}: ${ind.name} ${place}位 +${prize}${up ? " " + up : ""}`);
 }
 
 /* ---------- 1日の終わり ---------- */
-const upkeepPreview = () => G.stock.reduce((s, id) => s + (isAdult(get(id)) ? UPKEEP_ADULT : UPKEEP_BABY), 0);
+const upkeep = () => G.stock.reduce((s, id) => s + (isAdult(get(id)) ? UPKEEP_ADULT : UPKEEP_BABY), 0);
 function endDay() {
-  const upkeep = upkeepPreview(), oldBanner = bannerOf(G.day);
-  G.coins -= upkeep;
+  const cost = upkeep(), oldBanner = bannerOf(G.day);
+  G.coins -= cost;
   G.day++;
   const gotTicket = G.tickets < MAX_TICKETS;
   if (gotTicket) G.tickets++;
-  G.last = null; G.lastTour = null; G.confirm = null;
-  note(`${G.day}日目の朝。餌代 −${upkeep}コイン${gotTicket ? "、ガチャチケット +1" : ""}`);
-  let surprise = null;
-  G.stock.map(get).filter(i => G.day - i.born === ADULT_AGE).forEach(i => {
-    const sp = specials(i);
-    if (sp.length) { note(`${i.name}が大人になったら……${sp.join("、")}！ 特異体質です`); surprise = i; }
-    else note(`${i.name}が大人になりました。体つきが見えてきました`);
-  });
-  if (bannerOf(G.day) !== oldBanner) note(`ガチャが「${bannerOf(G.day).name}」に切り替わりました`);
-  if (G.coins < 0) note("コインがマイナスです。大会で稼ぐか、モフを売って立て直しましょう");
-  if (surprise) { G.focus = surprise.id; toast(`${surprise.name}が${specials(surprise)[0]}に育った！`); }
-  else toast(`${G.day}日目 · 餌代 −${upkeep}${gotTicket ? " · チケット +1" : ""}`);
+  G.tourRes = {}; G.pulls = [];
+  const grown = G.stock.map(get).filter(i => G.day - i.born === ADULT_AGE);
+  const info = { cost, gotTicket, grown: grown.map(i => i.id), banner: bannerOf(G.day) !== oldBanner ? bannerOf(G.day).name : null };
+  note(`${G.day}日目の朝 (餌代 −${cost})`);
+  grown.forEach(i => { const sp = specials(i); note(sp.length ? `${i.name}が大人に…${sp.join("、")}！` : `${i.name}が大人になった`); });
+  ui.sheet = { kind: "day", info };
 }
 
-/* ---------- ガチャを引く ---------- */
+/* ---------- ガチャ ---------- */
+function pullWhy(n, pay) {
+  if (room() < n) return room() ? `空きが${room()}匹分しかない` : "飼育場が満員";
+  if (pay === "ticket") return G.tickets < 1 ? "明日また1枚" : "";
+  const c = n === 5 ? PULL5_COST : PULL_COST;
+  return G.coins < c ? `あと${c - G.coins}コイン` : "";
+}
 function pull(n, pay) {
-  if (room() < n) { toast(`飼育場の空きが足りません (あと${room()}匹)`); return; }
-  if (pay === "ticket") { if (G.tickets < 1) return; G.tickets--; }
-  else { const c = n === 5 ? PULL5_COST : PULL_COST * n; if (G.coins < c) return; G.coins -= c; }
+  if (pullWhy(n, pay)) return;
+  if (pay === "ticket") G.tickets--; else G.coins -= n === 5 ? PULL5_COST : PULL_COST;
   const banner = bannerOf(G.day), ids = [];
   for (let i = 0; i < n; i++) {
     const rar = rollRarity(R);
     ids.push(addInd({ g: gachaGenome(rar, banner, R), sex: R() < 0.5 ? "M" : "F", star: rar.star, sire: null, dam: null, gen: 0, born: G.day - 99 }).id);
   }
-  G.lastPull = ids;
-  const best = Math.max(...ids.map(id => get(id).star));
-  note(`ガチャ「${banner.name}」で${n}匹を迎えました (最高 ★${best})`);
-  const sp = ids.map(get).filter(i => specials(i).length);
-  sp.forEach(i => note(`${i.name}は${specials(i).join("、")}。特異体質かも！`));
-  if (sp.length) toast(`特異体質のモフが来た！ ${sp[0].name}: ${specials(sp[0])[0]}`);
+  G.pulls.push(...ids);
+  ids.map(get).forEach(i => note(`ガチャ: ${i.name} ★${i.star}${specials(i).length ? "・" + specials(i)[0] : ""}`));
+  ui.sheet = { kind: "gacha", ids };
 }
 
 function buy(id) {
   const r = RESEARCH.find(x => x.id === id);
   if (!r || U(id) || !reqOk(r) || G.coins < r.price) return;
   G.coins -= r.price; G.unlocks[id] = G.day;
-  note(`研究所: 「${r.name}」を手に入れました`);
-  toast(`「${r.name}」を解放しました`);
+  note(`研究所: ${r.name}を導入`);
+  toast(`${r.name}を導入した！`);
+}
+function sell(id) {
+  const ind = get(id);
+  G.stock = G.stock.filter(x => x !== id);
+  if (G.sel.M === id) G.sel.M = null;
+  if (G.sel.F === id) G.sel.F = null;
+  G.coins += SELL_PRICE;
+  note(`${ind.name}を売った (+${SELL_PRICE})`);
+  toast(`${ind.name}を売った +${SELL_PRICE}`);
+  ui.sheet = null;
+}
+
+/* ---------- 所長のひとこと ---------- */
+function bossLine() {
+  const all = G.stock.map(get), adults = all.filter(isAdult), ready = all.filter(canAct);
+  const measured = all.some(i => TRAITS.some(t => i.meas[t].length));
+  if (G.coins < upkeep() * 2) return "コインが心細い。大会で稼ぐか、何匹か売って餌代を減らそう。";
+  if (!measured) return "まずは誰かをタップして「走らせる」。見た目だけじゃ実力はわからんぞ。";
+  if (G.sel.M != null && G.sel.F == null) return "父は決まった。次は母 ♀ をタップして「母にする」。";
+  if (G.sel.F != null && G.sel.M == null) return "母は決まった。次は父 ♂ をタップして「父にする」。";
+  if (adults.length && !ready.length) return "今日はみんなお休み。右上の「次の日へ」で明日にしよう。";
+  if (!Object.keys(G.unlocks).length && G.coins >= 250) return "研究所で道具を買うと、能力が数字で見えるようになる。";
+  if (G.tickets > 0 && room() > 0) return "ガチャチケットが残ってる。新しい子を迎えてみよう。";
+  if (Object.keys(TOURS).some(k => G.entered[k] !== G.day) && ready.length) return "大会はまだ空いてる。実力がわかってきた子を出してみよう。";
+  return "動ける子は1日1回。実験・交配・大会のどれに使うかが腕の見せどころだ。";
 }
 
 /* ---------- 描画ヘルパ ---------- */
@@ -811,361 +824,372 @@ function svgVars(html) {
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const sexMark = s => (s === "M" ? "♂" : "♀");
-const starStr = n => (n ? "★".repeat(n) : "");
-const ageText = ind => (isAdult(ind) ? "大人" : `幼体 あと${ADULT_AGE - (G.day - ind.born)}日`);
-const lockNote = what => `<b>研究所</b>で「${what}」を解放すると`;
+const starStr = n => (n ? `<span class="stars" aria-label="レア度${n}">${"★".repeat(n)}</span>` : "");
+const ava = (ind, size) => `<span class="ava" style="width:${size}px;height:${size}px">${avatar(ind)}</span>`;
+const fmt = n => n.toLocaleString("ja-JP");
 
-function estRows(ind) {
-  const gv = ind.dna >= 2 ? baseValues(ind.g) : null;
-  return `<span class="est">${TRAITS.map(t => {
-    const i = traitInfo(ind, t);
-    let trk = "", v = `<span class="v unk">？</span>`;
-    if (i && i.kind === "est") {
-      const lo = clamp(i.mean - i.ci, 0, 100), hi = clamp(i.mean + i.ci, 0, 100);
-      trk += `<span class="band" style="left:${lo}%;width:${hi - lo}%;background:var(--${t})"></span><span class="dot" style="left:${clamp(i.mean, 0, 100)}%;background:var(--${t})"></span>`;
-      v = `<span class="v">${Math.round(i.mean)}<span class="muted" style="font-weight:400"> ±${Math.round(i.ci)}</span></span>`;
-    } else if (i && i.kind === "last") {
-      trk += `<span class="dot" style="left:${i.v}%;background:var(--${t})"></span>`;
-      v = `<span class="v"><span class="muted" style="font-weight:400">前回</span> ${i.v}</span>`;
-    } else if (i) {
-      const [a, b] = BIN5[i.bin];
-      trk += `<span class="band vague" style="left:${a}%;width:${b - a}%;background:var(--${t})"></span>`;
-      v = `<span class="v word">${WORD[t][i.bin]}?</span>`;
-    }
-    if (gv) trk += `<span class="gen" style="left:${clamp(gv[t], 0, 100)}%" title="遺伝子から見込まれる値 ${Math.round(gv[t])}"></span>`;
-    return `<span class="erow"><span class="lbl">${TNAME[t]}</span><span class="trk">${trk}</span>${v}</span>`;
-  }).join("")}</span>`;
+function track(ind, t) {
+  const i = traitInfo(ind, t), gv = ind.dna >= 2 ? baseValues(ind.g)[t] : null;
+  let s = "";
+  if (i && i.kind === "est") { const lo = clamp(i.mean - i.ci, 0, 100), hi = clamp(i.mean + i.ci, 0, 100); s += `<span class="band" style="left:${lo}%;width:${hi - lo}%;background:var(--${t})"></span><span class="dot" style="left:${clamp(i.mean, 0, 100)}%;background:var(--${t})"></span>`; }
+  else if (i && i.kind === "last") s += `<span class="dot" style="left:${i.v}%;background:var(--${t})"></span>`;
+  else if (i) { const [a, b] = BIN5[i.bin]; s += `<span class="band vague" style="left:${a}%;width:${b - a}%;background:var(--${t})"></span>`; }
+  if (gv != null) s += `<span class="gen" style="left:${clamp(gv, 0, 100)}%"></span>`;
+  return `<span class="trk">${s}</span>`;
+}
+function badges(ind) {
+  const b = [];
+  if (G.sel.M === ind.id) b.push(`<span class="chip pa">父</span>`);
+  if (G.sel.F === ind.id) b.push(`<span class="chip pa">母</span>`);
+  if (!isAdult(ind)) b.push(`<span class="chip">幼体 あと${ADULT_AGE - (G.day - ind.born)}日</span>`);
+  else if (ind.acted === G.day) b.push(`<span class="chip zz">zzz 休み</span>`);
+  if (isAdult(ind) && isSpecial(ind)) b.push(`<span class="chip gold">特異体質</span>`);
+  if (!has(ind.g, "D")) b.push(`<span class="chip red">病気</span>`);
+  if (ind.wins) b.push(`<span class="chip gold">優勝${ind.wins}</span>`);
+  return b.join("");
 }
 
-/* ---------- 描画: 上部バー ---------- */
-function renderHud() {
-  const up = upkeepPreview();
-  $("#hud").innerHTML = `
-    <div class="stat"><span class="l">日付</span><span class="v">${G.day}日目</span></div>
-    <div class="stat"><span class="l">コイン</span><span class="v${G.coins < 0 ? " neg" : ""}">${G.coins}</span></div>
-    <div class="stat"><span class="l">チケット</span><span class="v">${G.tickets}/${MAX_TICKETS}</span></div>
-    <div class="stat"><span class="l">飼育数</span><span class="v">${G.stock.length}/${G.cap}</span></div>
-    <div class="trophies" aria-label="大会のランク">${Object.entries(TOURS).map(([k, T]) => `<span class="${G.cleared[k] ? "won" : ""}">${T.short} ${G.cleared[k] ? "王者" : TIERS[G.tiers[k]].name}</span>`).join("")}</div>
-    <span class="spacer"></span>
-    <button class="btn primary" data-act="endday">1日を終える <small>餌代 −${up}</small></button>`;
+/* ---------- 上と下のバー ---------- */
+function renderTop() {
+  const up = upkeep(), low = G.coins < up * 2;
+  $("#top").innerHTML = `<span class="logo">配合ラボ</span>
+    <span class="pill num" title="日付">${G.day}日目</span>
+    <span class="pill num${low ? " low" : ""}" title="コイン (餌代 ${up}/日)">${ICON.coin}${fmt(G.coins)} <span class="feed">餌代−${up}/日</span></span>
+    <span class="pill num" title="ガチャチケット">${ICON.ticket}${G.tickets}</span>
+    <span class="grow"></span>
+    <button class="btn go next" data-act="endday">次の日へ ▶</button>`;
+}
+function renderNav() {
   const ready = G.stock.map(get).filter(canAct).length;
-  const open = Object.keys(TOURS).filter(k => G.entered[k] !== G.day).length;
-  const buyable = RESEARCH.filter(r => !U(r.id) && reqOk(r) && G.coins >= r.price).length;
-  $("#tab-farm").innerHTML = `飼育場${ready ? `<span class="badge" title="今日まだ行動できるモフ">${ready}</span>` : ""}`;
-  $("#tab-tour").innerHTML = `大会${open ? `<span class="badge" title="今日出場できる大会">${open}</span>` : ""}`;
-  $("#tab-gacha").innerHTML = `ガチャ${G.tickets ? `<span class="badge" title="ガチャチケット">${G.tickets}</span>` : ""}`;
-  $("#tab-lab").innerHTML = `研究所${buyable ? `<span class="badge" title="いま解放できる研究">${buyable}</span>` : ""}`;
+  const open = Object.keys(TOURS).some(k => G.entered[k] !== G.day) && ready;
+  const buyable = RESEARCH.some(r => !U(r.id) && reqOk(r) && G.coins >= r.price);
+  const items = [
+    ["farm", "飼育場", ready ? `あと${ready}` : ""],
+    ["tour", "大会", open ? "出場可" : ""],
+    ["gacha", "ガチャ", G.tickets ? "無料" : ""],
+    ["lab", "研究所", buyable ? "買える" : ""],
+  ];
+  $("#nav").innerHTML = items.map(([k, label, bd]) => `<button data-act="tab" data-tab="${k}"${ui.tab === k ? ' aria-current="page"' : ""}>${ICON[k]}${label}${bd ? `<span class="bd">${bd}</span>` : ""}</button>`).join("");
+}
+function renderPairBar() {
+  const s = G.sel.M != null ? get(G.sel.M) : null, d = G.sel.F != null ? get(G.sel.F) : null;
+  const show = ui.tab === "farm" && (s || d);
+  $("#pairbar").hidden = !show;
+  document.body.classList.toggle("has-pair", !!show);
+  if (!show) return;
+  const why = mateWhy();
+  $("#pairbar").innerHTML = `<div class="box">
+    ${s ? ava(s, 40) : `<span class="slot-empty">♂</span>`}<span class="x">×</span>${d ? ava(d, 40) : `<span class="slot-empty">♀</span>`}
+    <span class="who">${s ? esc(s.name) : "父?"} × ${d ? esc(d.name) : "母?"}<span>${why || `空き${room()}匹分`}</span></span>
+    <button class="btn go" data-act="open-mate">交配へ</button></div>`;
 }
 
-/* ---------- 描画: 飼育場 ---------- */
+/* ---------- 飼育場 ---------- */
 const expandPrice = () => 300 + (G.cap - START_CAP) * 50;
-function renderStock() {
-  $("#ledger-hint").textContent = U("stats") ? "帯は推定の幅 (95%)。測るほど狭くなります。" : "能力は見た目と実験の印象から推理します。研究所で道具をそろえると数字で見えます。";
+function farmOrder() {
   const ids = G.stock.slice();
   const val = (i, t) => { const x = traitInfo(i, t); return x ? x.key : -1; };
-  const key = { new: i => -i.id, str: i => -val(i, "str"), cha: i => -val(i, "cha"), fer: i => -val(i, "fer"), star: i => -i.star * 1000 - i.id }[G.sort];
-  ids.sort((a, b) => key(get(a)) - key(get(b)));
-  $("#stock").innerHTML = ids.map(id => {
-    const ind = get(id), role = G.sel.M === id ? "父" : G.sel.F === id ? "母" : "";
-    const tags = [];
-    if (role) tags.push(`<span class="tag role">${role}</span>`);
-    if (isAdult(ind) && isSpecial(ind)) tags.push(`<span class="tag rare">特異体質</span>`);
-    if (ind.wins) tags.push(`<span class="tag win">優勝${ind.wins}</span>`);
-    if (!has(ind.g, "D")) tags.push(`<span class="tag bad">病気</span>`);
-    const tired = isAdult(ind) && ind.acted === G.day;
-    return `<button class="card${G.focus === id ? " focus" : ""}${tired ? " tired" : ""}" data-act="focus" data-id="${id}">
-      <span class="ava">${avatar(ind)}</span>
-      <span class="meta"><span class="nm">${esc(ind.name)} <i class="sx">${sexMark(ind.sex)}</i>${ind.star ? `<span class="stars">${starStr(ind.star)}</span>` : ""}</span>
-      <span class="sub">${ageText(ind)}${tired ? " · 行動済み" : ""} · ${coatLabel(ind.g)}${ind.dna ? " · 検査済" : ""}</span>
-      <span class="tags">${tags.join("")}</span></span>
-      ${estRows(ind)}
+  const key = { new: i => -i.id, ready: i => (canAct(i) ? 0 : 1) * 1e6 - i.id, str: i => -val(i, "str"), cha: i => -val(i, "cha"), fer: i => -val(i, "fer"), star: i => -i.star * 1000 - i.id }[G.sort] || (i => -i.id);
+  return ids.sort((a, b) => key(get(a)) - key(get(b)));
+}
+function renderFarm() {
+  const ids = farmOrder(), price = expandPrice();
+  const sorts = [["new", "新しい順"], ["ready", "動ける子が先"], ["str", "強さ順"], ["cha", "魅力順"], ["fer", "生殖力順"], ["star", "レア度順"]];
+  let h = `<div class="boss"><span class="ava">${BOSS_SVG}</span><p class="bubble"><span class="who">所長</span>${bossLine()}</p></div>`;
+  h += `<div class="bar-row"><h2>飼育場<small class="num">${G.stock.length}/${G.cap}匹</small></h2>
+    <span style="display:flex;gap:8px;flex-wrap:wrap"><select id="sort" aria-label="並び順">${sorts.map(([v, l]) => `<option value="${v}"${G.sort === v ? " selected" : ""}>${l}</option>`).join("")}</select>
+    ${G.cap < MAX_CAP ? `<button class="btn" data-act="expand"${G.coins < price ? " disabled" : ""}>枠を+4<span class="sub" style="margin-left:4px">${price}</span></button>` : ""}</span></div>`;
+  h += `<div class="list">${ids.map(id => {
+    const ind = get(id), sel = G.sel.M === id || G.sel.F === id;
+    return `<button class="box mofu${sel ? " sel" : ""}" data-act="open" data-id="${id}">
+      ${ava(ind, 56)}
+      <span style="min-width:0"><span class="head"><span class="nm">${esc(ind.name)}</span><span class="sx">${sexMark(ind.sex)}</span>${starStr(ind.star)}${badges(ind)}</span>
+      <span class="meters">${TRAITS.map(t => { const i = traitInfo(ind, t); return `<span class="m"><span class="top-l"><span class="ml">${TNAME[t]}</span><span class="mv${i ? "" : " q"}">${infoText(i, t)}</span></span>${track(ind, t)}</span>`; }).join("")}</span></span>
     </button>`;
-  }).join("") || `<p class="muted">モフがいません。ガチャで迎えましょう。</p>`;
-  const price = expandPrice(), ex = $("#expand");
-  ex.disabled = G.cap >= MAX_CAP || G.coins < price;
-  ex.innerHTML = G.cap >= MAX_CAP ? "飼育場は最大です" : `飼育場を広げる (${G.cap + 4}匹) <small>${price}コイン</small>`;
+  }).join("") || `<p class="bubble">誰もいない…ガチャで迎えよう。</p>`}</div>`;
+  h += `<details class="box" style="box-shadow:none"><summary>日誌</summary><div class="diary">${G.log.slice(0, 40).map(l => `<div><span class="d">${l.day}日目</span><span>${esc(l.text)}</span></div>`).join("")}</div></details>`;
+  h += `<div class="footer"><button class="btn" data-act="reset">${ui.confirm === "reset" ? "全部消える。もう一度押すとやり直し" : "はじめからやり直す"}</button></div>`;
+  return h;
 }
 
-function slotHTML(id, sex) {
-  if (id == null) return `<div class="slot"><span class="muted">${sex === "M" ? "父 ♂" : "母 ♀"}を<br>カルテから選ぶ</span></div>`;
-  const i = get(id);
-  return `<div class="slot filled"><span class="ava">${avatar(i)}</span><span class="who">${esc(i.name)} ${sexMark(i.sex)}</span><button class="x" data-act="unpair" data-sex="${sex}">外す</button></div>`;
-}
-function histSVG(t, pr, s, d) {
-  const W = 300, H = 64, bins = pr.hist[t].length, bw = W / bins, max = Math.max(...pr.hist[t]);
-  let svg = `<svg viewBox="0 0 ${W} ${H + 14}" role="img" aria-label="${TNAME[t]}の予想分布"><line x1="0" x2="${W}" y1="${H}" y2="${H}" stroke="var(--line)"/>`;
-  pr.hist[t].forEach((c, i) => {
-    if (!c) return;
-    const h = Math.max(1.5, c / max * (H - 12));
-    svg += `<rect x="${(i * bw + 1).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${(bw - 2).toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="var(--${t})"><title>${i * 5}–${i * 5 + 4}: ${(c / pr.N * 100).toFixed(1)}%</title></rect>`;
-  });
-  const marks = [[s, "♂"], [d, "♀"]].map(([p, lab]) => { const i = traitInfo(p, t); return i && i.kind !== "word" ? { v: Math.round(i.key), lab } : null; }).filter(Boolean);
-  if (marks.length === 2 && Math.abs(marks[0].v - marks[1].v) < 7) marks.splice(0, 2, { v: Math.round((marks[0].v + marks[1].v) / 2), lab: "♂♀" });
-  for (const m of marks) { const x = m.v / 100 * W; svg += `<line x1="${x}" x2="${x}" y1="4" y2="${H}" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="3 2"/><text x="${clamp(x, 10, W - 10)}" y="${H + 12}" font-size="10" text-anchor="middle" fill="var(--muted)">${m.lab}${m.v}</text>`; }
-  return svgVars(svg + `</svg>`);
-}
-function stackHTML(parts) {
-  return `<div class="stack">${parts.filter(p => p.p > 0.0005).map(p => `<span style="flex:${p.p} 1 0;background:${p.fill || "var(--surface-2)"};color:${p.ink || "var(--ink)"};${p.fill ? "" : "border:1px solid var(--line);"}" title="${p.name} ${(p.p * 100).toFixed(1)}%">${p.p >= .12 ? `${p.name} ${Math.round(p.p * 100)}%` : ""}</span>`).join("")}</div>`;
+/* ---------- 大会 ---------- */
+function renderTour() {
+  const won = Object.values(G.cleared).filter(Boolean).length;
+  let h = G.hallDay
+    ? `<div class="box hall"><b>殿堂入り</b><span>${G.hallDay}日目、3種目の王者に！</span></div>`
+    : `<div class="boss"><span class="ava">${BOSS_SVG}</span><p class="bubble"><span class="who">所長</span>3種目すべて「王者」で優勝すれば殿堂入りだ。いま ${won}/3。</p></div>`;
+  h += `<div class="events">${Object.entries(TOURS).map(([k, T]) => {
+    const ti = G.tiers[k], tier = TIERS[ti], res = G.tourRes[k], done = G.entered[k] === G.day;
+    let e = `<div class="box ev"><div class="h"><div><h2>${T.name}</h2><p class="d">${T.desc}</p></div>${G.cleared[k] ? `<span class="chip gold">王者制覇</span>` : ""}</div>`;
+    e += `<div class="ladder">${TIERS.map((x, i) => `<span class="${i < ti || G.cleared[k] ? "on" : i === ti ? "cur" : ""}">${x.name}</span>`).join("")}</div>`;
+    e += `<div class="facts"><span>相手 平均<b>${tier.mean + T.offset}</b>点</span><span>優勝 <b>${tier.prize}</b></span><span>2位 <b>${Math.round(tier.prize * PLACE_PAY[1])}</b></span><span>3位 <b>${Math.round(tier.prize * PLACE_PAY[2])}</b></span></div>`;
+    if (res && res.day === G.day) e += `<button class="btn wide" data-act="result" data-type="${k}">今日の結果: ${res.place}位 +${res.prize}${res.up ? " " + res.up : ""}</button>`;
+    else if (!done) e += `<button class="btn go wide" data-act="entry" data-type="${k}">出場する子を選ぶ</button>`;
+    return e + `</div>`;
+  }).join("")}</div>`;
+  return h;
 }
 
-function renderMating() {
-  const s = G.sel.M != null ? get(G.sel.M) : null, d = G.sel.F != null ? get(G.sel.F) : null;
-  let h = `<h2>交配カード</h2><div class="pair">${slotHTML(G.sel.M, "M")}<span class="cross">×</span>${slotHTML(G.sel.F, "F")}</div>`;
-  if (s && d) {
-    if (U("pedigree")) {
-      const F = kin(s.id, d.id), st = fStatus(F);
-      h += `<div class="kv"><span class="status ${st.cls}"><span class="ic">${st.ic}</span>${st.text}</span><span>子の近交係数 <b>${(F * 100).toFixed(1)}%</b></span></div>`;
-    }
-    if (!U("sim")) {
-      h += `<div class="locked">どんな子が生まれるかは、生まれてみるまでわかりません。${lockNote("交配シミュレータ")}、検査済みの親どうしの子を予想できます。</div>`;
-    } else {
-      const lv = Math.min(s.dna, d.dna);
-      if (lv < 1) h += `<div class="locked">両親ともDNA検査をすると子の予想が見られます (${[s, d].filter(x => !x.dna).map(x => esc(x.name)).join("・")} が未検査)。</div>`;
-      else {
-        const pr = predict(s, d);
-        h += `<h3>子の予想</h3>`;
-        if (lv >= 2) for (const t of TRAITS) { const x = pr.stat[t]; h += `<div class="hist"><div class="hist-top"><span>${TNAME[t]}</span><span class="mono">平均 ${x.mean.toFixed(0)} · 80%が ${x.lo}–${x.hi}</span></div>${histSVG(t, pr, s, d)}</div>`; }
-        else h += `<p class="note">能力の分布は、両親ともゲノム解析をすると見られます。</p>`;
-        h += `<div class="prow"><span>毛色</span>${stackHTML(pr.coat)}</div><div class="prow"><span>斑紋 <span class="muted">(白以外)</span></span>${stackHTML(pr.spots)}</div>
-          <div class="kv"><span>筋肉質 <b>${Math.round(pr.muscle * 100)}%</b></span><span>めっちゃムキムキ <b>${(pr.mega * 100).toFixed(1)}%</b></span><span>多産体質 <b>${(pr.q * 100).toFixed(1)}%</b></span><span>病気 <b style="color:${pr.sick > 0 ? "var(--danger)" : "inherit"}">${(pr.sick * 100).toFixed(1)}%</b></span></div>`;
-      }
-    }
-    const why = !inStock(s.id) || !inStock(d.id) ? "手放した個体は交配できません" : !canAct(s) ? `${s.name}は今日は動けません` : !canAct(d) ? `${d.name}は今日は動けません` : room() < 1 ? "飼育場に空きがありません" : "";
-    h += `<button class="btn primary big block" data-act="mate"${why ? " disabled" : ""}>交配する</button>`;
-    h += `<p class="note">${why ? esc(why) + "。" : ""}両親とも今日の行動を使います。子は${ADULT_AGE}日で大人になり、体つきが見えてきます。</p>`;
-  } else {
-    h += `<p class="note">カルテの「父にする / 母にする」で♂と♀を選んで交配します。ふつうに見える親どうしから、とんでもない子が生まれることもあります。</p>`;
+/* ---------- ガチャ ---------- */
+function renderGacha() {
+  const b = bannerOf(G.day), left = BANNER_DAYS - ((G.day - 1) % BANNER_DAYS);
+  let h = `<div class="box banner"><span class="k">開催中 · あと${left}日</span><span class="t">${b.name}</span><p>${b.desc}</p><span class="left">次は「${bannerOf(G.day + left).name}」</span></div>`;
+  const opts = [["ticket", 1, "無料で1回", `チケット${G.tickets}枚`], ["coin", 1, "1回", `${PULL_COST}コイン`], ["coin", 5, "5回", `${PULL5_COST}コイン`]];
+  h += `<div class="pulls">${opts.map(([pay, n, label, sub]) => { const why = pullWhy(n, pay); return `<button class="btn ${pay === "ticket" ? "go" : ""}" data-act="pull" data-n="${n}" data-pay="${pay}"${why ? " disabled" : ""}>${label}<span class="sub">${why || sub}</span></button>`; }).join("")}</div>`;
+  h += `<p class="muted" style="font-size:13px;font-weight:700">迎えると餌代が1匹あたり1日${UPKEEP_ADULT}コイン増える。</p>`;
+  const ids = G.pulls.filter(id => get(id));
+  if (ids.length) h += `<h3>今日迎えた子</h3><div class="caps">${ids.map(id => capHTML(get(id))).join("")}</div>`;
+  h += `<details class="box" style="box-shadow:none"><summary>提供割合</summary><table class="rates"><tbody>${RARITY.slice().reverse().map(k => `<tr><td>${starStr(k.star)} ${["ふつうの群れ", "やや良い群れ", "良い群れ", "とても良い群れ", "伝説の群れ"][k.star - 1]}</td><td>${(k.p * 100).toFixed(0)}%</td></tr>`).join("")}</tbody></table><p class="muted" style="font-size:12.5px;margin-top:6px">★は出身の群れの質。1匹ずつの実力は迎えてから確かめよう。</p></details>`;
+  return h;
+}
+function capHTML(p) {
+  const sp = specials(p);
+  return `<button class="box cap${sp.length ? " sp" : ""}" data-act="open" data-id="${p.id}">${ava(p, 60)}${starStr(p.star)}<span>${esc(p.name)} ${sexMark(p.sex)}</span><span class="s">${sp.length ? esc(sp[0]) : coatLabel(p.g)}</span></button>`;
+}
+
+/* ---------- 研究所 ---------- */
+function renderLab() {
+  let h = `<div class="boss"><span class="ava">${BOSS_SVG}</span><p class="bubble"><span class="who">所長</span>最初は見た目と印象だけが頼りだ。道具をそろえると、見えるものが増えていく。</p></div>`;
+  h += `<div class="labs">${RESEARCH.map(r => {
+    const done = U(r.id), ok = reqOk(r), conf = ui.confirm === "buy:" + r.id;
+    const why = !ok ? `先に: ${r.reqText}` : G.coins < r.price ? `あと${r.price - G.coins}コイン` : "";
+    return `<div class="box res${done ? " done" : ""}"><div class="h"><h3>${r.name}</h3><b class="num">${done ? "導入済み" : `${ICON.coin} ${r.price}`}</b></div><p class="w">${r.what}</p>
+      ${done ? "" : `<button class="btn ${conf ? "warn" : why ? "" : "go"}" data-act="buy" data-id="${r.id}"${why ? " disabled" : ""}>${conf ? `本当に買う？ (${r.price})` : "導入する"}${why ? `<span class="sub">${why}</span>` : ""}</button>`}</div>`;
+  }).join("")}</div>`;
+  return h;
+}
+
+/* ---------- シート ---------- */
+function sheetHead(title, extra = "") {
+  return `<div class="sheet-head"><span class="grab"></span>${extra}<h2>${title}</h2><button class="iconbtn" data-act="close" aria-label="閉じる">×</button></div>`;
+}
+function mofuSheet(id) {
+  const ind = get(id);
+  if (!ind) return sheetHead("いない");
+  const here = inStock(id), order = farmOrder(), idx = order.indexOf(id);
+  const prev = idx > 0 ? order[idx - 1] : null, next = idx >= 0 && idx < order.length - 1 ? order[idx + 1] : null;
+  const nextReady = order.slice(idx + 1).concat(order.slice(0, Math.max(0, idx))).find(x => canAct(get(x)));
+  const rest = restWhy(ind);
+  let h = sheetHead(`${esc(ind.name)} <span class="muted">${sexMark(ind.sex)}</span>`,
+    `<button class="iconbtn" data-act="open" data-id="${prev}" aria-label="前の子"${prev == null ? " disabled" : ""}>◀</button><button class="iconbtn" data-act="open" data-id="${next}" aria-label="次の子"${next == null ? " disabled" : ""}>▶</button>`);
+  h += `<div class="sheet-body">`;
+  h += `<div class="who-big">${ava(ind, 84)}<div class="t"><div class="kv">${starStr(ind.star)}${badges(ind)}</div>
+    <span class="o">${ind.star ? "ガチャ出身" : `${ind.gen}代目・自家産`}${ind.wins ? ` · 優勝${ind.wins}回` : ""}</span>
+    <span class="chip ${rest ? "zz" : "ok"}" style="justify-self:start">${!here ? "もういない" : rest ? rest : "今日あと1回動ける"}</span></div></div>`;
+  if (ui.flash) {
+    h += `<div class="flash ${ui.flash.cls}">${esc(ui.flash.text)}</div>`;
   }
-  if (G.last) {
-    h += `<h3>${esc(G.last.msg)}</h3>`;
-    const pups = G.last.ids.filter(id => get(id) && inStock(id));
-    if (pups.length) h += `<div class="pups">${pups.map(id => { const p = get(id); return `<button class="pup new" data-act="focus" data-id="${id}"><span class="ava">${avatar(p)}</span>${esc(p.name)} ${sexMark(p.sex)}</button>`; }).join("")}</div>`;
-  }
-  $("#mating").innerHTML = h;
-}
-
-function alleleChips(g, i) {
-  const l = LOCI[i], sym = a => (l.kind === "add" ? (a ? "+" : "−") : a ? l.up : l.lo);
-  return `<span class="alle">${g[i].slice().sort((a, b) => b - a).map(a => `<span class="${a ? "hi" : ""}">${sym(a)}</span>`).join("")}</span>`;
-}
-function geneTable(ind) {
-  const g = ind.g;
-  const cnt = t => TLOCI[t].reduce((s, i) => s + g[i][0] + g[i][1], 0);
-  const lab = {
-    M: has(g, "M") ? "強さ+15 生殖力−15" : "通常",
-    X: { 2: "通常", 1: "保因者 (見た目は普通)", 0: "超筋肉: 強さ+30 生殖力−20" }[dose(g, "X")],
-    Q: ["通常", "多産型: 生殖力+18", "多産型×2: 生殖力+32 強さ−8"][qDose(g)],
-    D: { 2: "正常", 1: "保因者 (発症しない)", 0: "発症: 全能力ダウン" }[dose(g, "D")],
-  };
-  let h = `<table class="gtable"><thead><tr><th>遺伝子</th><th>遺伝子型</th><th>効果</th></tr></thead><tbody>`;
-  for (const t of TRAITS) h += ind.dna >= 2
-    ? `<tr><td>${TNAME[t]}</td><td><span class="alle">${TLOCI[t].map(i => alleleChips(g, i)).join("")}</span></td><td class="mono">+${cnt(t)}/${ADD[t] * 2}</td></tr>`
-    : `<tr><td>${TNAME[t]}</td><td class="muted">？ (ゲノム解析で判明)</td><td></td></tr>`;
-  for (const id of ["M", "X", "Q", "D"]) h += `<tr><td>${LOCI[IDX[id]].dna} ${id}</td><td>${alleleChips(g, IDX[id])}</td><td>${lab[id]}</td></tr>`;
-  h += `<tr><td>毛色</td><td><span class="alle">${alleleChips(g, IDX.C)}${alleleChips(g, IDX.B)}${alleleChips(g, IDX.P)}</span></td><td>${coatLabel(g)}</td></tr>`;
-  return h + `</tbody></table>`;
-}
-
-function renderDetail() {
-  const ind = G.focus != null ? get(G.focus) : null;
-  if (!ind) { $("#detail").innerHTML = `<h2>カルテ</h2><p class="note">カードをタップすると、そのモフのカルテが開きます。</p>`; return; }
-  const id = ind.id, here = inStock(id), adult = isAdult(ind), act = canAct(ind);
-  let h = `<div style="display:flex;gap:12px;align-items:center"><span class="ava" style="width:64px;height:64px;flex:none">${avatar(ind)}</span><div style="min-width:0"><h2>${esc(ind.name)} ${sexMark(ind.sex)} ${ind.star ? `<span class="stars">${starStr(ind.star)}</span>` : ""}</h2><span class="muted" style="font-size:12.5px">${ind.star ? "ガチャ出身" : `第${ind.gen}世代 · 自家産`} · ${here ? ageText(ind) : "手放した個体"}${ind.wins ? ` · 優勝${ind.wins}回` : ""}</span></div></div>`;
-  h += `<div class="looks" aria-label="見た目の印象">${looksText(ind).map(x => `<span class="${x.rare ? "rare" : ""}">${esc(x.t)}</span>`).join("")}</div>`;
-  h += estRows(ind);
+  h += `<div class="looks">${looksText(ind).map(x => `<span class="${x.rare ? "rare" : ""}">${esc(x.t)}</span>`).join("")}</div>`;
+  h += `<div class="big-meters">${TRAITS.map(t => { const i = traitInfo(ind, t); return `<div class="r"><b>${TNAME[t]}</b>${track(ind, t)}<span class="v${i ? "" : " muted"}">${infoText(i, t)}</span></div>`; }).join("")}</div>`;
   if (here) {
-    const why = !adult ? "幼体はまだ実験や交配ができません" : ind.acted === G.day ? "今日はもう行動しました。明日また動けます" : "";
-    h += `<div class="actions">`;
+    h += `<div class="acts">`;
     for (const [k, e] of Object.entries(EXPS)) {
-      const locked = e.needs && !U(e.needs);
-      const d = locked ? "研究所で「動物病院と提携」" : `${e.desc}${U(e.tool) ? " (点数)" : " (印象)"}`;
-      h += `<button class="btn" data-act="exp" data-kind="${k}" data-id="${id}"${!act || locked || G.coins < e.cost ? " disabled" : ""}>${e.name}${e.cost ? `<small>${e.cost}コイン</small>` : ""}<span class="d">${d}</span></button>`;
+      const why = expWhy(ind, e);
+      h += `<button class="btn${why ? "" : " go"}" data-act="exp" data-kind="${k}" data-id="${id}"${why ? " disabled" : ""}>${e.name}<span class="sub">${why || `${e.hint}${e.cost ? `・${e.cost}コイン` : ""}${U(e.tool) ? "" : "・印象のみ"}`}</span></button>`;
     }
     const lv = ind.dna < 1 ? 1 : 2, cost = lv === 2 ? COST.genome : COST.kit, tool = lv === 2 ? "genome" : "kit";
-    const gl = ind.dna >= 2 ? "ゲノム解析済み" : lv === 2 ? "ゲノム解析" : "DNA検査";
-    h += `<button class="btn" data-act="gtest" data-lv="${lv}" data-id="${id}"${ind.dna >= 2 || !U(tool) || G.coins < cost ? " disabled" : ""}>${gl}${ind.dna < 2 && U(tool) ? `<small>${cost}コイン</small>` : ""}<span class="d">${ind.dna >= 2 ? "遺伝子はすべて判明" : U(tool) ? (lv === 2 ? "能力の遺伝子までわかる" : "毛色・体質の遺伝子がわかる") : `研究所で「${lv === 2 ? "ゲノム解析装置" : "DNA検査キット"}」`}</span></button>`;
+    const gWhy = ind.dna >= 2 ? "全部わかっている" : !U(tool) ? `研究所で${lv === 2 ? "ゲノム解析装置" : "DNA検査キット"}` : G.coins < cost ? `あと${cost - G.coins}コイン` : "";
+    h += `<button class="btn" data-act="gtest" data-lv="${lv}" data-id="${id}"${gWhy ? " disabled" : ""}>${lv === 2 ? "ゲノム解析" : "DNA検査"}<span class="sub">${gWhy || `${cost}コイン・行動は使わない`}</span></button>`;
     const isSel = G.sel[ind.sex] === id;
-    h += `<button class="btn${isSel ? "" : " primary"}" data-act="pair" data-id="${id}"${!adult ? " disabled" : ""}>${isSel ? "交配相手から外す" : ind.sex === "M" ? "父にする" : "母にする"}<span class="d">交配カードにセット</span></button>`;
-    h += `<button class="btn danger" data-act="sell" data-id="${id}">${G.confirm === id ? "本当に売る？" : `売る<small>+${SELL_PRICE}コイン</small>`}<span class="d">${G.confirm === id ? "もう一度押すと売ります" : "飼育場から手放す"}</span></button>`;
+    h += `<button class="btn${isSel ? "" : " brand"}" data-act="pair" data-id="${id}"${!isAdult(ind) ? " disabled" : ""}>${isSel ? "親から外す" : ind.sex === "M" ? "父にする" : "母にする"}<span class="sub">${!isAdult(ind) ? "大人になってから" : "交配の親にセット"}</span></button>`;
+    const conf = ui.confirm === "sell:" + id;
+    h += `<button class="btn${conf ? " warn" : ""}" data-act="sell" data-id="${id}">${conf ? "本当に売る？" : "売る"}<span class="sub">${conf ? "もう一度押すと売る" : `+${SELL_PRICE}コイン`}</span></button>`;
     h += `</div>`;
-    if (why) h += `<p class="note">${why}。</p>`;
+    if (nextReady != null && nextReady !== id) h += `<div class="nextrow"><button class="btn" data-act="open" data-id="${nextReady}">次の動ける子へ ▶</button></div>`;
   }
   const all = TRAITS.flatMap(t => ind.meas[t].map(m => ({ ...m, t }))).sort((a, b) => b.day - a.day);
-  if (all.length) h += `<h3>実験の記録</h3><div class="mlog">${all.map(m => `<div><span>${m.day}日目 ${esc(m.src)}</span><span class="${m.num ? "mono" : ""}">${TNAME[m.t]} ${m.num ? m.v : WORD[m.t][bin5(m.v)]}</span></div>`).join("")}</div>`;
-  if (ind.sex === "F" && ind.births.length) h += `<h3>出産の記録</h3><div class="mlog">${ind.births.slice().reverse().map(b => `<div><span>${b.day}日目</span><span>${b.n ? b.n + "匹" : "受胎せず"}</span></div>`).join("")}</div>`;
-  if (ind.sex === "M" && ind.tries) h += `<div class="kv"><span>種付けの記録: ${ind.tries}回中 <b>${ind.hits}</b>回 受胎</span></div>`;
-  h += `<h3>遺伝子</h3>`;
-  h += ind.dna ? geneTable(ind) : `<div class="locked">遺伝子はわかりません。見た目から推理しましょう。たとえば白い子は必ず cc で、白い子が生まれたら両親とも c を隠し持っています。${U("kit") ? "" : lockNote("DNA検査キット") + "調べられます。"}</div>`;
-  if (ind.dna >= 2) h += `<p class="note">能力の帯にある縦線は、遺伝子から見込まれる値です (育ちのぶれを除く)。</p>`;
+  if (all.length || ind.births.length || ind.tries) {
+    h += `<details><summary>記録</summary><div class="rec">`;
+    h += all.map(m => `<div><span>${m.day}日目 ${esc(m.src)}</span><b>${TNAME[m.t]} ${m.num ? m.v : WORD[m.t][bin5(m.v)]}</b></div>`).join("");
+    h += ind.births.slice().reverse().map(b => `<div><span>${b.day}日目 出産</span><b>${b.n ? b.n + "匹" : "受胎せず"}</b></div>`).join("");
+    if (ind.sex === "M" && ind.tries) h += `<div><span>種付け</span><b>${ind.tries}回中${ind.hits}回 受胎</b></div>`;
+    h += `</div></details>`;
+  }
+  h += `<details${ind.dna ? " open" : ""}><summary>遺伝子${ind.dna ? "" : " (未検査)"}</summary>${ind.dna ? geneTable(ind) : `<p class="lock">遺伝子は見えない。見た目から推理しよう。白い子は必ず cc。白い子が生まれたら、両親とも c を隠し持っている。</p>`}</details>`;
   if (ind.sire != null) {
-    const pb = (pid, lab) => { const p = get(pid); return p ? `<button data-act="focus" data-id="${pid}"><span class="lab">${lab}</span>${esc(p.name)} <span class="muted">${p.star ? starStr(p.star) : "G" + p.gen}</span></button>` : ""; };
+    const pb = (pid, lab) => { const p = get(pid); return p ? `<button class="btn" data-act="open" data-id="${pid}"><span><span class="l">${lab}</span><br>${esc(p.name)}</span></button>` : ""; };
     const sire = get(ind.sire), dam = get(ind.dam);
-    h += `<h3>血統</h3><div class="ped">${pb(ind.sire, "父")}${pb(ind.dam, "母")}`;
+    h += `<details><summary>血統</summary><div class="ped">${pb(ind.sire, "父")}${pb(ind.dam, "母")}`;
     if (U("pedigree")) {
       if (sire && sire.sire != null) h += pb(sire.sire, "父方の祖父") + pb(sire.dam, "父方の祖母");
       if (dam && dam.sire != null) h += pb(dam.sire, "母方の祖父") + pb(dam.dam, "母方の祖母");
     }
-    h += `</div>`;
+    h += `</div>${U("pedigree") ? `<div class="kv" style="margin-top:8px">${fChip(inbreeding(id))}</div>` : ""}</details>`;
   }
-  if (U("pedigree")) { const F = inbreeding(id), st = fStatus(F); h += `<div class="kv"><span class="status ${st.cls}"><span class="ic">${st.ic}</span>${st.text}</span><span>近交係数 <b>${(F * 100).toFixed(1)}%</b></span></div>`; }
-  $("#detail").innerHTML = h;
+  return h + `</div>`;
 }
-function renderDiary() { $("#diary").innerHTML = G.log.slice(0, 40).map(l => `<div><span class="d">${l.day}日目</span><span>${esc(l.text)}</span></div>`).join(""); }
-
-/* ---------- 描画: 大会 ---------- */
-function renderTours() {
-  $("#hall").innerHTML = G.hallDay
-    ? `<div class="hall"><b>殿堂入り</b><span>${G.hallDay}日目に3種目すべての王者になりました。おめでとうございます！</span></div>`
-    : `<div class="panel" style="gap:4px"><h2>目指せ殿堂入り</h2><p class="note">レース・コンテスト・品評会の3種目で、それぞれ王者ランクの優勝を狙います。王者の相手は平均80点前後。品評会は3能力の平均で競うので、1つだけ強くても勝てません。</p></div>`;
-  const adults = G.stock.map(get).filter(canAct);
-  $("#tours").innerHTML = Object.entries(TOURS).map(([k, T]) => {
-    const ti = G.tiers[k], tier = TIERS[ti], done = G.entered[k] === G.day;
-    const rank = i => {
-      if (T.trait) { const x = traitInfo(i, T.trait); return x ? x.key : -1; }
-      const xs = TRAITS.map(t => traitInfo(i, t));
-      return xs.every(Boolean) ? xs.reduce((a, x) => a + x.key, 0) / 3 : -1;
-    };
-    const label = i => (T.trait ? infoLabel(traitInfo(i, T.trait), T.trait) : TRAITS.map(t => { const x = traitInfo(i, t); return x ? infoLabel(x, t) : "？"; }).join("・"));
-    const opts = adults.slice().sort((a, b) => rank(b) - rank(a)).map(i => `<option value="${i.id}">${esc(i.name)} ${sexMark(i.sex)} (${esc(label(i))})</option>`).join("");
-    let h = `<div class="panel tour"><div class="tour-head"><div><h2>${T.name}</h2><span class="muted" style="font-size:12.5px">${T.desc}</span></div><span class="tier${G.cleared[k] ? " max" : ""}">${G.cleared[k] ? "王者 制覇" : tier.name}</span></div>`;
-    h += `<div class="ladder" aria-label="ランク ${ti + 1}/4">${TIERS.map((_, i) => `<span class="${i < ti || G.cleared[k] ? "on" : i === ti ? "cur" : ""}"></span>`).join("")}</div>`;
-    h += `<div class="prize"><span>相手の平均 <b>${tier.mean + T.offset}</b></span><span>優勝 <b>${tier.prize}</b></span><span>2位 <b>${Math.round(tier.prize * PLACE_PAY[1])}</b></span><span>3位 <b>${Math.round(tier.prize * PLACE_PAY[2])}</b></span></div>`;
-    if (done) h += `<p class="note">今日は出場済みです。明日また挑戦できます。</p>`;
-    else if (!opts) h += `<p class="note">今日出場できる大人のモフがいません。</p>`;
-    else h += `<div class="enter"><select id="ent-${k}" aria-label="${T.name}に出場するモフ">${opts}</select><button class="btn primary" data-act="enter" data-type="${k}">出場する</button></div>`;
-    const L = G.lastTour;
-    if (L && L.type === k) {
-      h += `<h3>${L.tier}の結果: ${L.place}位 · +${L.prize}コイン</h3><table class="gtable"><thead><tr><th>順位</th><th>モフ</th><th style="text-align:right">点数</th></tr></thead><tbody>${L.rows.map((r, i) => `<tr class="${r.me ? "me" : ""}"><td class="mono">${i + 1}</td><td>${esc(r.name)}</td><td class="mono" style="text-align:right">${L.shown ? r.score : "—"}</td></tr>`).join("")}</tbody></table>`;
-      if (!L.shown) h += `<p class="note">点数は、研究所で「${RESEARCH.find(r => r.id === T.tool).name}」を解放すると見られます。</p>`;
+function alleleChips(g, i) {
+  const l = LOCI[i], sym = a => (l.kind === "add" ? (a ? "+" : "−") : a ? l.up : l.lo);
+  return `<span class="al">${g[i].slice().sort((a, b) => b - a).map(a => `<span class="${a ? "hi" : ""}">${sym(a)}</span>`).join("")}</span>`;
+}
+function geneTable(ind) {
+  const g = ind.g, cnt = t => TLOCI[t].reduce((s, i) => s + g[i][0] + g[i][1], 0);
+  const lab = {
+    M: has(g, "M") ? "筋肉質 (強さ+15・生殖力−15)" : "ふつう",
+    X: { 2: "ふつう", 1: "x を隠し持つ", 0: "ムキムキ (強さ+30・生殖力−20)" }[dose(g, "X")],
+    Q: ["ふつう", "多産 (生殖力+18)", "超多産 (生殖力+32・強さ−8)"][qDose(g)],
+    D: { 2: "健康", 1: "d を隠し持つ", 0: "病気 (全能力ダウン)" }[dose(g, "D")],
+  };
+  let h = `<table class="gtable"><tbody>`;
+  for (const t of TRAITS) h += ind.dna >= 2
+    ? `<tr><td>${TNAME[t]}</td><td>${TLOCI[t].map(i => alleleChips(g, i)).join(" ")}</td><td class="num"><b>+${cnt(t)}</b>/${ADD[t] * 2}</td></tr>`
+    : `<tr><td>${TNAME[t]}</td><td colspan="2" class="muted">？ (ゲノム解析でわかる)</td></tr>`;
+  for (const id of ["M", "X", "Q", "D"]) h += `<tr><td>${LOCI[IDX[id]].dna}</td><td>${alleleChips(g, IDX[id])}</td><td>${lab[id]}</td></tr>`;
+  h += `<tr><td>毛色</td><td>${alleleChips(g, IDX.C)} ${alleleChips(g, IDX.B)} ${alleleChips(g, IDX.P)}</td><td>${coatLabel(g)}</td></tr>`;
+  h += `</tbody></table><p class="legend">親から1本ずつ、2本で1組。大文字は1本あれば出る。小文字は2本そろうと出る。＋は能力を上げる遺伝子。</p>`;
+  if (ind.dna >= 2) h += `<p class="legend">能力バーの縦線は、遺伝子から見込まれる値。</p>`;
+  return h;
+}
+function histSVG(t, pr, s, d) {
+  const W = 300, H = 60, bins = pr.hist[t].length, bw = W / bins, max = Math.max(...pr.hist[t]);
+  let svg = `<svg viewBox="0 0 ${W} ${H + 14}" role="img" aria-label="${TNAME[t]}の予想"><line x1="0" x2="${W}" y1="${H}" y2="${H}" stroke="var(--soft)" stroke-width="2"/>`;
+  pr.hist[t].forEach((c, i) => {
+    if (!c) return;
+    const h = Math.max(1.5, c / max * (H - 8));
+    svg += `<rect x="${(i * bw + 1).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${(bw - 2).toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="var(--${t})"><title>${i * 5}–${i * 5 + 4}: ${(c / pr.N * 100).toFixed(1)}%</title></rect>`;
+  });
+  for (const [p, lab] of [[s, "♂"], [d, "♀"]]) {
+    const i = traitInfo(p, t);
+    if (!i || i.kind === "word") continue;
+    const x = clamp(i.key, 0, 100) / 100 * W;
+    svg += `<line x1="${x}" x2="${x}" y1="2" y2="${H}" stroke="var(--ink)" stroke-width="1.4" stroke-dasharray="3 2"/><text x="${clamp(x, 8, W - 8)}" y="${H + 12}" font-size="10" font-weight="800" text-anchor="middle" fill="var(--muted)">${lab}</text>`;
+  }
+  return svgVars(svg + `</svg>`);
+}
+function stackHTML(parts) {
+  return `<div class="stack">${parts.filter(p => p.p > 0.0005).map(p => `<span style="flex:${p.p} 1 0;background:${p.fill || "var(--panel-2)"};color:${p.ink || "var(--ink)"}" title="${p.name} ${(p.p * 100).toFixed(1)}%">${p.p >= .14 ? `${p.name}${Math.round(p.p * 100)}%` : ""}</span>`).join("")}</div>`;
+}
+function mateSheet() {
+  const s = G.sel.M != null ? get(G.sel.M) : null, d = G.sel.F != null ? get(G.sel.F) : null;
+  const slot = (p, sex) => p
+    ? `<div class="pslot on">${ava(p, 60)}<span>${esc(p.name)} ${sexMark(sex)}</span><span class="chip ${restWhy(p) ? "zz" : "ok"}">${restWhy(p) || "動ける"}</span><button class="btn" data-act="unpair" data-sex="${sex}">外す</button></div>`
+    : `<div class="pslot"><span class="slot-empty" style="width:60px;height:60px">${sexMark(sex)}</span><span class="muted">${sex === "M" ? "父" : "母"}が未定</span></div>`;
+  let h = sheetHead("交配") + `<div class="sheet-body"><div class="pair-big">${slot(s, "M")}<span class="cross">×</span>${slot(d, "F")}</div>`;
+  if (ui.flash) {
+    h += `<div class="flash ${ui.flash.cls}">${esc(ui.flash.text)}</div>`;
+    if (ui.flash.ids && ui.flash.ids.length) h += `<div class="pups">${ui.flash.ids.filter(get).map(id => { const p = get(id); return `<button class="box pup new" data-act="open" data-id="${id}">${ava(p, 48)}${esc(p.name)} ${sexMark(p.sex)}</button>`; }).join("")}</div>`;
+  }
+  if (s && d) {
+    if (U("pedigree")) h += `<div class="kv">${fChip(kin(s.id, d.id))}</div>`;
+    if (!U("sim")) h += `<p class="lock">どんな子が生まれるかは、生まれてのお楽しみ。研究所の「交配シミュレータ」があれば、検査済みの親どうしで予想できる。</p>`;
+    else if (Math.min(s.dna, d.dna) < 1) h += `<p class="lock">予想には2匹ともDNA検査が必要 (${[s, d].filter(x => !x.dna).map(x => esc(x.name)).join("・")} が未検査)。</p>`;
+    else {
+      const pr = predict(s, d);
+      if (Math.min(s.dna, d.dna) >= 2) h += TRAITS.map(t => { const x = pr.stat[t]; return `<div class="hist"><div class="ht"><span>${TNAME[t]}</span><span class="num">だいたい ${x.lo}〜${x.hi}</span></div>${histSVG(t, pr, s, d)}</div>`; }).join("");
+      else h += `<p class="lock">能力の予想は、2匹ともゲノム解析をすると出る。</p>`;
+      h += `<div class="prow"><span>毛色</span>${stackHTML(pr.coat)}</div><div class="prow"><span>模様</span>${stackHTML(pr.spots)}</div>
+        <div class="kv"><span class="chip">筋肉質 ${Math.round(pr.muscle * 100)}%</span><span class="chip gold">ムキムキ ${(pr.mega * 100).toFixed(1)}%</span><span class="chip gold">多産 ${(pr.q * 100).toFixed(1)}%</span><span class="chip ${pr.sick > 0 ? "red" : ""}">病気 ${(pr.sick * 100).toFixed(1)}%</span></div>`;
     }
-    return h + `</div>`;
-  }).join("");
+  }
+  const why = mateWhy(), tight = !why && room() < 4, conf = ui.confirm === "mate";
+  if (tight) h += `<p class="flash bad">飼育場の空きは${room()}匹分。あふれた子は里親に出すことになる。</p>`;
+  h += `<button class="btn ${why ? "" : conf ? "warn" : "go"} wide" data-act="mate"${why ? " disabled" : ""} style="min-height:52px;font-size:17px">${why || (conf ? "それでも交配する" : "交配する")}${why ? "" : `<span class="sub" style="margin-left:6px">2匹とも今日の行動を使う</span>`}</button>`;
+  return h + `</div>`;
 }
-
-/* ---------- 描画: ガチャ ---------- */
-function renderGacha() {
-  const b = bannerOf(G.day), left = BANNER_DAYS - ((G.day - 1) % BANNER_DAYS);
-  $("#banner").innerHTML = `<span class="k">PICK UP · 開催中</span><span class="t">${b.name}</span><p>${b.desc}</p><span class="left">残り${left}日 · 次は「${bannerOf(G.day + left).name}」</span>`;
-  const r = room();
-  $("#pullrow").innerHTML = `
-    <button class="btn primary big" data-act="pull" data-n="1" data-pay="ticket"${G.tickets < 1 || r < 1 ? " disabled" : ""}>チケットで1回<small>残り${G.tickets}枚</small></button>
-    <button class="btn big" data-act="pull" data-n="1" data-pay="coin"${G.coins < PULL_COST || r < 1 ? " disabled" : ""}>1回<small>${PULL_COST}コイン</small></button>
-    <button class="btn big" data-act="pull" data-n="5" data-pay="coin"${G.coins < PULL5_COST || r < 5 ? " disabled" : ""}>5回<small>${PULL5_COST}コイン</small></button>
-    ${r < 5 ? `<span class="note" style="align-self:center">飼育場の空きは${r}匹分。売るか広げると引けます。</span>` : ""}`;
-  $("#rates").innerHTML = `<thead><tr><th>レア度</th><th style="text-align:right">確率</th><th>群れの質</th></tr></thead><tbody>${RARITY.slice().reverse().map(k => `<tr><td class="stars" style="font-size:13px">${starStr(k.star)}</td><td class="n">${(k.p * 100).toFixed(0)}%</td><td>${["ふつう", "やや良い", "良い", "とても良い", "伝説級"][k.star - 1]}</td></tr>`).join("")}</tbody>`;
-  const ids = (G.lastPull || []).filter(id => get(id));
-  $("#reveal").innerHTML = ids.length ? `<h3 style="margin-bottom:8px">迎えたモフ</h3><div class="reveal">${ids.map((id, i) => { const p = get(id), sp = specials(p); return `<button class="cap${p.star >= 4 || sp.length ? " r4" : ""}" data-act="focus" data-id="${id}" data-go="farm" style="animation-delay:${i * 120}ms"><span class="ava">${avatar(p)}</span><span class="stars" style="font-size:14px">${starStr(p.star)}</span><b>${esc(p.name)} ${sexMark(p.sex)}</b><span class="muted" style="font-size:11.5px">${sp.length ? esc(sp[0]) : coatLabel(p.g)}</span></button>`; }).join("")}</div><p class="note" style="margin-top:8px">タップするとカルテを開きます。</p>` : "";
+function entrySheet(type) {
+  const T = TOURS[type], tier = TIERS[G.tiers[type]];
+  const rank = i => (T.trait ? (traitInfo(i, T.trait) || { key: -1 }).key : showKey(i));
+  const label = i => (T.trait ? infoText(traitInfo(i, T.trait), T.trait) : TRAITS.map(t => infoText(traitInfo(i, t), t)).join(" / "));
+  const list = G.stock.map(get).filter(isAdult).sort((a, b) => (canAct(b) - canAct(a)) || rank(b) - rank(a));
+  let h = sheetHead(`${T.name} ${tier.name}`) + `<div class="sheet-body"><p class="muted" style="font-weight:700;font-size:13.5px">${T.desc}。相手の平均は${tier.mean + T.offset}点くらい。出た子は今日の行動を使う。</p><div>`;
+  h += list.map(i => { const why = restWhy(i); return `<div class="row-pick${why ? " off" : ""}">${ava(i, 48)}<span class="t"><b>${esc(i.name)} ${sexMark(i.sex)} ${starStr(i.star)}</b><span>${T.trait ? TNAME[T.trait] : "強さ / 魅力 / 生殖力"}: ${label(i)}</span></span><button class="btn ${why ? "" : "go"}" data-act="enter" data-type="${type}" data-id="${i.id}"${why ? " disabled" : ""}>${why ? "休み" : "出す"}</button></div>`; }).join("") || `<p class="lock">大人のモフがいない。</p>`;
+  return h + `</div></div>`;
 }
-
-/* ---------- 描画: 研究所 ---------- */
-function renderLab() {
-  $("#lab").innerHTML = RESEARCH.map(r => {
-    const done = U(r.id), ok = reqOk(r);
-    return `<div class="panel res${done ? " done" : ""}"><div class="res-head"><h3>${r.name}</h3><span class="price">${done ? "解放済み" : r.price + "コイン"}</span></div>
-      <p class="what">${r.what}</p>
-      ${!done && !ok ? `<p class="req">先に: ${r.reqText}</p>` : ""}
-      ${done ? "" : `<button class="btn${ok && G.coins >= r.price ? " primary" : ""}" data-act="buy" data-id="${r.id}"${!ok || G.coins < r.price ? " disabled" : ""}>解放する</button>`}</div>`;
-  }).join("");
+function resultSheet(type) {
+  const T = TOURS[type], r = G.tourRes[type];
+  if (!r) return sheetHead(T.name);
+  const who = get(r.who);
+  let h = sheetHead(`${T.name} ${r.tier}`) + `<div class="sheet-body"><div class="result-big">${who ? `<div style="display:flex;justify-content:center">${ava(who, 72)}</div>` : ""}<span class="p${r.place === 1 ? " win" : ""}">${r.place === 1 ? "優勝！" : r.place + "位"}</span><b>${who ? esc(who.name) : ""} · +${r.prize}コイン</b>${r.up ? `<span class="chip gold" style="justify-self:center;font-size:14px">${r.up}</span>` : ""}</div>`;
+  h += `<table class="gtable"><tbody>${r.rows.map((x, i) => `<tr class="${x.me ? "me" : ""}"><td class="num">${i + 1}</td><td>${esc(x.name)}</td><td class="num" style="text-align:right">${r.shown ? x.score : "—"}</td></tr>`).join("")}</tbody></table>`;
+  if (!r.shown) h += `<p class="legend">点数は研究所の「${RESEARCH.find(x => x.id === T.tool).name}」で見られる。</p>`;
+  return h + `<button class="btn go wide" data-act="close">OK</button></div>`;
 }
+function daySheet(info) {
+  let h = `<div class="sheet-head"><span class="grab"></span><h2 style="text-align:center">朝</h2><button class="iconbtn" data-act="close" aria-label="閉じる">×</button></div><div class="sheet-body"><div class="day-title">${G.day}日目</div><div class="day-list">`;
+  h += `<div class="li">${ICON.coin}<span>餌代 −${info.cost}コイン → 残り <b class="num" style="color:${G.coins < 0 ? "var(--danger)" : "inherit"}">${fmt(G.coins)}</b></span></div>`;
+  if (info.gotTicket) h += `<div class="li">${ICON.ticket}<span>ガチャチケット +1</span></div>`;
+  for (const id of info.grown) { const i = get(id); if (!i) continue; const sp = specials(i); h += `<div class="li">${ava(i, 40)}<span><b>${esc(i.name)}</b>が大人になった${sp.length ? `……<b style="color:var(--rare)">${esc(sp.join("、"))}！</b>` : ""}</span></div>`; }
+  if (info.banner) h += `<div class="li">${ICON.gacha.replace('<svg', '<svg class="ico" style="width:22px;height:22px;color:var(--brand)"')}<span>ガチャが「${info.banner}」に</span></div>`;
+  if (G.coins < 0) h += `<p class="flash bad">コインがマイナス。大会で稼ぐか、売って餌代を減らそう。</p>`;
+  return h + `</div><button class="btn go wide" data-act="close" style="min-height:52px;font-size:17px">今日もがんばる</button></div>`;
+}
+function gachaSheet(ids) {
+  const sp = ids.map(get).filter(i => specials(i).length);
+  let h = sheetHead("ガチャ結果") + `<div class="sheet-body">`;
+  if (sp.length) h += `<p class="flash">特異体質！ ${esc(sp.map(i => `${i.name}: ${specials(i)[0]}`).join(" / "))}</p>`;
+  h += `<div class="caps">${ids.map(id => capHTML(get(id))).join("")}</div><p class="legend">タップすると詳しく見られる。</p>`;
+  return h + `<button class="btn go wide" data-act="close">OK</button></div>`;
+}
+function renderSheet() {
+  const root = $("#sheet-root"), el = $("#sheet"), s = ui.sheet;
+  root.hidden = !s;
+  document.body.classList.toggle("locked", !!s);
+  if (!s) { el.innerHTML = ""; return; }
+  const top = el.dataset.key === sheetKey(s) ? el.scrollTop : 0;
+  el.innerHTML = s.kind === "mofu" ? mofuSheet(s.id) : s.kind === "mate" ? mateSheet() : s.kind === "entry" ? entrySheet(s.type)
+    : s.kind === "result" ? resultSheet(s.type) : s.kind === "day" ? daySheet(s.info) : gachaSheet(s.ids);
+  el.scrollTop = top;
+  if (el.dataset.key !== sheetKey(s)) { el.dataset.key = sheetKey(s); el.focus({ preventScroll: true }); }
+}
+const sheetKey = s => s.kind + ":" + (s.id ?? s.type ?? "");
 
-let tab = "farm";
-const TABS = ["farm", "tour", "gacha", "lab"];
+/* ---------- 全体 ---------- */
 function render() {
-  renderHud();
-  if (tab === "farm") { renderStock(); renderMating(); renderDetail(); renderDiary(); }
-  if (tab === "tour") renderTours();
-  if (tab === "gacha") renderGacha();
-  if (tab === "lab") renderLab();
+  renderTop(); renderNav();
+  const v = { farm: renderFarm, tour: renderTour, gacha: renderGacha, lab: renderLab }[ui.tab]();
+  $("#main").innerHTML = `<div class="view">${v}</div>`;
+  renderPairBar(); renderSheet();
   save();
 }
-function setTab(t) {
-  tab = t;
-  document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", String(x.dataset.tab === t)));
-  for (const v of TABS) $("#view-" + v).hidden = v !== t;
-  try { localStorage.setItem(STORE_KEY + "-tab", t); } catch (e) {}
-  render();
-}
-/* 1列表示のときはカルテが台帳の下に来るので、タップしたらそこまで送る */
-function scrollToDetail() {
-  if (!matchMedia("(max-width: 900px)").matches) return;
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  $("#detail").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
-}
-
 let toastT;
-function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2600); }
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2200); }
+function arm(key) { ui.confirm = key; clearTimeout(ui.confirmT); ui.confirmT = setTimeout(() => { if (ui.confirm === key) { ui.confirm = null; render(); } }, 4000); }
 
-/* ---------- イベント ---------- */
-function bind() {
-  document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => setTab(b.dataset.tab)));
-  $("#f-sort").addEventListener("change", e => { G.sort = e.target.value; render(); });
-  $("#expand").addEventListener("click", () => {
-    const p = expandPrice();
-    if (G.cap >= MAX_CAP || G.coins < p) return;
-    G.coins -= p; G.cap = Math.min(MAX_CAP, G.cap + 4);
-    note(`飼育場を${G.cap}匹分に広げました (−${p}コイン)`);
-    render();
-  });
-  let resetArmed = false, resetT;
-  $("#reset-game").addEventListener("click", e => {
-    const btn = e.currentTarget;
-    if (!resetArmed) {
-      resetArmed = true; btn.textContent = "全部消えます。もう一度押すとやり直し";
-      clearTimeout(resetT); resetT = setTimeout(() => { resetArmed = false; btn.textContent = "はじめからやり直す"; }, 4000);
-      return;
-    }
-    resetArmed = false; btn.textContent = "はじめからやり直す";
-    newGame(Date.now() >>> 0); setTab("farm");
-    toast("新しい牧場を開きました");
-  });
-
-  document.addEventListener("click", e => {
-    const el = e.target.closest("[data-act]");
-    if (!el || el.disabled) return;
-    const act = el.dataset.act, id = el.dataset.id != null && act !== "buy" ? +el.dataset.id : null;
-    if (act !== "sell") G.confirm = null;
-    switch (act) {
-      case "focus":
-        G.focus = id;
-        if (el.dataset.go) { setTab(el.dataset.go); scrollToDetail(); return; }
-        if (el.classList.contains("card") || el.classList.contains("pup")) { render(); scrollToDetail(); return; }
-        break;
-      case "exp": doExp(id, el.dataset.kind); break;
-      case "gtest": geneTest(id, +el.dataset.lv); break;
-      case "pair": { const ind = get(id); G.sel[ind.sex] = G.sel[ind.sex] === id ? null : id; G.last = null; break; }
-      case "unpair": G.sel[el.dataset.sex] = null; break;
-      case "mate": mate(); break;
-      case "sell": {
-        if (G.confirm !== id) { G.confirm = id; break; }
-        const ind = get(id);
-        G.stock = G.stock.filter(x => x !== id);
-        if (G.sel.M === id) G.sel.M = null;
-        if (G.sel.F === id) G.sel.F = null;
-        G.coins += SELL_PRICE; G.confirm = null;
-        note(`${ind.name}を売りました (+${SELL_PRICE}コイン)`);
-        toast(`${ind.name}を売りました`);
-        break;
-      }
-      case "endday": endDay(); break;
-      case "enter": { const sel = document.getElementById("ent-" + el.dataset.type); if (sel) enterTour(el.dataset.type, +sel.value); break; }
-      case "pull": pull(+el.dataset.n, el.dataset.pay); break;
-      case "buy": buy(el.dataset.id); break;
-      default: return;
-    }
-    render();
-  });
-}
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if (!el || el.disabled) return;
+  const act = el.dataset.act, id = el.dataset.id != null && act !== "buy" ? +el.dataset.id : null;
+  const keep = ui.confirm;
+  ui.confirm = null;
+  switch (act) {
+    case "tab": ui.tab = el.dataset.tab; ui.sheet = null; window.scrollTo(0, 0); try { localStorage.setItem(STORE_KEY + "-tab", ui.tab); } catch (err) {} break;
+    case "open": ui.flash = null; ui.sheet = { kind: "mofu", id }; break;
+    case "close": ui.sheet = null; ui.flash = null; break;
+    case "exp": doExp(id, el.dataset.kind); break;
+    case "gtest": geneTest(id, +el.dataset.lv); break;
+    case "pair": { const ind = get(id); G.sel[ind.sex] = G.sel[ind.sex] === id ? null : id; ui.flash = null;
+      if (G.sel.M != null && G.sel.F != null) { ui.sheet = { kind: "mate" }; }
+      else toast(G.sel[ind.sex] === id ? `${ind.name}を${ind.sex === "M" ? "父" : "母"}にした。次は${ind.sex === "M" ? "母 ♀" : "父 ♂"}を選ぼう` : "親から外した");
+      break; }
+    case "unpair": G.sel[el.dataset.sex] = null; ui.flash = null; break;
+    case "open-mate": ui.flash = null; ui.sheet = { kind: "mate" }; break;
+    case "mate": if (room() < 4 && keep !== "mate") { arm("mate"); break; } mate(); break;
+    case "sell": if (keep !== "sell:" + id) { arm("sell:" + id); break; } sell(id); break;
+    case "buy": if (keep !== "buy:" + el.dataset.id) { arm("buy:" + el.dataset.id); break; } buy(el.dataset.id); break;
+    case "reset": if (keep !== "reset") { arm("reset"); break; } newGame(Date.now() >>> 0); ui.tab = "farm"; ui.sheet = null; toast("新しい牧場をはじめた"); break;
+    case "endday": endDay(); break;
+    case "entry": ui.sheet = { kind: "entry", type: el.dataset.type }; break;
+    case "enter": enterTour(el.dataset.type, id); ui.sheet = { kind: "result", type: el.dataset.type }; break;
+    case "result": ui.sheet = { kind: "result", type: el.dataset.type }; break;
+    case "pull": pull(+el.dataset.n, el.dataset.pay); break;
+    case "expand": { const p = expandPrice(); if (G.cap >= MAX_CAP || G.coins < p) break; G.coins -= p; G.cap = Math.min(MAX_CAP, G.cap + 4); note(`飼育場を${G.cap}匹分に (−${p})`); toast(`飼育場が${G.cap}匹分に広がった`); break; }
+    default: return;
+  }
+  render();
+});
+document.addEventListener("change", e => { if (e.target.id === "sort") { G.sort = e.target.value; render(); } });
+document.addEventListener("keydown", e => {
+  if (!ui.sheet) return;
+  if (e.key === "Escape") { ui.sheet = null; ui.flash = null; render(); }
+});
 
 /* ---------- 起動 ---------- */
 function start(data) {
   let ok = data && data.game ? restore(data.game) : false;
   if (!ok) { try { ok = restore(JSON.parse(localStorage.getItem(STORE_KEY))); } catch (e) { ok = false; } }
   if (!ok) newGame(20261006);
-  $("#f-sort").value = G.sort;
-  bind();
-  let t = "farm";
-  try { t = localStorage.getItem(STORE_KEY + "-tab") || "farm"; } catch (e) {}
-  setTab(TABS.includes(t) ? t : "farm");
+  try { const t = localStorage.getItem(STORE_KEY + "-tab"); if (["farm", "tour", "gacha", "lab"].includes(t)) ui.tab = t; } catch (e) {}
+  render();
 }
 window.claude?.hot?.snapshot?.(() => ({ game: { ...G, reg: [...G.reg.values()] } }));
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
