@@ -148,7 +148,6 @@ select { min-height: 44px; padding: 6px 10px; border: 2px solid var(--ink); bord
 .trk .band.guess { opacity: .12; }
 .m .mv.g, .big-meters .v.g { color: var(--muted); font-weight: 700; }
 .trk .dot { position: absolute; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; border: 1.5px solid #fff; }
-.trk .gen { position: absolute; top: -2px; bottom: -2px; width: 2px; margin-left: -1px; background: var(--ink); }
 
 /* 交配バー */
 .pairbar { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 66px); z-index: 19; padding-inline: 12px; pointer-events: none; }
@@ -707,11 +706,15 @@ function measure(ind, t, sigma, src, num) {
 /* 統計ノートがあれば推定値±幅、点数の記録があれば前回の点数、印象しかなければ印象の平均 */
 function traitInfo(ind, t, noParent) {
   const nums = ind.meas[t].filter(m => m.num), words = ind.meas[t].filter(m => !m.num);
-  /* 点数の記録が1つでもあれば、誤差の大きさで重みをつけて推定値と幅を出す (統計ノートは最初から使える) */
-  if (nums.length) {
+  /* 点数の記録があれば、誤差の大きさと新しさで重みをつけて推定値と幅を出す (統計ノートは最初から使える)。
+     ゲノム解析ずみなら、遺伝子から見込まれる値も1つの手がかりとして混ぜる。
+     遺伝子では「育ちのぶれ」(標準偏差 SIGMA) まではわからないので、幅はゼロにならない */
+  const gene = ind.dna >= 2;
+  if (nums.length || gene) {
     let w = 0, s = 0;
     for (const m of nums) { const wi = Math.pow(0.9, G.day - m.day) / (m.s * m.s); w += wi; s += m.v * wi; }
-    return { kind: "est", mean: s / w, ci: 1.96 * Math.sqrt(1 / w), key: s / w, n: nums.length };
+    if (gene) { const mul = isAdult(ind) ? ageMul(ind, t) : 1, sd = SIGMA * mul; const wi = 1 / (sd * sd); w += wi; s += clamp(baseValues(ind.g)[t], 0, 100) * mul * wi; }
+    return { kind: "est", mean: s / w, ci: 1.96 * Math.sqrt(1 / w), key: s / w, n: nums.length, gene };
   }
   if (nums.length) { const v = nums[nums.length - 1].v; return { kind: "last", v, key: v, n: nums.length }; }
   if (words.length) { const b = Math.round(words.reduce((a, m) => a + bin5(m.v), 0) / words.length); return { kind: "word", bin: b, key: (BIN5[b][0] + BIN5[b][1]) / 2 }; }
@@ -784,7 +787,7 @@ function doExp(id, kind) {
   const after = traitInfo(ind, e.trait), first = num && after.n === 1;
   const words = baby ? SENT_BABY : SENT;
   let msg = num ? `${e.verb}: ${TNAME[e.trait]} ${v}点${baby ? "の見込み" : ""}` : `${e.verb}: ${words[e.trait][bin5(v)]}`;
-  if (num && !first && before && before.kind === "est") msg += `　${moodWord(v - before.mean, before.ci)}。これまでの${after.n}回を合わせると ${Math.round(after.mean)}±${Math.round(after.ci)}`;
+  if (num && before && before.kind === "est") msg += `　${moodWord(v - before.mean, before.ci)}。${after.gene ? `遺伝子の見込みと${after.n}回の結果` : `これまでの${after.n}回`}を合わせると ${Math.round(after.mean)}±${Math.round(after.ci)}`;
   else if (baby) msg += "　(子どものうちは参考程度。大人になると変わることも)";
   else if (first || !num && ind.meas[e.trait].length === 1) msg += "　(その日の調子で点数はぶれる。何回か測ると本当の実力が見えてくる)";
   note(`${ind.name}の${msg}`);
@@ -1067,13 +1070,12 @@ const ava = (ind, size) => `<span class="ava" style="width:${size}px;height:${si
 const fmt = n => n.toLocaleString("ja-JP");
 
 function track(ind, t) {
-  const i = traitInfo(ind, t), gv = ind.dna >= 2 ? baseValues(ind.g)[t] : null;
+  const i = traitInfo(ind, t);
   let s = "";
   if (i && i.kind === "est") { const lo = clamp(i.mean - i.ci, 0, 100), hi = clamp(i.mean + i.ci, 0, 100); s += `<span class="band" style="left:${lo}%;width:${hi - lo}%;background:var(--${t})"></span><span class="dot" style="left:${clamp(i.mean, 0, 100)}%;background:var(--${t})"></span>`; }
   else if (i && i.kind === "last") s += `<span class="dot" style="left:${i.v}%;background:var(--${t})"></span>`;
   else if (i && i.kind === "guess") s += `<span class="band guess" style="left:${i.lo}%;width:${i.hi - i.lo}%;background:var(--${t})"></span>`;
   else if (i) { const [a, b] = BIN5[i.bin]; s += `<span class="band vague" style="left:${a}%;width:${b - a}%;background:var(--${t})"></span>`; }
-  if (gv != null) s += `<span class="gen" style="left:${clamp(gv, 0, 100)}%"></span>`;
   return `<span class="trk">${s}</span>`;
 }
 function badges(ind) {
@@ -1248,7 +1250,7 @@ function mofuSheet(id) {
     h += `<div class="flash ${ui.flash.cls}">${esc(ui.flash.text)}</div>`;
   }
   h += `<div class="looks">${looksText(ind).map(x => `<span class="${x.rare ? "rare" : ""}">${esc(x.t)}</span>`).join("")}</div>`;
-  h += `<div class="big-meters">${TRAITS.map(t => { const i = traitInfo(ind, t); return `<div class="r"><b>${TNAME[t]}</b>${track(ind, t)}<span class="v${!i ? " muted" : i.kind === "guess" ? " g" : ""}">${infoText(i, t)}${i && i.kind === "guess" ? `<small style="font-weight:700"> (${i.src === "look" ? "見た目" : "親から"})</small>` : ""}${i && i.n ? `<small class="muted" style="font-weight:700"> ${i.n === 1 ? "1回だけ" : `${i.n}回の平均`}</small>` : ""}</span></div>`; }).join("")}</div>`;
+  h += `<div class="big-meters">${TRAITS.map(t => { const i = traitInfo(ind, t); return `<div class="r"><b>${TNAME[t]}</b>${track(ind, t)}<span class="v${!i ? " muted" : i.kind === "guess" ? " g" : ""}">${infoText(i, t)}${i && i.kind === "guess" ? `<small style="font-weight:700"> (${i.src === "look" ? "見た目" : "親から"})</small>` : ""}${i && i.kind === "est" ? `<small class="muted" style="font-weight:700"> ${i.gene ? (i.n ? `遺伝子+${i.n}回` : "遺伝子から") : i.n === 1 ? "1回だけ" : `${i.n}回の平均`}</small>` : ""}</span></div>`; }).join("")}</div>`;
   if (here) {
     h += `<div class="acts">`;
     for (const [k, e] of Object.entries(EXPS)) {
@@ -1318,7 +1320,7 @@ function geneTable(ind) {
   else h += `<tr><td>寿命</td><td colspan="2" class="muted">？ (ゲノム解析でわかる)</td></tr>`;
   h += `<tr><td>毛色</td><td>${alleleChips(g, IDX.C)} ${alleleChips(g, IDX.B)} ${alleleChips(g, IDX.P)}</td><td>${coatLabel(g)}</td></tr>`;
   h += `</tbody></table><p class="legend">親から1本ずつ、2本で1組。大文字は1本あれば出る。小文字は2本そろうと出る。＋は能力を上げる遺伝子。</p>`;
-  if (ind.dna >= 2) h += `<p class="legend">能力バーの縦線は、遺伝子から見込まれる値。</p>`;
+  if (ind.dna >= 2) h += `<p class="legend">能力の推定には遺伝子からの見込みも入っている。ただし同じ遺伝子でも育ちで±12くらい変わるので、幅はなくならない。実験と合わせると狭くなる。</p>`;
   return h;
 }
 function histSVG(t, pr, s, d) {
